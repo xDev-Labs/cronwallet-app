@@ -111,6 +111,19 @@ export default function PaymentInitiateScreen() {
                 </TouchableOpacity>
             </View>
 
+            <View style={styles.nextButtonContainer}>
+                <TouchableOpacity
+                    style={[
+                        styles.nextButton,
+                        (amount === '0' || parseFloat(amount) === 0) && styles.nextButtonDisabled,
+                    ]}
+                    onPress={handleNext}
+                    disabled={amount === '0' || parseFloat(amount) === 0}
+                >
+                    <ArrowRight size={28} color="#000" strokeWidth={2.5} pointerEvents="none" />
+                </TouchableOpacity>
+            </View>
+
             <View style={styles.keypad}>
                 {numberPad.map((row, rowIndex) => (
                     <View key={rowIndex} style={styles.keypadRow}>
@@ -157,16 +170,7 @@ export default function PaymentInitiateScreen() {
                 ))}
             </View>
 
-            <TouchableOpacity
-                style={[
-                    styles.nextButton,
-                    (amount === '0' || parseFloat(amount) === 0) && styles.nextButtonDisabled,
-                ]}
-                onPress={handleNext}
-                disabled={amount === '0' || parseFloat(amount) === 0}
-            >
-                <ArrowRight size={28} color="#000" strokeWidth={2.5} pointerEvents="none" />
-            </TouchableOpacity>
+
         </SafeAreaView>
     );
 }
@@ -297,10 +301,13 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 28,
     },
+    nextButtonContainer: {
+        alignItems: 'flex-end',
+        justifyContent: 'center',
+        marginBottom: 24,
+        marginHorizontal: 16,
+    },
     nextButton: {
-        position: 'absolute',
-        bottom: 24,
-        right: 24,
         width: 64,
         height: 64,
         borderRadius: 32,

@@ -118,10 +118,6 @@ export default function RecipientScreen() {
                     <Send size={20} color="#000" pointerEvents="none" />
                     <Text style={styles.payButtonText}>Pay</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.messageButton}>
-                    <Text style={styles.messageButtonText}>Message...</Text>
-                    <Send size={20} color="#8E8E93" pointerEvents="none" />
-                </TouchableOpacity>
             </View>
         </SafeAreaView>
     );
@@ -242,6 +238,7 @@ const styles = StyleSheet.create({
     },
     footer: {
         flexDirection: 'row',
+        justifyContent: 'center',
         padding: 16,
         gap: 12,
         backgroundColor: '#000',
