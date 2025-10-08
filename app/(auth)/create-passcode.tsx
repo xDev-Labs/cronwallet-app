@@ -2,7 +2,7 @@ import CodeInput from '@/components/CodeInput';
 import { useRouter } from 'expo-router';
 import { Lock } from 'lucide-react-native';
 import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Keyboard, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native';
 
 export default function CreatePasscodeScreen() {
     const router = useRouter();
@@ -17,29 +17,31 @@ export default function CreatePasscodeScreen() {
     };
 
     return (
-        <View style={styles.container}>
-            <View style={styles.content}>
-                <View style={styles.header}>
-                    <View style={styles.iconContainer}>
-                        <Lock size={32} color="#fff" strokeWidth={2} />
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={styles.container}>
+                <View style={styles.content}>
+                    <View style={styles.header}>
+                        <View style={styles.iconContainer}>
+                            <Lock size={32} color="#fff" strokeWidth={2} />
+                        </View>
+                        <Text style={styles.title}>Create Your Passcode</Text>
+                        <Text style={styles.subtitle}>
+                            Enter a 4-digit passcode to secure your account
+                        </Text>
                     </View>
-                    <Text style={styles.title}>Create Your Passcode</Text>
-                    <Text style={styles.subtitle}>
-                        Enter a 4-digit passcode to secure your account
-                    </Text>
-                </View>
 
-                <View style={styles.codeContainer}>
-                    <CodeInput length={4} onComplete={handlePasscodeComplete} error={error} />
-                </View>
+                    <View style={styles.codeContainer}>
+                        <CodeInput length={4} onComplete={handlePasscodeComplete} error={error} />
+                    </View>
 
-                <View style={styles.infoBox}>
-                    <Text style={styles.infoText}>
-                        Your passcode will be used to access your account securely
-                    </Text>
+                    <View style={styles.infoBox}>
+                        <Text style={styles.infoText}>
+                            Your passcode will be used to access your account securely
+                        </Text>
+                    </View>
                 </View>
             </View>
-        </View>
+        </TouchableWithoutFeedback>
     );
 }
 

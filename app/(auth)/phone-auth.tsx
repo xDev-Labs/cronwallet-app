@@ -2,7 +2,7 @@ import PrimaryButton from '@/components/PrimaryButton';
 import { useRouter } from 'expo-router';
 import { Phone } from 'lucide-react-native';
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Keyboard, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from 'react-native';
 
 export default function PhoneAuthScreen() {
     const router = useRouter();
@@ -46,44 +46,46 @@ export default function PhoneAuthScreen() {
             style={styles.container}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
-            <View style={styles.content}>
-                <View style={styles.header}>
-                    <View style={styles.iconContainer}>
-                        <Phone size={32} color="#fff" strokeWidth={2} />
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                <View style={styles.content}>
+                    <View style={styles.header}>
+                        <View style={styles.iconContainer}>
+                            <Phone size={32} color="#fff" strokeWidth={2} />
+                        </View>
+                        <Text style={styles.title}>Enter Your Phone Number</Text>
+                        <Text style={styles.subtitle}>
+                            We'll send you a verification code to confirm your number
+                        </Text>
                     </View>
-                    <Text style={styles.title}>Enter Your Phone Number</Text>
-                    <Text style={styles.subtitle}>
-                        We'll send you a verification code to confirm your number
-                    </Text>
-                </View>
 
-                <View style={styles.form}>
-                    <View style={styles.inputContainer}>
-                        <Text style={styles.prefix}>+1</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={phoneNumber}
-                            onChangeText={formatPhoneNumber}
-                            placeholder="(555) 123-4567"
-                            placeholderTextColor="#666"
-                            keyboardType="phone-pad"
-                            maxLength={10}
-                            accessible={true}
-                            accessibilityLabel="Phone number input"
+                    <View style={styles.form}>
+                        <View style={styles.inputContainer}>
+                            <Text style={styles.prefix}>+1</Text>
+                            <TextInput
+                                style={styles.input}
+                                value={phoneNumber}
+                                onChangeText={formatPhoneNumber}
+                                placeholder="(555) 123-4567"
+                                placeholderTextColor="#666"
+                                keyboardType="phone-pad"
+                                maxLength={10}
+                                accessible={true}
+                                accessibilityLabel="Phone number input"
+                            />
+                        </View>
+                        {error ? <Text style={styles.errorText}>{error}</Text> : null}
+                    </View>
+
+                    <View style={styles.buttonContainer}>
+                        <PrimaryButton
+                            title="Send OTP"
+                            onPress={handleSendOTP}
+                            disabled={phoneNumber.length !== 10}
+                            loading={loading}
                         />
                     </View>
-                    {error ? <Text style={styles.errorText}>{error}</Text> : null}
                 </View>
-
-                <View style={styles.buttonContainer}>
-                    <PrimaryButton
-                        title="Send OTP"
-                        onPress={handleSendOTP}
-                        disabled={phoneNumber.length !== 10}
-                        loading={loading}
-                    />
-                </View>
-            </View>
+            </TouchableWithoutFeedback>
         </KeyboardAvoidingView>
     );
 }

@@ -2,7 +2,7 @@ import CodeInput from '@/components/CodeInput';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { CheckCircle, ShieldCheck } from 'lucide-react-native';
 import { useRef, useState } from 'react';
-import { Animated, StyleSheet, Text, View } from 'react-native';
+import { Animated, Keyboard, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native';
 
 export default function OTPVerificationScreen() {
     const router = useRouter();
@@ -59,34 +59,36 @@ export default function OTPVerificationScreen() {
     }
 
     return (
-        <View style={styles.container}>
-            <View style={styles.content}>
-                <View style={styles.header}>
-                    <View style={styles.iconContainer}>
-                        <ShieldCheck size={32} color="#fff" strokeWidth={2} />
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={styles.container}>
+                <View style={styles.content}>
+                    <View style={styles.header}>
+                        <View style={styles.iconContainer}>
+                            <ShieldCheck size={32} color="#fff" strokeWidth={2} />
+                        </View>
+                        <Text style={styles.title}>Enter Verification Code</Text>
+                        <Text style={styles.subtitle}>
+                            We've sent a 4-digit code to{'\n'}
+                            <Text style={styles.phoneText}>+1 {phoneNumber}</Text>
+                        </Text>
                     </View>
-                    <Text style={styles.title}>Enter Verification Code</Text>
-                    <Text style={styles.subtitle}>
-                        We've sent a 4-digit code to{'\n'}
-                        <Text style={styles.phoneText}>+1 {phoneNumber}</Text>
+
+                    <View style={styles.codeContainer}>
+                        <CodeInput length={4} onComplete={handleOTPComplete} error={error} />
+                        {error && (
+                            <Text style={styles.errorText}>
+                                Invalid code. Please try again. (Hint: use 1234)
+                            </Text>
+                        )}
+                    </View>
+
+                    <Text style={styles.resendText}>
+                        Didn't receive the code?{' '}
+                        <Text style={styles.resendLink}>Resend</Text>
                     </Text>
                 </View>
-
-                <View style={styles.codeContainer}>
-                    <CodeInput length={4} onComplete={handleOTPComplete} error={error} />
-                    {error && (
-                        <Text style={styles.errorText}>
-                            Invalid code. Please try again. (Hint: use 1234)
-                        </Text>
-                    )}
-                </View>
-
-                <Text style={styles.resendText}>
-                    Didn't receive the code?{' '}
-                    <Text style={styles.resendLink}>Resend</Text>
-                </Text>
             </View>
-        </View>
+        </TouchableWithoutFeedback>
     );
 }
 

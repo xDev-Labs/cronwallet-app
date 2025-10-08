@@ -2,7 +2,7 @@ import CodeInput from '@/components/CodeInput';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { CheckCircle2, Lock } from 'lucide-react-native';
 import { useRef, useState } from 'react';
-import { Animated, StyleSheet, Text, View } from 'react-native';
+import { Animated, Keyboard, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native';
 
 export default function ConfirmPasscodeScreen() {
     const router = useRouter();
@@ -73,28 +73,30 @@ export default function ConfirmPasscodeScreen() {
     }
 
     return (
-        <View style={styles.container}>
-            <View style={styles.content}>
-                <View style={styles.header}>
-                    <View style={styles.iconContainer}>
-                        <Lock size={32} color="#fff" strokeWidth={2} />
-                    </View>
-                    <Text style={styles.title}>Confirm Your Passcode</Text>
-                    <Text style={styles.subtitle}>
-                        Re-enter your passcode to confirm
-                    </Text>
-                </View>
-
-                <View style={styles.codeContainer}>
-                    <CodeInput length={4} onComplete={handlePasscodeComplete} error={error} />
-                    {error && (
-                        <Text style={styles.errorText}>
-                            Passcodes don't match. Please try again.
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={styles.container}>
+                <View style={styles.content}>
+                    <View style={styles.header}>
+                        <View style={styles.iconContainer}>
+                            <Lock size={32} color="#fff" strokeWidth={2} />
+                        </View>
+                        <Text style={styles.title}>Confirm Your Passcode</Text>
+                        <Text style={styles.subtitle}>
+                            Re-enter your passcode to confirm
                         </Text>
-                    )}
+                    </View>
+
+                    <View style={styles.codeContainer}>
+                        <CodeInput length={4} onComplete={handlePasscodeComplete} error={error} />
+                        {error && (
+                            <Text style={styles.errorText}>
+                                Passcodes don't match. Please try again.
+                            </Text>
+                        )}
+                    </View>
                 </View>
             </View>
-        </View>
+        </TouchableWithoutFeedback>
     );
 }
 
