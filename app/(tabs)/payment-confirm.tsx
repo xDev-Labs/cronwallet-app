@@ -1,8 +1,9 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { ChevronDown, Clock, MoveVertical as MoreVertical, ShieldCheck, X } from 'lucide-react-native';
 import { useState } from 'react';
-import { ActivityIndicator, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import * as LocalAuthentication from 'expo-local-authentication';
 import { mockContacts, mockUserAccount } from '../../data/mockData';
 
 export default function PaymentConfirmScreen() {
@@ -14,15 +15,59 @@ export default function PaymentConfirmScreen() {
         return null;
     }
 
-    const handlePayment = () => {
-        setIsProcessing(true);
-        setTimeout(() => {
-            setIsProcessing(false);
-            router.push({
-                pathname: './payment-success' as any,
-                params: { contactId, amount },
+    const handlePayment = async () => {
+        try {
+            // Check if biometric authentication is available
+            const hasHardware = await LocalAuthentication.hasHardwareAsync();
+            const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+            const authTypes = await LocalAuthentication.supportedAuthenticationTypesAsync();
+
+            if (!hasHardware) {
+                Alert.alert('Error', 'Biometric authentication is not available on this device.');
+                return;
+            }
+
+            if (!isEnrolled) {
+                Alert.alert('Error', 'No biometric authentication is enrolled on this device. Please set up Face ID or Touch ID in Settings.');
+                return;
+            }
+
+            // Determine authentication method
+            const hasFaceID = authTypes.includes(LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION);
+            const hasTouchID = authTypes.includes(LocalAuthentication.AuthenticationType.FINGERPRINT);
+
+            const promptMessage = hasFaceID
+                ? 'Scan your face to confirm payment'
+                : hasTouchID
+                ? 'Scan your fingerprint to confirm payment'
+                : 'Authenticate to confirm payment';
+
+            // Authenticate with Face ID
+            const result = await LocalAuthentication.authenticateAsync({
+                promptMessage,
+                fallbackLabel: 'Use Passcode',
+                cancelLabel: 'Cancel',
+                disableDeviceFallback: false,
             });
-        }, 2000);
+
+            if (!result.success) {
+                Alert.alert('Authentication Failed', 'Payment cancelled. Please try again.');
+                return;
+            }
+
+            // Proceed with payment after successful authentication
+            setIsProcessing(true);
+            setTimeout(() => {
+                setIsProcessing(false);
+                router.push({
+                    pathname: './payment-success' as any,
+                    params: { contactId, amount },
+                });
+            }, 2000);
+        } catch (error) {
+            Alert.alert('Error', 'An error occurred during authentication. Please try again.');
+            console.error('Biometric authentication error:', error);
+        }
     };
 
     const renderAvatar = () => {
