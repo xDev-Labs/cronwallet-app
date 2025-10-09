@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "cron-wallet-app",
-    "slug": "cron-wallet-app",
+    "name": "Cron",
+    "slug": "cron",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",

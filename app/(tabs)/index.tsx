@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { Building2, CircleDot, QrCode, Search, Send, Smartphone } from 'lucide-react-native';
+import { Building2, CircleDot, QrCode, Search, Send, Smartphone, Users } from 'lucide-react-native';
 import { Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { mockContacts } from '../../data/mockData';
@@ -107,6 +107,13 @@ export default function PaymentHome() {
             </View>
             <Text style={styles.actionLabel}>Mobile</Text>
             <Text style={styles.actionLabel}>recharge</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.actionItem} onPress={() => router.push('./contacts' as any)}>
+            <View style={styles.actionIcon}>
+              <Users size={28} color="#fff" strokeWidth={2} />
+            </View>
+            <Text style={styles.actionLabel}>Contacts</Text>
           </TouchableOpacity>
         </View>
 
@@ -275,6 +282,7 @@ const styles = StyleSheet.create({
   },
   actionsGrid: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     paddingHorizontal: 16,
     marginBottom: 24,
     justifyContent: 'space-between',
@@ -282,6 +290,7 @@ const styles = StyleSheet.create({
   actionItem: {
     alignItems: 'center',
     width: '23%',
+    marginBottom: 16,
   },
   actionIcon: {
     width: 64,
