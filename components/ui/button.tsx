@@ -4,7 +4,7 @@ import * as React from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 
 const buttonVariants = cva(
-  'flex-row justify-center items-start',
+  'flex-row justify-center items-center',
   {
     variants: {
       variant: {
