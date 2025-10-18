@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
+import { Gift, History, Home, User } from 'lucide-react-native';
 import React from 'react';
-import { Home, History, Gift, User } from 'lucide-react-native';
 
 import { HapticTab } from '@/components/haptic-tab';
 
@@ -88,6 +88,12 @@ export default function TabLayout() {
       />
       <Tabs.Screen
         name="recipient"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="pay-anyone"
         options={{
           href: null,
         }}

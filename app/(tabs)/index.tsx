@@ -2,6 +2,7 @@ import { ChevronRight } from '@/components/icons/ChevronRight';
 import { RosetteDiscount } from '@/components/icons/RosetteDiscount';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
+import { router } from 'expo-router';
 import { Bell, Home, QrCode, Send, Smartphone } from 'lucide-react-native';
 import { Image, Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -121,7 +122,7 @@ export default function HomeScreen() {
             <ActionCard
               icon={Send}
               title="Pay anyone"
-              onPress={() => console.log('Pay anyone')}
+              onPress={() => router.push('/(tabs)/pay-anyone')}
             />
             <ActionCard
               icon={QrCode}
