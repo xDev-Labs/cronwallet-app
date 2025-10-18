@@ -1,5 +1,8 @@
 import CodeInput from '@/components/CodeInput';
 import { Text } from '@/components/ui/text';
+import { useAuth } from '@/lib/contexts/AuthContext';
+import type { User } from '@/lib/types/user.types';
+import { secureStorage } from '@/lib/storage/storage';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { CheckCircle2, Lock } from 'lucide-react-native';
 import { useRef, useState } from 'react';
@@ -7,7 +10,8 @@ import { Animated, Keyboard, TouchableWithoutFeedback, View } from 'react-native
 
 export default function ConfirmPasscodeScreen() {
     const router = useRouter();
-    const { passcode } = useLocalSearchParams();
+    const { passcode, phoneNumber, countryCode } = useLocalSearchParams();
+    const { saveUser } = useAuth();
     const [error, setError] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
 
@@ -15,7 +19,7 @@ export default function ConfirmPasscodeScreen() {
     const checkScaleAnim = useRef(new Animated.Value(0)).current;
     const opacityAnim = useRef(new Animated.Value(0)).current;
 
-    const handlePasscodeComplete = (confirmPasscode: string) => {
+    const handlePasscodeComplete = async (confirmPasscode: string) => {
         if (confirmPasscode === passcode) {
             setError(false);
             setShowSuccess(true);
@@ -44,9 +48,28 @@ export default function ConfirmPasscodeScreen() {
                 useNativeDriver: true,
             }).start();
 
-            setTimeout(() => {
-                router.replace('/(tabs)');
-            }, 2000);
+            // Save passcode to secure storage
+            try {
+                await secureStorage.savePasscode(passcode as string);
+
+                // Create user profile
+                const newUser: User = {
+                    id: Date.now().toString(),
+                    phoneNumber: (phoneNumber as string) || '',
+                    countryCode: (countryCode as string) || '',
+                    hasCompletedOnboarding: false,
+                    createdAt: new Date().toISOString(),
+                };
+
+                await saveUser(newUser);
+
+                setTimeout(() => {
+                    router.replace('/(onboarding)/username');
+                }, 2000);
+            } catch (err) {
+                console.error('Error saving user data:', err);
+                setError(true);
+            }
         } else {
             setError(true);
         }

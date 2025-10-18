@@ -1,7 +1,7 @@
-import * as React from 'react';
-import { Pressable, Text, ActivityIndicator, StyleSheet, View } from 'react-native';
-import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
+import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 
 const buttonVariants = cva(
   'flex-row justify-center items-start',
@@ -10,7 +10,7 @@ const buttonVariants = cva(
       variant: {
         default: 'bg-primary rounded-[9px]',
         secondary: 'bg-secondary rounded-xl',
-        outline: 'border-2 border-border bg-transparent rounded-xl',
+        outline: 'border-2 border-border bg-transparent border-primary rounded-xl',
         ghost: 'bg-transparent rounded-xl',
         destructive: 'bg-error rounded-xl',
       },
@@ -29,15 +29,15 @@ const buttonVariants = cva(
 );
 
 const buttonTextVariants = cva(
-  'text-center',
+  'text-center font-sans text-xl tracking-[-0.04em]',
   {
     variants: {
       variant: {
-        default: 'text-foreground font-sans text-2xl tracking-[-0.04em]',
-        secondary: 'text-foreground font-semibold text-base',
-        outline: 'text-foreground font-semibold text-base',
-        ghost: 'text-foreground font-semibold text-base',
-        destructive: 'text-foreground font-semibold text-base',
+        default: 'text-foreground',
+        secondary: 'text-foreground',
+        outline: 'text-primary',
+        ghost: 'text-foreground',
+        destructive: 'text-foreground',
       },
       size: {
         default: '',
@@ -55,7 +55,7 @@ const buttonTextVariants = cva(
 
 export interface ButtonProps
   extends React.ComponentPropsWithoutRef<typeof Pressable>,
-    VariantProps<typeof buttonVariants> {
+  VariantProps<typeof buttonVariants> {
   loading?: boolean;
   children?: React.ReactNode;
 }
@@ -124,4 +124,5 @@ const styles = StyleSheet.create({
   },
 });
 
-export { Button, buttonVariants, buttonTextVariants };
+export { Button, buttonTextVariants, buttonVariants };
+

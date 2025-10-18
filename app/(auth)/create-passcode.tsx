@@ -1,19 +1,24 @@
 import CodeInput from '@/components/CodeInput';
 import { Text } from '@/components/ui/text';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Lock } from 'lucide-react-native';
 import { useState } from 'react';
 import { Keyboard, TouchableWithoutFeedback, View } from 'react-native';
 
 export default function CreatePasscodeScreen() {
     const router = useRouter();
+    const { phoneNumber, countryCode } = useLocalSearchParams();
     const [error, setError] = useState(false);
 
     const handlePasscodeComplete = (passcode: string) => {
         setError(false);
         router.push({
             pathname: '/(auth)/confirm-passcode',
-            params: { passcode }
+            params: {
+                passcode,
+                phoneNumber,
+                countryCode
+            }
         });
     };
 

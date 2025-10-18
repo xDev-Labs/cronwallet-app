@@ -3,9 +3,11 @@ import { Smartphone } from 'lucide-react-native';
 import { useEffect, useRef } from 'react';
 import { Animated, View } from 'react-native';
 import { Text } from '@/components/ui/text';
+import { useAuth } from '@/lib/contexts/AuthContext';
 
 export default function SplashScreen() {
   const router = useRouter();
+  const { user, isLoading } = useAuth();
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
 
@@ -27,13 +29,26 @@ export default function SplashScreen() {
       duration: 600,
       useNativeDriver: true,
     }).start();
-
-    const timer = setTimeout(() => {
-      router.replace('/(auth)/phone-auth');
-    }, 2500);
-
-    return () => clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    if (!isLoading) {
+      const timer = setTimeout(() => {
+        // Route based on user state
+        if (user) {
+          if (user.hasCompletedOnboarding) {
+            router.replace('/(tabs)');
+          } else {
+            router.replace('/(onboarding)/username');
+          }
+        } else {
+          router.replace('/(auth)/phone-auth');
+        }
+      }, 2500);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading, user]);
 
   return (
     <View className="flex-1 bg-background-secondary justify-center items-center">

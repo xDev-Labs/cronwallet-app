@@ -64,7 +64,13 @@ export default function OTPVerificationScreen() {
 
         // Simulate OTP verification (use 123456 as correct OTP)
         if (otp === '123456') {
-            router.replace('/(auth)/create-passcode');
+            router.replace({
+                pathname: '/(auth)/create-passcode',
+                params: {
+                    phoneNumber,
+                    countryCode
+                }
+            });
         } else {
             setError(true);
         }

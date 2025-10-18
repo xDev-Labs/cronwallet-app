@@ -1,11 +1,16 @@
+import { Text } from '@/components/ui/text';
+import { UserIcon } from '@/components/icons/UserIcon';
+import { mockContacts } from '@/data/mockData';
+import { useAuth } from '@/lib/contexts/AuthContext';
+import { clearAllStorage } from '@/lib/storage/storage';
 import { router } from 'expo-router';
 import { Building2, CircleDot, QrCode, Search, Send, Smartphone, Users } from 'lucide-react-native';
 import { Image, ScrollView, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Text } from '@/components/ui/text';
-import { mockContacts } from '@/data/mockData';
 
 export default function PaymentHome() {
+  const { user } = useAuth();
+
   const handleContactPress = (contactId: string) => {
     router.push({
       pathname: './recipient' as any,
@@ -48,10 +53,19 @@ export default function PaymentHome() {
             placeholderTextColor="#8E8E93"
           />
           <TouchableOpacity className="ml-2">
-            <Image
-              source={{ uri: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=100' }}
-              className="w-9 h-9 rounded-full"
-            />
+            {user?.avatar ? (
+              <View
+                className="w-9 h-9 rounded-full items-center justify-center"
+                style={{ backgroundColor: user.avatar }}
+              >
+                <UserIcon size={20} color="#FFFFFF" />
+              </View>
+            ) : (
+              <Image
+                source={{ uri: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=100' }}
+                className="w-9 h-9 rounded-full"
+              />
+            )}
           </TouchableOpacity>
         </View>
       </View>
@@ -91,7 +105,7 @@ export default function PaymentHome() {
 
         {/* Actions Grid */}
         <View className="flex-row flex-wrap px-4 mb-6 justify-between">
-          <TouchableOpacity className="items-center w-[23%] mb-4">
+          <TouchableOpacity className="items-center w-[23%] mb-4" onPress={() => clearAllStorage()}>
             <View className="w-16 h-16 rounded-2xl bg-accent items-center justify-center mb-2">
               <QrCode size={28} color="#fff" strokeWidth={2} />
             </View>
