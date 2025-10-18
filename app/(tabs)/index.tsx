@@ -1,3 +1,5 @@
+import { ChevronRight } from '@/components/icons/ChevronRight';
+import { RosetteDiscount } from '@/components/icons/RosetteDiscount';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { Bell, Home, QrCode, Send, Smartphone } from 'lucide-react-native';
@@ -134,7 +136,23 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* Empty State */}
+        {/* Offer */}
+        <View className="px-4 py-4">
+          <Pressable
+            className="bg-[#4A3DFF] flex-row items-center justify-between rounded-xl px-6 py-4"
+          >
+            <View className="flex-row items-center">
+              <Text className="text-white font-bold text-base mr-2">
+                FIRST TRANSFER FREE
+              </Text>
+              <ChevronRight size={16} color="#FFFFFF" strokeWidth={2} />
+            </View>
+            <View className="w-8 h-8 rounded-full  items-center justify-center">
+              <RosetteDiscount size={24} color="#fff" />
+            </View>
+          </Pressable>
+        </View>
+
       </ScrollView>
     </SafeAreaView>
   );
