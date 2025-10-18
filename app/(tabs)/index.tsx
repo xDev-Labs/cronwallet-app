@@ -1,8 +1,9 @@
 import { router } from 'expo-router';
 import { Building2, CircleDot, QrCode, Search, Send, Smartphone, Users } from 'lucide-react-native';
-import { Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Image, ScrollView, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { mockContacts } from '../../data/mockData';
+import { Text } from '@/components/ui/text';
+import { mockContacts } from '@/data/mockData';
 
 export default function PaymentHome() {
   const handleContactPress = (contactId: string) => {
@@ -17,7 +18,7 @@ export default function PaymentHome() {
       return (
         <Image
           source={{ uri: contact.avatarUrl }}
-          style={styles.avatar}
+          className="w-16 h-16 rounded-full mb-2"
         />
       );
     }
@@ -27,127 +28,149 @@ export default function PaymentHome() {
     const colorIndex = contact.name.charCodeAt(0) % colors.length;
 
     return (
-      <View style={[styles.avatarPlaceholder, { backgroundColor: colors[colorIndex] }]}>
-        <Text style={styles.avatarInitial}>{initial}</Text>
+      <View
+        className="w-16 h-16 rounded-full items-center justify-center mb-2"
+        style={{ backgroundColor: colors[colorIndex] }}
+      >
+        <Text className="text-foreground text-2xl font-bold">{initial}</Text>
       </View>
     );
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.searchContainer}>
-          <Search size={20} color="#8E8E93" style={styles.searchIcon} />
+    <SafeAreaView className="flex-1 bg-background">
+      <View className="px-4 pt-2 pb-4">
+        <View className="flex-row items-center bg-background-tertiary rounded-xl px-4 h-13">
+          <Search size={20} color="#8E8E93" className="mr-2" />
           <TextInput
-            style={styles.searchInput}
+            className="flex-1 text-foreground text-base"
             placeholder="Pay by name or phone number"
             placeholderTextColor="#8E8E93"
           />
-          <TouchableOpacity style={styles.profileButton}>
+          <TouchableOpacity className="ml-2">
             <Image
               source={{ uri: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=100' }}
-              style={styles.profileImage}
+              className="w-9 h-9 rounded-full"
             />
           </TouchableOpacity>
         </View>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={styles.promoCard}>
-          <View style={styles.promoContent}>
-            <Text style={styles.promoTitle}>Laddoos are tick-ing!</Text>
-            <Text style={styles.promoSubtitle}>A new challenge unlocks</Text>
-            <Text style={styles.promoSubtitle}>up to ₹1,001 and more</Text>
-            <TouchableOpacity style={styles.promoButton}>
-              <Text style={styles.promoButtonText}>Join the Tick Squad</Text>
-              <Text style={styles.promoArrow}>→</Text>
+        {/* Promo Card */}
+        <View className="bg-[#1a237e] mx-4 mb-6 rounded-2xl p-5 flex-row justify-between overflow-hidden">
+          <View className="flex-1">
+            <Text className="text-foreground text-2xl font-bold mb-2">
+              Laddoos are tick-ing!
+            </Text>
+            <Text className="text-[#B3B3FF] text-sm mb-0.5">
+              A new challenge unlocks
+            </Text>
+            <Text className="text-[#B3B3FF] text-sm mb-0.5">
+              up to ₹1,001 and more
+            </Text>
+            <TouchableOpacity className="flex-row items-center bg-white/20 px-4 py-2 rounded-full mt-3 self-start">
+              <Text className="text-foreground text-sm font-semibold mr-2">
+                Join the Tick Squad
+              </Text>
+              <Text className="text-foreground text-base">→</Text>
             </TouchableOpacity>
           </View>
-          <View style={styles.promoIllustration}>
-            <View style={styles.characterOrange}>
-              <Text style={styles.characterEmoji}>🥚</Text>
+          <View className="relative w-30 justify-center items-center">
+            <View className="w-15 h-15 rounded-full bg-[#FF9800] items-center justify-center absolute left-0">
+              <Text className="text-[32px]">🥚</Text>
             </View>
-            <View style={styles.characterPink}>
-              <Text style={styles.characterEmoji}>🎀</Text>
+            <View className="w-15 h-15 rounded-full bg-[#FF4081] items-center justify-center absolute right-5 -top-2.5">
+              <Text className="text-[32px]">🎀</Text>
             </View>
-            <View style={styles.checkmark}>
-              <Text style={styles.checkmarkText}>✓</Text>
+            <View className="w-12 h-12 rounded-full bg-accent-light items-center justify-center absolute right-0 bottom-0">
+              <Text className="text-foreground text-[28px] font-bold">✓</Text>
             </View>
           </View>
         </View>
 
-        <View style={styles.actionsGrid}>
-          <TouchableOpacity style={styles.actionItem}>
-            <View style={styles.actionIcon}>
+        {/* Actions Grid */}
+        <View className="flex-row flex-wrap px-4 mb-6 justify-between">
+          <TouchableOpacity className="items-center w-[23%] mb-4">
+            <View className="w-16 h-16 rounded-2xl bg-accent items-center justify-center mb-2">
               <QrCode size={28} color="#fff" strokeWidth={2} />
             </View>
-            <Text style={styles.actionLabel}>Scan any</Text>
-            <Text style={styles.actionLabel}>QR code</Text>
+            <Text className="text-foreground text-xs text-center">Scan any</Text>
+            <Text className="text-foreground text-xs text-center">QR code</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionItem}>
-            <View style={styles.actionIcon}>
+          <TouchableOpacity className="items-center w-[23%] mb-4">
+            <View className="w-16 h-16 rounded-2xl bg-accent items-center justify-center mb-2">
               <Send size={28} color="#fff" strokeWidth={2} />
             </View>
-            <Text style={styles.actionLabel}>Pay</Text>
-            <Text style={styles.actionLabel}>anyone</Text>
+            <Text className="text-foreground text-xs text-center">Pay</Text>
+            <Text className="text-foreground text-xs text-center">anyone</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionItem}>
-            <View style={styles.actionIcon}>
+          <TouchableOpacity className="items-center w-[23%] mb-4">
+            <View className="w-16 h-16 rounded-2xl bg-accent items-center justify-center mb-2">
               <Building2 size={28} color="#fff" strokeWidth={2} />
             </View>
-            <Text style={styles.actionLabel}>Bank</Text>
-            <Text style={styles.actionLabel}>transfer</Text>
+            <Text className="text-foreground text-xs text-center">Bank</Text>
+            <Text className="text-foreground text-xs text-center">transfer</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionItem}>
-            <View style={styles.actionIcon}>
+          <TouchableOpacity className="items-center w-[23%] mb-4">
+            <View className="w-16 h-16 rounded-2xl bg-accent items-center justify-center mb-2">
               <Smartphone size={28} color="#fff" strokeWidth={2} />
             </View>
-            <Text style={styles.actionLabel}>Mobile</Text>
-            <Text style={styles.actionLabel}>recharge</Text>
+            <Text className="text-foreground text-xs text-center">Mobile</Text>
+            <Text className="text-foreground text-xs text-center">recharge</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionItem} onPress={() => router.push('./contacts' as any)}>
-            <View style={styles.actionIcon}>
+          <TouchableOpacity
+            className="items-center w-[23%] mb-4"
+            onPress={() => router.push('./contacts' as any)}
+          >
+            <View className="w-16 h-16 rounded-2xl bg-accent items-center justify-center mb-2">
               <Users size={28} color="#fff" strokeWidth={2} />
             </View>
-            <Text style={styles.actionLabel}>Contacts</Text>
+            <Text className="text-foreground text-xs text-center">Contacts</Text>
           </TouchableOpacity>
         </View>
 
-        <View style={styles.quickActions}>
-          <TouchableOpacity style={styles.quickActionButton}>
+        {/* Quick Actions */}
+        <View className="flex-row px-4 mb-6 items-center gap-3">
+          <TouchableOpacity className="flex-row items-center bg-background-tertiary px-4 py-2.5 rounded-full gap-2">
             <CircleDot size={20} color="#fff" />
-            <Text style={styles.quickActionText}>Tap & Pay</Text>
+            <Text className="text-foreground text-sm font-medium">Tap & Pay</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.quickActionButtonOutline}>
-            <Text style={styles.quickActionTextOutline}>+ Activate UPI Lite</Text>
+          <TouchableOpacity className="border border-dashed border-[#3C3C3E] px-4 py-2.5 rounded-full">
+            <Text className="text-foreground-secondary text-sm">+ Activate UPI Lite</Text>
           </TouchableOpacity>
         </View>
 
-        <View style={styles.peopleSection}>
-          <Text style={styles.sectionTitle}>People</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.peopleList}>
+        {/* People Section */}
+        <View className="pb-6">
+          <Text variant="h3" className="text-foreground px-4 mb-4">
+            People
+          </Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} className="pl-4">
             {mockContacts.map((contact) => (
               <TouchableOpacity
                 key={contact.id}
-                style={styles.personItem}
+                className="items-center mr-4 w-20"
                 onPress={() => handleContactPress(contact.id)}
               >
                 {renderContactAvatar(contact)}
-                <Text style={styles.personName} numberOfLines={1}>
+                <Text className="text-foreground text-xs text-center" numberOfLines={1}>
                   {contact.name}
                 </Text>
-                {contact.id === '1' && <View style={styles.newBadge} />}
+                {contact.id === '1' && (
+                  <View className="w-2 h-2 rounded-full bg-accent-light absolute top-0 right-5" />
+                )}
               </TouchableOpacity>
             ))}
-            <TouchableOpacity style={styles.personItem}>
-              <View style={styles.moreButton}>
-                <Text style={styles.moreButtonText}>✓</Text>
+            <TouchableOpacity className="items-center mr-4 w-20">
+              <View className="w-16 h-16 rounded-full bg-background-tertiary items-center justify-center mb-2">
+                <Text className="text-foreground text-2xl">✓</Text>
               </View>
-              <Text style={styles.personName}>More</Text>
+              <Text className="text-foreground text-xs text-center">More</Text>
             </TouchableOpacity>
           </ScrollView>
         </View>
@@ -155,258 +178,3 @@ export default function PaymentHome() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#000',
-  },
-  header: {
-    paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 16,
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#2C2C2E',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    height: 52,
-  },
-  searchIcon: {
-    marginRight: 8,
-  },
-  searchInput: {
-    flex: 1,
-    color: '#fff',
-    fontSize: 16,
-  },
-  profileButton: {
-    marginLeft: 8,
-  },
-  profileImage: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-  },
-  promoCard: {
-    backgroundColor: '#1a237e',
-    marginHorizontal: 16,
-    marginBottom: 24,
-    borderRadius: 16,
-    padding: 20,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    overflow: 'hidden',
-  },
-  promoContent: {
-    flex: 1,
-  },
-  promoTitle: {
-    color: '#fff',
-    fontSize: 24,
-    fontWeight: '700',
-    marginBottom: 8,
-  },
-  promoSubtitle: {
-    color: '#B3B3FF',
-    fontSize: 14,
-    marginBottom: 2,
-  },
-  promoButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    marginTop: 12,
-    alignSelf: 'flex-start',
-  },
-  promoButtonText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
-    marginRight: 8,
-  },
-  promoArrow: {
-    color: '#fff',
-    fontSize: 16,
-  },
-  promoIllustration: {
-    position: 'relative',
-    width: 120,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  characterOrange: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: '#FF9800',
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'absolute',
-    left: 0,
-  },
-  characterPink: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: '#FF4081',
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'absolute',
-    right: 20,
-    top: -10,
-  },
-  characterEmoji: {
-    fontSize: 32,
-  },
-  checkmark: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: '#2196F3',
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'absolute',
-    right: 0,
-    bottom: 0,
-  },
-  checkmarkText: {
-    color: '#fff',
-    fontSize: 28,
-    fontWeight: '700',
-  },
-  actionsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    paddingHorizontal: 16,
-    marginBottom: 24,
-    justifyContent: 'space-between',
-  },
-  actionItem: {
-    alignItems: 'center',
-    width: '23%',
-    marginBottom: 16,
-  },
-  actionIcon: {
-    width: 64,
-    height: 64,
-    borderRadius: 16,
-    backgroundColor: '#1565C0',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  actionLabel: {
-    color: '#fff',
-    fontSize: 12,
-    textAlign: 'center',
-  },
-  quickActions: {
-    flexDirection: 'row',
-    paddingHorizontal: 16,
-    marginBottom: 24,
-    alignItems: 'center',
-    gap: 12,
-  },
-  quickActionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#2C2C2E',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 20,
-    gap: 8,
-  },
-  quickActionText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  quickActionButtonOutline: {
-    borderWidth: 1,
-    borderColor: '#3C3C3E',
-    borderStyle: 'dashed',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 20,
-  },
-  quickActionTextOutline: {
-    color: '#8E8E93',
-    fontSize: 14,
-  },
-  upiId: {
-    color: '#8E8E93',
-    fontSize: 14,
-    flex: 1,
-    textAlign: 'right',
-  },
-  peopleSection: {
-    paddingBottom: 24,
-  },
-  sectionTitle: {
-    color: '#fff',
-    fontSize: 28,
-    fontWeight: '700',
-    paddingHorizontal: 16,
-    marginBottom: 16,
-  },
-  peopleList: {
-    paddingLeft: 16,
-  },
-  personItem: {
-    alignItems: 'center',
-    marginRight: 16,
-    width: 80,
-  },
-  avatar: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    marginBottom: 8,
-  },
-  avatarPlaceholder: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  avatarInitial: {
-    color: '#fff',
-    fontSize: 24,
-    fontWeight: '700',
-  },
-  personName: {
-    color: '#fff',
-    fontSize: 12,
-    textAlign: 'center',
-  },
-  newBadge: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#2196F3',
-    position: 'absolute',
-    top: 0,
-    right: 20,
-  },
-  moreButton: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: '#2C2C2E',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  moreButtonText: {
-    color: '#fff',
-    fontSize: 24,
-  },
-});

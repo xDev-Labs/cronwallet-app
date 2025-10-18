@@ -1,8 +1,9 @@
 import CodeInput from '@/components/CodeInput';
+import { Text } from '@/components/ui/text';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { CheckCircle2, Lock } from 'lucide-react-native';
 import { useRef, useState } from 'react';
-import { Animated, Keyboard, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native';
+import { Animated, Keyboard, TouchableWithoutFeedback, View } from 'react-native';
 
 export default function ConfirmPasscodeScreen() {
     const router = useRouter();
@@ -53,18 +54,24 @@ export default function ConfirmPasscodeScreen() {
 
     if (showSuccess) {
         return (
-            <View style={styles.container}>
-                <Animated.View style={[
-                    styles.successContainer,
-                    { transform: [{ scale: scaleAnim }] },
-                ]}>
+            <View className="flex-1 bg-background-secondary">
+                <Animated.View
+                    className="flex-1 justify-center items-center"
+                    style={{ transform: [{ scale: scaleAnim }] }}
+                >
                     <Animated.View style={{ transform: [{ scale: checkScaleAnim }] }}>
                         <CheckCircle2 size={100} color="#4ecca3" strokeWidth={2} />
                     </Animated.View>
-                    <Animated.Text style={[styles.successTitle, { opacity: opacityAnim }]}>
+                    <Animated.Text
+                        className="text-4xl font-bold text-green-500 mt-8"
+                        style={{ opacity: opacityAnim }}
+                    >
                         All Set!
                     </Animated.Text>
-                    <Animated.Text style={[styles.successSubtitle, { opacity: opacityAnim }]}>
+                    <Animated.Text
+                        className="text-base text-foreground-secondary mt-3"
+                        style={{ opacity: opacityAnim }}
+                    >
                         Your account is now secure
                     </Animated.Text>
                 </Animated.View>
@@ -74,22 +81,24 @@ export default function ConfirmPasscodeScreen() {
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <View style={styles.container}>
-                <View style={styles.content}>
-                    <View style={styles.header}>
-                        <View style={styles.iconContainer}>
+            <View className="flex-1 bg-background-secondary">
+                <View className="flex-1 px-6 justify-center">
+                    <View className="items-center mb-12">
+                        <View className="w-20 h-20 rounded-xl bg-secondary items-center justify-center mb-6">
                             <Lock size={32} color="#fff" strokeWidth={2} />
                         </View>
-                        <Text style={styles.title}>Confirm Your Passcode</Text>
-                        <Text style={styles.subtitle}>
+                        <Text variant="h3" className="text-foreground mb-3 text-center">
+                            Confirm Your Passcode
+                        </Text>
+                        <Text variant="caption" className="text-foreground-secondary text-center leading-6">
                             Re-enter your passcode to confirm
                         </Text>
                     </View>
 
-                    <View style={styles.codeContainer}>
+                    <View className="items-center mb-8">
                         <CodeInput length={4} onComplete={handlePasscodeComplete} error={error} />
                         {error && (
-                            <Text style={styles.errorText}>
+                            <Text className="text-error text-sm mt-4 text-center">
                                 Passcodes don't match. Please try again.
                             </Text>
                         )}
@@ -99,67 +108,3 @@ export default function ConfirmPasscodeScreen() {
         </TouchableWithoutFeedback>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#1a1a2e',
-    },
-    content: {
-        flex: 1,
-        paddingHorizontal: 24,
-        justifyContent: 'center',
-    },
-    header: {
-        alignItems: 'center',
-        marginBottom: 48,
-    },
-    iconContainer: {
-        width: 80,
-        height: 80,
-        borderRadius: 20,
-        backgroundColor: '#0f3460',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginBottom: 24,
-    },
-    title: {
-        fontSize: 28,
-        fontWeight: '700',
-        color: '#fff',
-        marginBottom: 12,
-        textAlign: 'center',
-    },
-    subtitle: {
-        fontSize: 16,
-        color: '#a0a0a0',
-        textAlign: 'center',
-        lineHeight: 24,
-    },
-    codeContainer: {
-        alignItems: 'center',
-        marginBottom: 32,
-    },
-    errorText: {
-        color: '#e94560',
-        fontSize: 14,
-        marginTop: 16,
-        textAlign: 'center',
-    },
-    successContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    successTitle: {
-        fontSize: 36,
-        fontWeight: '700',
-        color: '#4ecca3',
-        marginTop: 32,
-    },
-    successSubtitle: {
-        fontSize: 16,
-        color: '#a0a0a0',
-        marginTop: 12,
-    },
-});

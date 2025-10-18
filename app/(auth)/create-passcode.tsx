@@ -1,8 +1,9 @@
 import CodeInput from '@/components/CodeInput';
+import { Text } from '@/components/ui/text';
 import { useRouter } from 'expo-router';
 import { Lock } from 'lucide-react-native';
 import { useState } from 'react';
-import { Keyboard, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native';
+import { Keyboard, TouchableWithoutFeedback, View } from 'react-native';
 
 export default function CreatePasscodeScreen() {
     const router = useRouter();
@@ -18,24 +19,26 @@ export default function CreatePasscodeScreen() {
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <View style={styles.container}>
-                <View style={styles.content}>
-                    <View style={styles.header}>
-                        <View style={styles.iconContainer}>
+            <View className="flex-1 bg-background-secondary">
+                <View className="flex-1 px-6 justify-center">
+                    <View className="items-center mb-12">
+                        <View className="w-20 h-20 rounded-xl bg-secondary items-center justify-center mb-6">
                             <Lock size={32} color="#fff" strokeWidth={2} />
                         </View>
-                        <Text style={styles.title}>Create Your Passcode</Text>
-                        <Text style={styles.subtitle}>
+                        <Text variant="h3" className="text-foreground mb-3 text-center">
+                            Create Your Passcode
+                        </Text>
+                        <Text variant="caption" className="text-foreground-secondary text-center leading-6">
                             Enter a 4-digit passcode to secure your account
                         </Text>
                     </View>
 
-                    <View style={styles.codeContainer}>
+                    <View className="items-center mb-8">
                         <CodeInput length={4} onComplete={handlePasscodeComplete} error={error} />
                     </View>
 
-                    <View style={styles.infoBox}>
-                        <Text style={styles.infoText}>
+                    <View className="bg-background-tertiary rounded-xl p-4 border-l-4 border-secondary">
+                        <Text className="text-sm text-foreground-secondary leading-5">
                             Your passcode will be used to access your account securely
                         </Text>
                     </View>
@@ -44,57 +47,3 @@ export default function CreatePasscodeScreen() {
         </TouchableWithoutFeedback>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#1a1a2e',
-    },
-    content: {
-        flex: 1,
-        paddingHorizontal: 24,
-        justifyContent: 'center',
-    },
-    header: {
-        alignItems: 'center',
-        marginBottom: 48,
-    },
-    iconContainer: {
-        width: 80,
-        height: 80,
-        borderRadius: 20,
-        backgroundColor: '#0f3460',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginBottom: 24,
-    },
-    title: {
-        fontSize: 28,
-        fontWeight: '700',
-        color: '#fff',
-        marginBottom: 12,
-        textAlign: 'center',
-    },
-    subtitle: {
-        fontSize: 16,
-        color: '#a0a0a0',
-        textAlign: 'center',
-        lineHeight: 24,
-    },
-    codeContainer: {
-        alignItems: 'center',
-        marginBottom: 32,
-    },
-    infoBox: {
-        backgroundColor: '#2a2a3e',
-        borderRadius: 12,
-        padding: 16,
-        borderLeftWidth: 4,
-        borderLeftColor: '#0f3460',
-    },
-    infoText: {
-        fontSize: 14,
-        color: '#a0a0a0',
-        lineHeight: 20,
-    },
-});

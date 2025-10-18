@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { StyleSheet, TextInput, View } from 'react-native';
+import { TextInput, View } from 'react-native';
+import { cn } from '@/lib/utils';
 
 interface CodeInputProps {
     length: number;
@@ -40,16 +41,16 @@ export default function CodeInput({ length, onComplete, error }: CodeInputProps)
     };
 
     return (
-        <View style={styles.container}>
+        <View className="flex-row justify-center gap-3">
             {Array.from({ length }).map((_, index) => (
                 <TextInput
                     key={index}
                     ref={(ref) => { inputRefs.current[index] = ref; }}
-                    style={[
-                        styles.input,
-                        code[index] && styles.inputFilled,
-                        error && styles.inputError,
-                    ]}
+                    className={cn(
+                        'w-14 h-16 border-2 rounded-xl text-2xl font-semibold text-center text-foreground bg-background-secondary',
+                        code[index] ? 'border-secondary bg-secondary' : 'border-background-tertiary',
+                        error && 'border-error'
+                    )}
                     value={code[index]}
                     onChangeText={(text) => handleChange(text, index)}
                     onKeyPress={(e) => handleKeyPress(e, index)}
@@ -63,30 +64,3 @@ export default function CodeInput({ length, onComplete, error }: CodeInputProps)
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        gap: 12,
-    },
-    input: {
-        width: 56,
-        height: 64,
-        borderWidth: 2,
-        borderColor: '#2a2a3e',
-        borderRadius: 12,
-        fontSize: 24,
-        fontWeight: '600',
-        textAlign: 'center',
-        color: '#fff',
-        backgroundColor: '#1a1a2e',
-    },
-    inputFilled: {
-        borderColor: '#0f3460',
-        backgroundColor: '#0f3460',
-    },
-    inputError: {
-        borderColor: '#e94560',
-    },
-});

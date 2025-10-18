@@ -1,7 +1,8 @@
 import { useRouter } from 'expo-router';
 import { Smartphone } from 'lucide-react-native';
 import { useEffect, useRef } from 'react';
-import { Animated, StyleSheet, Text, View } from 'react-native';
+import { Animated, View } from 'react-native';
+import { Text } from '@/components/ui/text';
 
 export default function SplashScreen() {
   const router = useRouter();
@@ -35,56 +36,24 @@ export default function SplashScreen() {
   }, []);
 
   return (
-    <View style={styles.container}>
-      <Animated.View style={[
-        styles.logoContainer,
-        {
+    <View className="flex-1 bg-background-secondary justify-center items-center">
+      <Animated.View
+        className="items-center"
+        style={{
           transform: [{ scale: scaleAnim }],
           opacity: opacityAnim,
-        },
-      ]}>
-        <View style={styles.iconWrapper}>
+        }}
+      >
+        <View className="w-30 h-30 rounded-[30px] bg-secondary justify-center items-center mb-6 shadow-lg">
           <Smartphone size={64} color="#fff" strokeWidth={2} />
         </View>
-        <Text style={styles.appName}>Welcome to Cron!</Text>
-        <Text style={styles.tagline}>Payments, simplified.</Text>
+        <Text className="text-4xl font-bold text-foreground mb-2">
+          Welcome to Cron!
+        </Text>
+        <Text className="text-base text-foreground-secondary font-normal">
+          Payments, simplified.
+        </Text>
       </Animated.View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#1a1a2e',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  logoContainer: {
-    alignItems: 'center',
-  },
-  iconWrapper: {
-    width: 120,
-    height: 120,
-    borderRadius: 30,
-    backgroundColor: '#0f3460',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 24,
-    shadowColor: '#16213e',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
-  },
-  appName: {
-    fontSize: 36,
-    fontWeight: '700',
-    color: '#fff',
-    marginBottom: 8,
-  },
-  tagline: {
-    fontSize: 16,
-    color: '#a0a0a0',
-    fontWeight: '400',
-  },
-});

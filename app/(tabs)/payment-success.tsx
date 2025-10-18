@@ -1,7 +1,8 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { CircleCheck as CheckCircle, Share2, ShieldCheck } from 'lucide-react-native';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Text } from '@/components/ui/text';
 import { mockContacts } from '../../data/mockData';
 
 export default function PaymentSuccessScreen() {
@@ -23,251 +24,64 @@ export default function PaymentSuccessScreen() {
     const formattedDate = `${currentDate.getDate()} ${currentDate.toLocaleString('en-US', { month: 'long' })} ${currentDate.getFullYear()}, ${currentDate.toLocaleString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}`;
 
     return (
-        <SafeAreaView style={styles.container}>
-            <View style={styles.content}>
-                <View style={styles.successSection}>
-                    <View style={styles.checkmarkContainer}>
+        <SafeAreaView className="flex-1 bg-background">
+            <View className="flex-1 px-4 pt-[60px]">
+                <View className="items-center mb-10">
+                    <View className="mb-8">
                         <CheckCircle size={80} color="#2196F3" fill="#2196F3" strokeWidth={0} />
                     </View>
 
-                    <Text style={styles.amountText}>₹{amount}.00</Text>
+                    <Text className="text-foreground text-5xl font-normal mb-6">₹{amount}.00</Text>
 
-                    <Text style={styles.paidToLabel}>Paid to</Text>
-                    <Text style={styles.recipientName}>{contact.name.split(' ')[0]}</Text>
+                    <Text className="text-foreground-secondary text-base mb-2">Paid to</Text>
+                    <Text className="text-foreground text-[28px] font-semibold mb-3">{contact.name.split(' ')[0]}</Text>
 
-                    <View style={styles.verifiedBadge}>
+                    <View className="flex-row items-center gap-1.5 mb-2">
                         <ShieldCheck size={16} color="#4CAF50" fill="#4CAF50" />
-                        <Text style={styles.bankingName}>Banking name: {contact.bankingName}</Text>
+                        <Text className="text-foreground-secondary text-sm">Banking name: {contact.bankingName}</Text>
                     </View>
 
-                    <Text style={styles.timestamp}>{formattedDate}</Text>
+                    <Text className="text-foreground-secondary text-sm">{formattedDate}</Text>
                 </View>
 
-                <View style={styles.rewardsCard}>
-                    <View style={styles.rewardsContent}>
-                        <Text style={styles.rewardsTitle}>You have unopened</Text>
-                        <Text style={styles.rewardsTitle}>rewards</Text>
-                        <TouchableOpacity style={styles.openNowButton}>
-                            <Text style={styles.openNowText}>Open now</Text>
+                <View className="bg-[#1C1C1E] rounded-2xl p-6 flex-row justify-between items-center mb-6">
+                    <View className="flex-1">
+                        <Text className="text-foreground text-lg font-medium leading-6">You have unopened</Text>
+                        <Text className="text-foreground text-lg font-medium leading-6">rewards</Text>
+                        <TouchableOpacity className="bg-[rgba(255,255,255,0.1)] py-2 px-4 rounded-[20px] self-start mt-3">
+                            <Text className="text-foreground text-sm font-medium">Open now</Text>
                         </TouchableOpacity>
                     </View>
-                    <View style={styles.rewardsIllustration}>
-                        <View style={styles.giftBox}>
-                            <Text style={styles.giftEmoji}>🎁</Text>
+                    <View className="relative w-[100px] h-[100px] justify-center items-center">
+                        <View className="w-[70px] h-[70px] bg-[#2196F3] rounded-xl justify-center items-center" style={{ transform: [{ rotate: '-10deg' }] }}>
+                            <Text className="text-[36px]">🎁</Text>
                         </View>
-                        <View style={styles.confettiRed} />
-                        <View style={styles.confettiBlue} />
-                        <View style={styles.confettiGreen} />
-                        <View style={styles.confettiYellow} />
+                        <View className="absolute w-2 h-2 bg-[#FF5252] rounded-full top-2.5 right-5" />
+                        <View className="absolute w-1.5 h-1.5 bg-[#2196F3] rounded-full bottom-5 left-2.5" />
+                        <View className="absolute w-[7px] h-[7px] bg-[#4CAF50] rounded-full top-[15px] left-[15px]" />
+                        <View className="absolute w-2 h-2 bg-[#FFC107] rounded-full bottom-[15px] right-[15px]" />
                     </View>
                 </View>
 
-                <View style={styles.poweredBy}>
-                    <Text style={styles.poweredByText}>POWERED BY</Text>
+                <View className="items-center gap-2">
+                    <Text className="text-foreground-secondary text-[11px] tracking-wider">POWERED BY</Text>
                     <Image
                         source={{ uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/UPI-Logo-vector.svg/200px-UPI-Logo-vector.svg.png' }}
-                        style={styles.upiLogo}
+                        className="w-[100px] h-[30px] tint-[#8E8E93]"
                         resizeMode="contain"
                     />
                 </View>
             </View>
 
-            <View style={styles.footer}>
-                <TouchableOpacity style={styles.shareButton}>
+            <View className="flex-row p-4 gap-3 bg-background border-t border-[#1C1C1E]">
+                <TouchableOpacity className="flex-row items-center justify-center bg-[#1C1C1E] py-3.5 px-6 rounded-3xl gap-2 flex-1">
                     <Share2 size={20} color="#fff" />
-                    <Text style={styles.shareButtonText}>Share screenshot</Text>
+                    <Text className="text-foreground text-base font-medium">Share screenshot</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.doneButton} onPress={handleDone}>
-                    <Text style={styles.doneButtonText}>Done</Text>
+                <TouchableOpacity className="bg-[#A8D5FF] py-3.5 px-10 rounded-3xl justify-center items-center" onPress={handleDone}>
+                    <Text className="text-background text-base font-semibold">Done</Text>
                 </TouchableOpacity>
             </View>
         </SafeAreaView>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#000',
-    },
-    content: {
-        flex: 1,
-        paddingHorizontal: 16,
-        paddingTop: 60,
-    },
-    successSection: {
-        alignItems: 'center',
-        marginBottom: 40,
-    },
-    checkmarkContainer: {
-        marginBottom: 32,
-    },
-    amountText: {
-        color: '#fff',
-        fontSize: 48,
-        fontWeight: '400',
-        marginBottom: 24,
-    },
-    paidToLabel: {
-        color: '#8E8E93',
-        fontSize: 16,
-        marginBottom: 8,
-    },
-    recipientName: {
-        color: '#fff',
-        fontSize: 28,
-        fontWeight: '600',
-        marginBottom: 12,
-    },
-    verifiedBadge: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 6,
-        marginBottom: 8,
-    },
-    bankingName: {
-        color: '#8E8E93',
-        fontSize: 14,
-    },
-    timestamp: {
-        color: '#8E8E93',
-        fontSize: 14,
-    },
-    rewardsCard: {
-        backgroundColor: '#1C1C1E',
-        borderRadius: 16,
-        padding: 24,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 24,
-    },
-    rewardsContent: {
-        flex: 1,
-    },
-    rewardsTitle: {
-        color: '#fff',
-        fontSize: 18,
-        fontWeight: '500',
-        lineHeight: 24,
-    },
-    openNowButton: {
-        backgroundColor: 'rgba(255, 255, 255, 0.1)',
-        paddingVertical: 8,
-        paddingHorizontal: 16,
-        borderRadius: 20,
-        alignSelf: 'flex-start',
-        marginTop: 12,
-    },
-    openNowText: {
-        color: '#fff',
-        fontSize: 14,
-        fontWeight: '500',
-    },
-    rewardsIllustration: {
-        position: 'relative',
-        width: 100,
-        height: 100,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    giftBox: {
-        width: 70,
-        height: 70,
-        backgroundColor: '#2196F3',
-        borderRadius: 12,
-        justifyContent: 'center',
-        alignItems: 'center',
-        transform: [{ rotate: '-10deg' }],
-    },
-    giftEmoji: {
-        fontSize: 36,
-    },
-    confettiRed: {
-        position: 'absolute',
-        width: 8,
-        height: 8,
-        backgroundColor: '#FF5252',
-        borderRadius: 4,
-        top: 10,
-        right: 20,
-    },
-    confettiBlue: {
-        position: 'absolute',
-        width: 6,
-        height: 6,
-        backgroundColor: '#2196F3',
-        borderRadius: 3,
-        bottom: 20,
-        left: 10,
-    },
-    confettiGreen: {
-        position: 'absolute',
-        width: 7,
-        height: 7,
-        backgroundColor: '#4CAF50',
-        borderRadius: 3.5,
-        top: 15,
-        left: 15,
-    },
-    confettiYellow: {
-        position: 'absolute',
-        width: 8,
-        height: 8,
-        backgroundColor: '#FFC107',
-        borderRadius: 4,
-        bottom: 15,
-        right: 15,
-    },
-    poweredBy: {
-        alignItems: 'center',
-        gap: 8,
-    },
-    poweredByText: {
-        color: '#8E8E93',
-        fontSize: 11,
-        letterSpacing: 1,
-    },
-    upiLogo: {
-        width: 100,
-        height: 30,
-        tintColor: '#8E8E93',
-    },
-    footer: {
-        flexDirection: 'row',
-        padding: 16,
-        gap: 12,
-        backgroundColor: '#000',
-        borderTopWidth: 1,
-        borderTopColor: '#1C1C1E',
-    },
-    shareButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#1C1C1E',
-        paddingVertical: 14,
-        paddingHorizontal: 24,
-        borderRadius: 24,
-        gap: 8,
-        flex: 1,
-    },
-    shareButtonText: {
-        color: '#fff',
-        fontSize: 16,
-        fontWeight: '500',
-    },
-    doneButton: {
-        backgroundColor: '#A8D5FF',
-        paddingVertical: 14,
-        paddingHorizontal: 40,
-        borderRadius: 24,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    doneButtonText: {
-        color: '#000',
-        fontSize: 16,
-        fontWeight: '600',
-    },
-});

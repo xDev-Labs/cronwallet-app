@@ -1,8 +1,9 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { ArrowRight, Clock, MoveVertical as MoreVertical, ShieldCheck, X } from 'lucide-react-native';
 import { useState } from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Text } from '@/components/ui/text';
 import { mockContacts } from '../../data/mockData';
 
 export default function PaymentInitiateScreen() {
@@ -50,15 +51,15 @@ export default function PaymentInitiateScreen() {
             return (
                 <Image
                     source={{ uri: contact.avatarUrl }}
-                    style={styles.avatar}
+                    className="w-20 h-20 rounded-full mb-4"
                 />
             );
         }
 
         const initial = contact.name.charAt(0).toUpperCase();
         return (
-            <View style={[styles.avatarPlaceholder, { backgroundColor: '#4CAF50' }]}>
-                <Text style={styles.avatarInitial}>{initial}</Text>
+            <View className="w-20 h-20 rounded-full justify-center items-center mb-4 bg-[#4CAF50]">
+                <Text className="text-foreground text-[32px] font-bold">{initial}</Text>
             </View>
         );
     };
@@ -71,52 +72,49 @@ export default function PaymentInitiateScreen() {
     ];
 
     return (
-        <SafeAreaView style={styles.container}>
-            <View style={styles.header}>
+        <SafeAreaView className="flex-1 bg-background">
+            <View className="flex-row items-center justify-between px-4 py-3">
                 <TouchableOpacity
-                    style={styles.closeButton}
+                    className="p-2"
                     onPress={() => router.back()}
                     hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 >
                     <X size={28} color="#fff" pointerEvents="none" />
                 </TouchableOpacity>
-                <View style={styles.headerActions}>
-                    <TouchableOpacity style={styles.iconButton}>
+                <View className="flex-row gap-2">
+                    <TouchableOpacity className="p-1">
                         <Clock size={24} color="#fff" />
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.iconButton}>
+                    <TouchableOpacity className="p-1">
                         <MoreVertical size={24} color="#fff" />
                     </TouchableOpacity>
                 </View>
             </View>
 
-            <View style={styles.content}>
-                <View style={styles.recipientInfo}>
+            <View className="flex-1 items-center pt-10">
+                <View className="items-center mb-10">
                     {renderAvatar()}
-                    <Text style={styles.payingText}>Paying {contact.bankingName}</Text>
-                    <View style={styles.verifiedBadge}>
+                    <Text className="text-foreground text-xl font-semibold mb-2">Paying {contact.bankingName}</Text>
+                    <View className="flex-row items-center gap-1.5 mb-1">
                         <ShieldCheck size={16} color="#4CAF50" fill="#4CAF50" />
-                        <Text style={styles.bankingName}>Banking name: {contact.bankingName}</Text>
+                        <Text className="text-foreground-secondary text-sm">Banking name: {contact.bankingName}</Text>
                     </View>
-                    <Text style={styles.phoneNumber}>{contact.phone}</Text>
+                    <Text className="text-foreground-secondary text-sm">{contact.phone}</Text>
                 </View>
 
-                <View style={styles.amountSection}>
-                    <Text style={styles.currencySymbol}>₹</Text>
-                    <Text style={styles.amountDisplay}>{amount}</Text>
+                <View className="flex-row items-center justify-center mb-6">
+                    <Text className="text-foreground text-[64px] font-light">₹</Text>
+                    <Text className="text-foreground text-[64px] font-light ml-2">{amount}</Text>
                 </View>
 
-                <TouchableOpacity style={styles.addNoteButton}>
-                    <Text style={styles.addNoteText}>Add note</Text>
+                <TouchableOpacity className="py-2 px-5">
+                    <Text className="text-foreground-secondary text-base">Add note</Text>
                 </TouchableOpacity>
             </View>
 
-            <View style={styles.nextButtonContainer}>
+            <View className="items-end justify-center mb-6 mx-4">
                 <TouchableOpacity
-                    style={[
-                        styles.nextButton,
-                        (amount === '0' || parseFloat(amount) === 0) && styles.nextButtonDisabled,
-                    ]}
+                    className={`w-16 h-16 rounded-full bg-[#A8D5FF] justify-center items-center ${(amount === '0' || parseFloat(amount) === 0) && 'opacity-40'}`}
                     onPress={handleNext}
                     disabled={amount === '0' || parseFloat(amount) === 0}
                 >
@@ -124,13 +122,13 @@ export default function PaymentInitiateScreen() {
                 </TouchableOpacity>
             </View>
 
-            <View style={styles.keypad}>
+            <View className="px-4 pb-4">
                 {numberPad.map((row, rowIndex) => (
-                    <View key={rowIndex} style={styles.keypadRow}>
+                    <View key={rowIndex} className="flex-row justify-between mb-2">
                         {row.map((key) => (
                             <TouchableOpacity
                                 key={key}
-                                style={styles.keypadButton}
+                                className="w-[31%] aspect-[2.4] bg-[#3C3C3E] rounded-lg justify-center items-center"
                                 onPress={() => {
                                     if (key === 'back') {
                                         handleBackspace();
@@ -142,12 +140,12 @@ export default function PaymentInitiateScreen() {
                                 }}
                             >
                                 {key === 'back' ? (
-                                    <Text style={styles.keypadBackspace}>⌫</Text>
+                                    <Text className="text-foreground text-[28px]">⌫</Text>
                                 ) : (
                                     <>
-                                        <Text style={styles.keypadNumber}>{key}</Text>
+                                        <Text className="text-foreground text-[28px] font-normal">{key}</Text>
                                         {key !== '.' && (
-                                            <Text style={styles.keypadLetters}>
+                                            <Text className="text-foreground-secondary text-[11px] mt-0.5">
                                                 {
                                                     {
                                                         '2': 'ABC',
@@ -174,148 +172,3 @@ export default function PaymentInitiateScreen() {
         </SafeAreaView>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#000',
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-    },
-    closeButton: {
-        padding: 8,
-    },
-    headerActions: {
-        flexDirection: 'row',
-        gap: 8,
-    },
-    iconButton: {
-        padding: 4,
-    },
-    content: {
-        flex: 1,
-        alignItems: 'center',
-        paddingTop: 40,
-    },
-    recipientInfo: {
-        alignItems: 'center',
-        marginBottom: 40,
-    },
-    avatar: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
-        marginBottom: 16,
-    },
-    avatarPlaceholder: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginBottom: 16,
-    },
-    avatarInitial: {
-        color: '#fff',
-        fontSize: 32,
-        fontWeight: '700',
-    },
-    payingText: {
-        color: '#fff',
-        fontSize: 20,
-        fontWeight: '600',
-        marginBottom: 8,
-    },
-    verifiedBadge: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 6,
-        marginBottom: 4,
-    },
-    bankingName: {
-        color: '#8E8E93',
-        fontSize: 14,
-    },
-    phoneNumber: {
-        color: '#8E8E93',
-        fontSize: 14,
-    },
-    amountSection: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: 24,
-    },
-    currencySymbol: {
-        color: '#fff',
-        fontSize: 64,
-        fontWeight: '300',
-    },
-    amountDisplay: {
-        color: '#fff',
-        fontSize: 64,
-        fontWeight: '300',
-        marginLeft: 8,
-    },
-    addNoteButton: {
-        paddingVertical: 8,
-        paddingHorizontal: 20,
-    },
-    addNoteText: {
-        color: '#8E8E93',
-        fontSize: 16,
-    },
-    keypad: {
-        paddingHorizontal: 16,
-        paddingBottom: 16,
-    },
-    keypadRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: 8,
-    },
-    keypadButton: {
-        width: '31%',
-        aspectRatio: 2.4,
-        backgroundColor: '#3C3C3E',
-        borderRadius: 8,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    keypadNumber: {
-        color: '#fff',
-        fontSize: 28,
-        fontWeight: '400',
-    },
-    keypadLetters: {
-        color: '#8E8E93',
-        fontSize: 11,
-        marginTop: 2,
-    },
-    keypadBackspace: {
-        color: '#fff',
-        fontSize: 28,
-    },
-    nextButtonContainer: {
-        alignItems: 'flex-end',
-        justifyContent: 'center',
-        marginBottom: 24,
-        marginHorizontal: 16,
-    },
-    nextButton: {
-        width: 64,
-        height: 64,
-        borderRadius: 32,
-        backgroundColor: '#A8D5FF',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    nextButtonDisabled: {
-        opacity: 0.4,
-    },
-});

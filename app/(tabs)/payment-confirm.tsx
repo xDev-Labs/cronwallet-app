@@ -1,9 +1,10 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { ChevronDown, Clock, MoveVertical as MoreVertical, ShieldCheck, X } from 'lucide-react-native';
 import { useState } from 'react';
-import { ActivityIndicator, Alert, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as LocalAuthentication from 'expo-local-authentication';
+import { Text } from '@/components/ui/text';
 import { mockContacts, mockUserAccount } from '../../data/mockData';
 
 export default function PaymentConfirmScreen() {
@@ -75,92 +76,92 @@ export default function PaymentConfirmScreen() {
             return (
                 <Image
                     source={{ uri: contact.avatarUrl }}
-                    style={styles.avatar}
+                    className="w-20 h-20 rounded-full mb-4"
                 />
             );
         }
 
         const initial = contact.name.charAt(0).toUpperCase();
         return (
-            <View style={[styles.avatarPlaceholder, { backgroundColor: '#4CAF50' }]}>
-                <Text style={styles.avatarInitial}>{initial}</Text>
+            <View className="w-20 h-20 rounded-full justify-center items-center mb-4 bg-[#4CAF50]">
+                <Text className="text-foreground text-[32px] font-bold">{initial}</Text>
             </View>
         );
     };
 
     return (
-        <SafeAreaView style={styles.container}>
-            <View style={styles.header}>
+        <SafeAreaView className="flex-1 bg-background">
+            <View className="flex-row items-center justify-between px-4 py-3">
                 <TouchableOpacity
-                    style={styles.closeButton}
+                    className="p-2"
                     onPress={() => router.back()}
                     hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 >
                     <X size={28} color="#fff" pointerEvents="none" />
                 </TouchableOpacity>
-                <View style={styles.headerActions}>
-                    <TouchableOpacity style={styles.iconButton}>
+                <View className="flex-row gap-2">
+                    <TouchableOpacity className="p-1">
                         <Clock size={24} color="#fff" />
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.iconButton}>
+                    <TouchableOpacity className="p-1">
                         <MoreVertical size={24} color="#fff" />
                     </TouchableOpacity>
                 </View>
             </View>
 
-            <View style={styles.content}>
-                <View style={styles.recipientInfo}>
+            <View className="flex-1 items-center pt-10">
+                <View className="items-center mb-10">
                     {renderAvatar()}
-                    <Text style={styles.payingText}>Paying {contact.bankingName}</Text>
-                    <View style={styles.verifiedBadge}>
+                    <Text className="text-foreground text-xl font-semibold mb-2">Paying {contact.bankingName}</Text>
+                    <View className="flex-row items-center gap-1.5 mb-1">
                         <ShieldCheck size={16} color="#4CAF50" fill="#4CAF50" />
-                        <Text style={styles.bankingName}>Banking name: {contact.bankingName}</Text>
+                        <Text className="text-foreground-secondary text-sm">Banking name: {contact.bankingName}</Text>
                     </View>
-                    <Text style={styles.phoneNumber}>{contact.phone}</Text>
+                    <Text className="text-foreground-secondary text-sm">{contact.phone}</Text>
                 </View>
 
-                <View style={styles.amountSection}>
-                    <Text style={styles.currencySymbol}>₹</Text>
-                    <Text style={styles.amountDisplay}>{amount}</Text>
+                <View className="flex-row items-center justify-center mb-6">
+                    <Text className="text-foreground text-[64px] font-light">₹</Text>
+                    <Text className="text-foreground text-[64px] font-light ml-2">{amount}</Text>
                 </View>
 
-                <TouchableOpacity style={styles.addNoteButton}>
-                    <Text style={styles.addNoteText}>Add note</Text>
+                <TouchableOpacity className="py-2 px-5">
+                    <Text className="text-foreground-secondary text-base">Add note</Text>
                 </TouchableOpacity>
             </View>
 
-            <View style={styles.footer}>
-                <View style={styles.accountSection}>
-                    <Text style={styles.accountLabel}>Choose account to pay with</Text>
-                    <TouchableOpacity style={styles.accountCard}>
+            <View className="px-4 pb-6">
+                <View className="mb-4">
+                    <Text className="text-foreground text-base mb-3">Choose account to pay with</Text>
+                    <TouchableOpacity className="flex-row items-center bg-[#1C1C1E] p-4 rounded-xl gap-3">
                         <Image
                             source={{ uri: 'https://images.pexels.com/photos/164501/pexels-photo-164501.jpeg?auto=compress&cs=tinysrgb&w=100' }}
-                            style={styles.bankIcon}
+                            className="w-10 h-10 rounded-lg"
                         />
-                        <View style={styles.accountInfo}>
-                            <Text style={styles.bankName}>{mockUserAccount.bankName} ····{mockUserAccount.accountNumber}</Text>
-                            <Text style={styles.accountBalance}>Balance: Check now</Text>
+                        <View className="flex-1">
+                            <Text className="text-foreground text-base font-medium mb-1">{mockUserAccount.bankName} ····{mockUserAccount.accountNumber}</Text>
+                            <Text className="text-[#2196F3] text-sm">Balance: Check now</Text>
                         </View>
                         <ChevronDown size={24} color="#8E8E93" />
                     </TouchableOpacity>
                 </View>
 
                 <TouchableOpacity
-                    style={styles.payButton}
+                    className="bg-[#A8D5FF] py-4 rounded-[28px] items-center mb-4 min-h-[56px] justify-center"
                     onPress={handlePayment}
                     disabled={isProcessing}
                 >
                     {isProcessing ? (
                         <ActivityIndicator color="#000" />
                     ) : (
-                        <Text style={styles.payButtonText}>Pay ₹{amount}</Text>
+                        <Text className="text-background text-lg font-semibold">Pay ₹{amount}</Text>
                     )}
                 </TouchableOpacity>
 
-                <View style={styles.poweredBy}>
+                <View className="items-center">
                     <Image
                         source={{ uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/UPI-Logo-vector.svg/200px-UPI-Logo-vector.svg.png' }}
-                        style={styles.upiLogo}
+                        className="w-[100px] h-[30px] tint-[#8E8E93]"
                         resizeMode="contain"
                     />
                 </View>
@@ -168,160 +169,3 @@ export default function PaymentConfirmScreen() {
         </SafeAreaView>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#000',
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-    },
-    closeButton: {
-        padding: 8,
-    },
-    headerActions: {
-        flexDirection: 'row',
-        gap: 8,
-    },
-    iconButton: {
-        padding: 4,
-    },
-    content: {
-        flex: 1,
-        alignItems: 'center',
-        paddingTop: 40,
-    },
-    recipientInfo: {
-        alignItems: 'center',
-        marginBottom: 40,
-    },
-    avatar: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
-        marginBottom: 16,
-    },
-    avatarPlaceholder: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginBottom: 16,
-    },
-    avatarInitial: {
-        color: '#fff',
-        fontSize: 32,
-        fontWeight: '700',
-    },
-    payingText: {
-        color: '#fff',
-        fontSize: 20,
-        fontWeight: '600',
-        marginBottom: 8,
-    },
-    verifiedBadge: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 6,
-        marginBottom: 4,
-    },
-    bankingName: {
-        color: '#8E8E93',
-        fontSize: 14,
-    },
-    phoneNumber: {
-        color: '#8E8E93',
-        fontSize: 14,
-    },
-    amountSection: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: 24,
-    },
-    currencySymbol: {
-        color: '#fff',
-        fontSize: 64,
-        fontWeight: '300',
-    },
-    amountDisplay: {
-        color: '#fff',
-        fontSize: 64,
-        fontWeight: '300',
-        marginLeft: 8,
-    },
-    addNoteButton: {
-        paddingVertical: 8,
-        paddingHorizontal: 20,
-    },
-    addNoteText: {
-        color: '#8E8E93',
-        fontSize: 16,
-    },
-    footer: {
-        paddingHorizontal: 16,
-        paddingBottom: 24,
-    },
-    accountSection: {
-        marginBottom: 16,
-    },
-    accountLabel: {
-        color: '#fff',
-        fontSize: 16,
-        marginBottom: 12,
-    },
-    accountCard: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#1C1C1E',
-        padding: 16,
-        borderRadius: 12,
-        gap: 12,
-    },
-    bankIcon: {
-        width: 40,
-        height: 40,
-        borderRadius: 8,
-    },
-    accountInfo: {
-        flex: 1,
-    },
-    bankName: {
-        color: '#fff',
-        fontSize: 16,
-        fontWeight: '500',
-        marginBottom: 4,
-    },
-    accountBalance: {
-        color: '#2196F3',
-        fontSize: 14,
-    },
-    payButton: {
-        backgroundColor: '#A8D5FF',
-        paddingVertical: 16,
-        borderRadius: 28,
-        alignItems: 'center',
-        marginBottom: 16,
-        minHeight: 56,
-        justifyContent: 'center',
-    },
-    payButtonText: {
-        color: '#000',
-        fontSize: 18,
-        fontWeight: '600',
-    },
-    poweredBy: {
-        alignItems: 'center',
-    },
-    upiLogo: {
-        width: 100,
-        height: 30,
-        tintColor: '#8E8E93',
-    },
-});

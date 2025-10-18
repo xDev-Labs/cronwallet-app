@@ -1,0 +1,13 @@
+{
+  "$schema": "https://rnr.do/schema.json",
+  "style": "default",
+  "tailwind": {
+    "config": "tailwind.config.js",
+    "css": "app/global.css"
+  },
+  "aliases": {
+    "components": "@/components",
+    "lib": "@/lib",
+    "utils": "@/lib/utils"
+  }
+}

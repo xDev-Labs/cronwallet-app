@@ -1,4 +1,4 @@
-import { Contact, Transaction, UserAccount } from '../types/payment';
+import { Contact, Transaction, UserAccount } from '@/lib/types';
 
 export const mockContacts: Contact[] = [
     {

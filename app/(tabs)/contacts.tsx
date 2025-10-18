@@ -5,12 +5,12 @@ import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
-  StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Text } from '@/components/ui/text';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 interface PhoneContact {
   id: string;
@@ -48,18 +48,20 @@ export default function ContactsScreen() {
     const colorIndex = item.name ? item.name.charCodeAt(0) % colors.length : 0;
 
     return (
-      <TouchableOpacity style={styles.contactItem}>
+      <TouchableOpacity className="flex-row items-center bg-[#1C1C1E] rounded-xl p-3 mb-2">
         <View
-          style={[
-            styles.avatarPlaceholder,
-            { backgroundColor: colors[colorIndex] },
-          ]}
+          className="w-12 h-12 rounded-full items-center justify-center mr-3"
+          style={{ backgroundColor: colors[colorIndex] }}
         >
-          <Text style={styles.avatarInitial}>{initial}</Text>
+          <Text className="text-foreground text-xl font-bold">{initial}</Text>
         </View>
-        <View style={styles.contactInfo}>
-          <Text style={styles.contactName}>{item.name}</Text>
-          <Text style={styles.contactPhone}>{phoneNumber}</Text>
+        <View className="flex-1">
+          <Text className="text-foreground text-base font-semibold mb-1">
+            {item.name}
+          </Text>
+          <Text className="text-foreground-secondary text-sm">
+            {phoneNumber}
+          </Text>
         </View>
       </TouchableOpacity>
     );
@@ -69,18 +71,18 @@ export default function ContactsScreen() {
     return (
       <>
         <Stack.Screen options={{ headerShown: false }} />
-        <SafeAreaView style={styles.container}>
-          <View style={styles.header}>
+        <SafeAreaView className="flex-1 bg-background">
+          <View className="flex-row items-center px-4 py-4 border-b border-border">
             <TouchableOpacity
-              style={styles.backButton}
+              className="mr-4"
               onPress={() => router.back()}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
               <X size={28} color="#fff" pointerEvents="none" />
             </TouchableOpacity>
-            <Text style={styles.headerTitle}>Contacts</Text>
+            <Text variant="h3">Contacts</Text>
           </View>
-          <View style={styles.centerContent}>
+          <View className="flex-1 justify-center items-center">
             <ActivityIndicator size="large" color="#2196F3" />
           </View>
         </SafeAreaView>
@@ -92,20 +94,22 @@ export default function ContactsScreen() {
     return (
       <>
         <Stack.Screen options={{ headerShown: false }} />
-        <SafeAreaView style={styles.container}>
-          <View style={styles.header}>
+        <SafeAreaView className="flex-1 bg-background">
+          <View className="flex-row items-center px-4 py-4 border-b border-border">
             <TouchableOpacity
-              style={styles.backButton}
+              className="mr-4"
               onPress={() => router.replace('/(tabs)/' as any)}
             >
               <ArrowLeft size={24} color="#fff" />
             </TouchableOpacity>
-            <Text style={styles.headerTitle}>Contacts</Text>
+            <Text variant="h3">Contacts</Text>
           </View>
-          <View style={styles.centerContent}>
+          <View className="flex-1 justify-center items-center px-8">
             <User size={64} color="#8E8E93" />
-            <Text style={styles.permissionTitle}>Contacts Permission Required</Text>
-            <Text style={styles.permissionDescription}>
+            <Text variant="h4" className="text-foreground mt-4 text-center">
+              Contacts Permission Required
+            </Text>
+            <Text variant="caption" className="text-foreground-secondary mt-2 text-center">
               Please grant access to your contacts to view and select them.
             </Text>
           </View>
@@ -117,29 +121,31 @@ export default function ContactsScreen() {
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
-      <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
+      <SafeAreaView className="flex-1 bg-background">
+        <View className="flex-row items-center px-4 py-4 border-b border-border">
           <TouchableOpacity
-            style={styles.backButton}
+            className="mr-4"
             onPress={() => router.back()}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
             <X size={28} color="#fff" pointerEvents="none" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Contacts</Text>
+          <Text variant="h3">Contacts</Text>
         </View>
 
         {contacts.length === 0 ? (
-          <View style={styles.centerContent}>
+          <View className="flex-1 justify-center items-center">
             <User size={64} color="#8E8E93" />
-            <Text style={styles.emptyText}>No contacts found</Text>
+            <Text className="text-foreground-secondary text-base mt-4">
+              No contacts found
+            </Text>
           </View>
         ) : (
           <FlatList
             data={contacts}
             renderItem={renderContact}
             keyExtractor={(item) => item.id}
-            contentContainerStyle={styles.listContent}
+            contentContainerClassName="p-4"
             showsVerticalScrollIndicator={false}
           />
         )}
@@ -147,87 +153,3 @@ export default function ContactsScreen() {
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#000',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#2C2C2E',
-  },
-  backButton: {
-    marginRight: 16,
-  },
-  headerTitle: {
-    color: '#fff',
-    fontSize: 24,
-    fontWeight: '700',
-  },
-  centerContent: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 32,
-  },
-  permissionTitle: {
-    color: '#fff',
-    fontSize: 20,
-    fontWeight: '700',
-    marginTop: 16,
-    textAlign: 'center',
-  },
-  permissionDescription: {
-    color: '#8E8E93',
-    fontSize: 14,
-    marginTop: 8,
-    textAlign: 'center',
-  },
-  emptyText: {
-    color: '#8E8E93',
-    fontSize: 16,
-    marginTop: 16,
-  },
-  listContent: {
-    padding: 16,
-  },
-  contactItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#1C1C1E',
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 8,
-  },
-  avatarPlaceholder: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  avatarInitial: {
-    color: '#fff',
-    fontSize: 20,
-    fontWeight: '700',
-  },
-  contactInfo: {
-    flex: 1,
-  },
-  contactName: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 4,
-  },
-  contactPhone: {
-    color: '#8E8E93',
-    fontSize: 14,
-  },
-});
