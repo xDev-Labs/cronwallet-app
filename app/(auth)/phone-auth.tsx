@@ -1,6 +1,9 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
+import { CountryPicker } from '@/components/CountryPicker';
+import { countries, type Country } from '@/lib/constants/countries';
+import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
     Image,
@@ -8,7 +11,6 @@ import {
     Platform,
     SafeAreaView,
     StatusBar,
-    TouchableOpacity,
     View
 } from 'react-native';
 
@@ -24,7 +26,9 @@ const CronLogo = () => (
 
 export default function PhoneAuthScreen() {
     const [phoneNumber, setPhoneNumber] = useState('');
-    const [countryCode, setCountryCode] = useState('+91');
+    const [selectedCountry, setSelectedCountry] = useState<Country>(
+        countries.find((c) => c.code === 'IN') || countries[0]
+    );
     const [isFocused, setIsFocused] = useState(false);
 
     const handlePhoneNumberChange = (text: string) => {
@@ -34,7 +38,13 @@ export default function PhoneAuthScreen() {
     };
 
     const handleNext = () => {
-        console.log('Sending OTP to:', countryCode, phoneNumber);
+        console.log('Sending OTP to:', selectedCountry.dialCode, phoneNumber);
+        router.push({
+            pathname: '/(auth)/otp-verification',
+            params: {
+                phoneNumber: selectedCountry.dialCode + phoneNumber
+            }
+        });
     };
 
     const isButtonEnabled = phoneNumber.length >= 10;
@@ -67,13 +77,10 @@ export default function PhoneAuthScreen() {
                             : 'border-border-light bg-gray-100'
                             }`}>
                             {/* Country Code Selector */}
-                            <TouchableOpacity className="flex-row items-center px-2" activeOpacity={0.7}>
-                                <Text className="text-xl mr-1.5">🇮🇳</Text>
-                                <Text className="text-base font-semibold text-foreground-dark mr-1">
-                                    {countryCode}
-                                </Text>
-                                <Text className="text-lg text-foreground-tertiary ml-1">⌄</Text>
-                            </TouchableOpacity>
+                            <CountryPicker
+                                selectedCountry={selectedCountry}
+                                onSelectCountry={setSelectedCountry}
+                            />
 
                             {/* Separator Line */}
                             <View className="w-px h-3/5 bg-gray-300 mx-2" />

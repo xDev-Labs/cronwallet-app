@@ -74,7 +74,7 @@ export default function OTPVerificationScreen() {
                         </Text>
                         <Text variant="caption" className="text-foreground-secondary text-center leading-6">
                             We've sent a 4-digit code to{'\n'}
-                            <Text className="text-secondary font-semibold">+1 {phoneNumber}</Text>
+                            <Text className="text-secondary font-semibold">{phoneNumber}</Text>
                         </Text>
                     </View>
 
