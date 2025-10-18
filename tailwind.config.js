@@ -63,7 +63,10 @@ module.exports = {
         },
       },
       fontFamily: {
-        sans: ['System'],
+        sans: ['Montserrat_400Regular', 'System'],
+        medium: ['Montserrat_500Medium', 'System'],
+        semibold: ['Montserrat_600SemiBold', 'System'],
+        bold: ['Montserrat_700Bold', 'System'],
         mono: ['monospace'],
       },
       spacing: {

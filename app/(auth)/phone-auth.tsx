@@ -53,11 +53,11 @@ export default function PhoneAuthScreen() {
                     </View>
 
                     {/* Content Area */}
-                    <View className="flex-1 px-6">
-                        <Text variant="h3" className="text-foreground-dark mb-2">
+                    <View className="flex-1 px-6 mt-5">
+                        <Text variant="h3" className="text-foreground-dark">
                             Phone Number
                         </Text>
-                        <Text variant="caption" className="text-foreground-tertiary mb-8">
+                        <Text variant="caption" className="text-foreground-tertiary mb-8 font-sans">
                             What is your phone number
                         </Text>
 
@@ -98,7 +98,7 @@ export default function PhoneAuthScreen() {
                         <Button
                             onPress={handleNext}
                             disabled={!isButtonEnabled}
-                            className="shadow-lg shadow-primary/20"
+                            className="shadow-lg shadow-primary/20 font-medium"
                         >
                             Next
                         </Button>
