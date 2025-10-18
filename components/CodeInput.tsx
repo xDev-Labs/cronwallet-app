@@ -1,22 +1,34 @@
+import { cn } from '@/lib/utils';
 import { useEffect, useRef, useState } from 'react';
 import { TextInput, View } from 'react-native';
-import { cn } from '@/lib/utils';
 
 interface CodeInputProps {
     length: number;
-    onComplete: (code: string) => void;
+    onComplete?: (code: string) => void;
     error?: boolean;
+    value?: string;
+    onChange?: (code: string) => void;
 }
 
-export default function CodeInput({ length, onComplete, error }: CodeInputProps) {
-    const [code, setCode] = useState<string[]>(Array(length).fill(''));
+export default function CodeInput({ length, onComplete, error, value, onChange }: CodeInputProps) {
+    const [code, setCode] = useState<string[]>(
+        value ? value.split('').concat(Array(length - value.length).fill('')) : Array(length).fill('')
+    );
     const inputRefs = useRef<(TextInput | null)[]>([]);
+    const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
 
     useEffect(() => {
         if (inputRefs.current[0]) {
             inputRefs.current[0].focus();
         }
     }, []);
+
+    useEffect(() => {
+        if (value !== undefined) {
+            const newCode = value.split('').concat(Array(length - value.length).fill(''));
+            setCode(newCode.slice(0, length));
+        }
+    }, [value, length]);
 
     const handleChange = (text: string, index: number) => {
         if (!/^\d*$/.test(text)) return;
@@ -25,12 +37,16 @@ export default function CodeInput({ length, onComplete, error }: CodeInputProps)
         newCode[index] = text;
         setCode(newCode);
 
+        const codeString = newCode.join('');
+        onChange?.(codeString);
+
         if (text && index < length - 1) {
             inputRefs.current[index + 1]?.focus();
         }
 
-        if (newCode.every(digit => digit !== '') && newCode.length === length) {
-            onComplete(newCode.join(''));
+        // Only auto-complete if onComplete is provided and no onChange
+        if (!onChange && onComplete && newCode.every(digit => digit !== '') && newCode.length === length) {
+            onComplete(codeString);
         }
     };
 
@@ -41,19 +57,25 @@ export default function CodeInput({ length, onComplete, error }: CodeInputProps)
     };
 
     return (
-        <View className="flex-row justify-center gap-3">
+        <View className="flex-row justify-center gap-4">
             {Array.from({ length }).map((_, index) => (
                 <TextInput
                     key={index}
                     ref={(ref) => { inputRefs.current[index] = ref; }}
                     className={cn(
-                        'w-14 h-16 border-2 rounded-xl text-2xl font-semibold text-center text-foreground bg-background-secondary',
-                        code[index] ? 'border-secondary bg-secondary' : 'border-background-tertiary',
+                        'w-12 h-[48px] border-2 rounded-xl text-2xl font-bold text-center bg-white',
+                        focusedIndex === index
+                            ? 'border-primary'
+                            : code[index]
+                                ? 'border-gray-300 text-foreground-dark'
+                                : 'border-gray-200',
                         error && 'border-error'
                     )}
                     value={code[index]}
                     onChangeText={(text) => handleChange(text, index)}
                     onKeyPress={(e) => handleKeyPress(e, index)}
+                    onFocus={() => setFocusedIndex(index)}
+                    onBlur={() => setFocusedIndex(null)}
                     keyboardType="number-pad"
                     maxLength={1}
                     selectTextOnFocus

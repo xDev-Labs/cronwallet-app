@@ -1,7 +1,7 @@
+import { CountryPicker } from '@/components/CountryPicker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
-import { CountryPicker } from '@/components/CountryPicker';
 import { countries, type Country } from '@/lib/constants/countries';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
@@ -42,7 +42,8 @@ export default function PhoneAuthScreen() {
         router.push({
             pathname: '/(auth)/otp-verification',
             params: {
-                phoneNumber: selectedCountry.dialCode + phoneNumber
+                countryCode: selectedCountry.dialCode,
+                phoneNumber
             }
         });
     };
