@@ -52,7 +52,7 @@ export default function PaymentConfirmScreen() {
             {/* Header */}
             <View className="flex-row items-center px-4 py-4">
                 <Pressable
-                    onPress={() => router.back()}
+                    onPress={() => router.push({ pathname: '/(tabs)/payment-initiate' as any, params: { contactId } })}
                     className="p-2"
                     hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 >

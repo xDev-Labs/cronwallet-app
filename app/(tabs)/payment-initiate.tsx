@@ -53,8 +53,8 @@ export default function PaymentInitiateScreen() {
         <SafeAreaView edges={['top']} className="flex-1 bg-white">
             {/* Header */}
             <View className="flex-row items-center px-4 py-3">
-                <TouchableOpacity className="p-2" onPress={() => router.back()}>
-                    <ChevronLeft size={24} color="#000" />
+                <TouchableOpacity className="p-2" onPress={() => router.push({ pathname: '/(tabs)/recipient' as any, params: { contactId } })}>
+                    <ChevronLeft size={28} color="#000" pointerEvents="none" />
                 </TouchableOpacity>
             </View>
 

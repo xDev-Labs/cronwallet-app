@@ -19,7 +19,7 @@ export default function RecipientScreen() {
 
     const handlePayPress = () => {
         router.push({
-            pathname: './payment-initiate' as any,
+            pathname: '/(tabs)/payment-initiate' as any,
             params: { contactId },
         });
     };
@@ -55,7 +55,7 @@ export default function RecipientScreen() {
             <View className="flex-row items-center px-4 py-3 justify-between">
                 <TouchableOpacity
                     className="p-2"
-                    onPress={() => router.back()}
+                    onPress={() => router.push('/(tabs)/pay-anyone')}
                     hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 >
                     <ChevronLeft size={28} color="#000" pointerEvents="none" />

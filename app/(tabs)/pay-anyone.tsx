@@ -25,7 +25,7 @@ export default function PayAnyoneScreen() {
 
     const handleContactPress = (contact: Contact) => {
         router.push({
-            pathname: './recipient' as any,
+            pathname: '/(tabs)/recipient',
             params: { contactId: contact.id },
         });
     };
