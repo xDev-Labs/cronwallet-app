@@ -20,6 +20,7 @@
     "@react-navigation/native": "^7.1.8",
     "@solana/spl-token": "^0.4.14",
     "@solana/web3.js": "^1.98.4",
+    "@web3icons/core": "^4.0.26",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "expo": "~54.0.10",

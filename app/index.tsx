@@ -53,10 +53,10 @@ export default function SplashScreen() {
   return (
     <View className="flex-1 bg-background-secondary justify-center items-center">
       <Animated.View
-        className="items-center"
         style={{
           transform: [{ scale: scaleAnim }],
           opacity: opacityAnim,
+          alignItems: 'center',
         }}
       >
         <View className="w-30 h-30 rounded-[30px] bg-secondary justify-center items-center mb-6 shadow-lg">

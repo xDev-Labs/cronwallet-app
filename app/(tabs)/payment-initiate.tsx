@@ -1,174 +1,172 @@
-import { router, useLocalSearchParams } from 'expo-router';
-import { ArrowRight, Clock, MoveVertical as MoreVertical, ShieldCheck, X } from 'lucide-react-native';
-import { useState } from 'react';
-import { Image, TouchableOpacity, View } from 'react-native';
+import { Button } from '@/components/ui/button';
+import { CryptoIcon } from '@/components/CryptoIcon';
+import { router } from 'expo-router';
+import { ChevronDown, ChevronLeft } from 'lucide-react-native';
+import { useRef, useState } from 'react';
+import { Animated, Image, Modal, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Text } from '@/components/ui/text';
-import { mockContacts } from '../../data/mockData';
 
 export default function PaymentInitiateScreen() {
-    const { contactId } = useLocalSearchParams();
-    const contact = mockContacts.find(c => c.id === contactId);
-    const [amount, setAmount] = useState('0');
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [selectedCoin, setSelectedCoin] = useState({ name: 'SOL', symbol: 'solana', rate: 0.40 });
+    const slideAnim = useRef(new Animated.Value(0)).current;
 
-    if (!contact) {
-        return null;
-    }
-
-    const handleNumberPress = (num: string) => {
-        if (amount === '0') {
-            setAmount(num);
-        } else {
-            setAmount(amount + num);
-        }
-    };
-
-    const handleBackspace = () => {
-        if (amount.length === 1) {
-            setAmount('0');
-        } else {
-            setAmount(amount.slice(0, -1));
-        }
-    };
-
-    const handleDecimal = () => {
-        if (!amount.includes('.')) {
-            setAmount(amount + '.');
-        }
-    };
-
-    const handleNext = () => {
-        if (amount !== '0' && parseFloat(amount) > 0) {
-            router.push({
-                pathname: './payment-confirm' as any,
-                params: { contactId, amount },
-            });
-        }
-    };
-
-    const renderAvatar = () => {
-        if (contact.avatarUrl) {
-            return (
-                <Image
-                    source={{ uri: contact.avatarUrl }}
-                    className="w-20 h-20 rounded-full mb-4"
-                />
-            );
-        }
-
-        const initial = contact.name.charAt(0).toUpperCase();
-        return (
-            <View className="w-20 h-20 rounded-full justify-center items-center mb-4 bg-[#4CAF50]">
-                <Text className="text-foreground text-[32px] font-bold">{initial}</Text>
-            </View>
-        );
-    };
-
-    const numberPad = [
-        ['1', '2', '3'],
-        ['4', '5', '6'],
-        ['7', '8', '9'],
-        ['.', '0', 'back'],
+    const coins = [
+        { name: 'Solana', symbol: 'solana', rate: 0.20 },
+        { name: 'USDT', symbol: 'usdt', rate: 100 },
+        { name: 'USDC', symbol: 'usdc', rate: 100 }
     ];
 
+    const openModal = () => {
+        setIsModalVisible(true);
+        Animated.timing(slideAnim, {
+            toValue: 1,
+            duration: 300,
+            useNativeDriver: true,
+        }).start();
+    };
+
+    const closeModal = () => {
+        Animated.timing(slideAnim, {
+            toValue: 0,
+            duration: 300,
+            useNativeDriver: true,
+        }).start(() => {
+            setIsModalVisible(false);
+        });
+    };
+
+    const selectCoin = (coin: any) => {
+        setSelectedCoin(coin);
+        closeModal();
+    };
+
     return (
-        <SafeAreaView edges={['top']} className="flex-1 bg-background">
-            <View className="flex-row items-center justify-between px-4 py-3">
-                <TouchableOpacity
-                    className="p-2"
-                    onPress={() => router.back()}
-                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                >
-                    <X size={28} color="#fff" pointerEvents="none" />
-                </TouchableOpacity>
-                <View className="flex-row gap-2">
-                    <TouchableOpacity className="p-1">
-                        <Clock size={24} color="#fff" />
-                    </TouchableOpacity>
-                    <TouchableOpacity className="p-1">
-                        <MoreVertical size={24} color="#fff" />
-                    </TouchableOpacity>
-                </View>
-            </View>
-
-            <View className="flex-1 items-center pt-10">
-                <View className="items-center mb-10">
-                    {renderAvatar()}
-                    <Text className="text-foreground text-xl font-semibold mb-2">Paying {contact.bankingName}</Text>
-                    <View className="flex-row items-center gap-1.5 mb-1">
-                        <ShieldCheck size={16} color="#4CAF50" fill="#4CAF50" />
-                        <Text className="text-foreground-secondary text-sm">Banking name: {contact.bankingName}</Text>
-                    </View>
-                    <Text className="text-foreground-secondary text-sm">{contact.phone}</Text>
-                </View>
-
-                <View className="flex-row items-center justify-center mb-6">
-                    <Text className="text-foreground text-[64px] font-light">₹</Text>
-                    <Text className="text-foreground text-[64px] font-light ml-2">{amount}</Text>
-                </View>
-
-                <TouchableOpacity className="py-2 px-5">
-                    <Text className="text-foreground-secondary text-base">Add note</Text>
+        <SafeAreaView edges={['top']} className="flex-1 bg-white">
+            {/* Header */}
+            <View className="flex-row items-center px-4 py-3">
+                <TouchableOpacity className="p-2" onPress={() => router.back()}>
+                    <ChevronLeft size={24} color="#000" />
                 </TouchableOpacity>
             </View>
 
-            <View className="items-end justify-center mb-6 mx-4">
-                <TouchableOpacity
-                    className={`w-16 h-16 rounded-full bg-[#A8D5FF] justify-center items-center ${(amount === '0' || parseFloat(amount) === 0) && 'opacity-40'}`}
-                    onPress={handleNext}
-                    disabled={amount === '0' || parseFloat(amount) === 0}
-                >
-                    <ArrowRight size={28} color="#000" strokeWidth={2.5} pointerEvents="none" />
-                </TouchableOpacity>
-            </View>
-
-            <View className="px-4 pb-4">
-                {numberPad.map((row, rowIndex) => (
-                    <View key={rowIndex} className="flex-row justify-between mb-2">
-                        {row.map((key) => (
-                            <TouchableOpacity
-                                key={key}
-                                className="w-[31%] aspect-[2.4] bg-[#3C3C3E] rounded-lg justify-center items-center"
-                                onPress={() => {
-                                    if (key === 'back') {
-                                        handleBackspace();
-                                    } else if (key === '.') {
-                                        handleDecimal();
-                                    } else {
-                                        handleNumberPress(key);
-                                    }
-                                }}
-                            >
-                                {key === 'back' ? (
-                                    <Text className="text-foreground text-[28px]">⌫</Text>
-                                ) : (
-                                    <>
-                                        <Text className="text-foreground text-[28px] font-normal">{key}</Text>
-                                        {key !== '.' && (
-                                            <Text className="text-foreground-secondary text-[11px] mt-0.5">
-                                                {
-                                                    {
-                                                        '2': 'ABC',
-                                                        '3': 'DEF',
-                                                        '4': 'GHI',
-                                                        '5': 'JKL',
-                                                        '6': 'MNO',
-                                                        '7': 'PQRS',
-                                                        '8': 'TUV',
-                                                        '9': 'WXYZ',
-                                                    }[key]
-                                                }
-                                            </Text>
-                                        )}
-                                    </>
-                                )}
+            {/* Main Content */}
+            <View className="flex-1 px-4">
+                {/* You send exactly section */}
+                <View className="mb-8">
+                    <Text className="font-sans text-black text-base mb-3">You send exactly</Text>
+                    <View className="flex-row items-center justify-between">
+                        <View className="flex-1 mr-4">
+                            <TouchableOpacity className="w-2/3 bg-gray-100 rounded-xl p-4 flex-row items-center justify-between">
+                                <View className="flex-row items-center">
+                                    <Image
+                                        source={{ uri: 'https://flagcdn.com/w20/us.png' }}
+                                        className="w-6 h-4 mr-2"
+                                    />
+                                    <Text className="text-black font-medium">USD</Text>
+                                </View>
+                                <ChevronDown size={16} color="#000" />
                             </TouchableOpacity>
-                        ))}
+                        </View>
+                        <Text className="w-1/3 text-right text-[#4A3DFF] text-4xl font-bold">100.00</Text>
                     </View>
-                ))}
+                </View>
+
+                {/* Recipient gets section */}
+                <View className="mb-8">
+                    <Text className="text-black text-base mb-3">Recipient gets</Text>
+                    <View className="flex-row items-center justify-between">
+                        <View className="flex-1 mr-4">
+                            <TouchableOpacity
+                                className="w-2/3 bg-gray-100 rounded-xl p-4 flex-row items-center justify-between"
+                                onPress={openModal}
+                            >
+                                <View className="flex-row items-center">
+                                    <CryptoIcon symbol={selectedCoin.symbol} size={24} variant="branded" />
+                                    <Text className="text-black font-medium ml-2">{selectedCoin.name}</Text>
+                                </View>
+                                <ChevronDown size={16} color="#000" />
+                            </TouchableOpacity>
+                        </View>
+                        <Text className="w-1/3 text-right text-[#4A3DFF] text-4xl font-bold">{selectedCoin.rate}</Text>
+                    </View>
+                </View>
+
+                {/* Estimated fees section */}
+                <View className="border-2 border-dashed border-green-500 rounded-xl p-4 mb-8">
+                    <View className="flex-row items-center justify-between">
+                        <View className="flex-1">
+                            <View className="flex-row items-center mb-2">
+                                <View className="w-5 h-5 bg-black rounded items-center justify-center mr-2">
+                                    <Text className="text-white text-xs">$</Text>
+                                </View>
+                                <Text className="font-sans text-gray-500 text-sm">Estimated fees</Text>
+                            </View>
+                            <Text className="font-sans text-black text-sm">Included in USD amount:</Text>
+                        </View>
+                        <Text className="text-green-500 font-bold text-lg">FREE</Text>
+                    </View>
+                </View>
             </View>
 
+            {/* Bottom Button */}
+            <View
+                className="flex-row justify-center p-4 gap-3 bg-white"
+                style={{
+                    shadowColor: '#4A3DFF',
+                    shadowOffset: { width: 0, height: -1 },
+                    shadowRadius: 13.5,
+                    shadowOpacity: 0.078,
+                    elevation: 8
+                }}
+            >
+                <Button className='w-full'>Make Transfer</Button>
+            </View>
 
+            {/* Coin Selection Modal */}
+            <Modal
+                visible={isModalVisible}
+                transparent={true}
+                animationType="none"
+                onRequestClose={closeModal}
+            >
+                <View className="flex-1 justify-end bg-black/50">
+                    <TouchableOpacity
+                        className="flex-1"
+                        onPress={closeModal}
+                        activeOpacity={1}
+                    />
+                    <Animated.View
+                        className="bg-white rounded-t-3xl"
+                        style={{
+                            transform: [{
+                                translateY: slideAnim.interpolate({
+                                    inputRange: [0, 1],
+                                    outputRange: [400, 0]
+                                })
+                            }]
+                        }}
+                    >
+                        <View className="p-6">
+                            <Text className="text-black text-xl font-bold mb-6">Select Coin</Text>
+
+                            {coins.map((coin, index) => (
+                                <TouchableOpacity
+                                    key={index}
+                                    className="flex-row items-center justify-between py-4 border-b border-gray-100"
+                                    onPress={() => selectCoin(coin)}
+                                >
+                                    <View className="flex-row items-center">
+                                        <CryptoIcon symbol={coin.symbol} size={32} variant="branded" />
+                                        <Text className="text-black text-base font-medium ml-3">{coin.name}</Text>
+                                    </View>
+                                    <Text className="text-[#4A3DFF] text-base font-medium">≈ {coin.rate}</Text>
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+                    </Animated.View>
+                </View>
+            </Modal>
         </SafeAreaView>
     );
 }
