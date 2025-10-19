@@ -1,7 +1,6 @@
-import { Text } from '@/components/ui/text';
+import { CronLogo } from '@/components/common/CronLogo';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { useRouter } from 'expo-router';
-import { Smartphone } from 'lucide-react-native';
 import { useEffect, useRef } from 'react';
 import { Animated, View } from 'react-native';
 
@@ -56,7 +55,7 @@ export default function SplashScreen() {
   }, [isLoading, user, isBiometricAuthenticated]);
 
   return (
-    <View className="flex-1 bg-background-secondary justify-center items-center">
+    <View className=" bg-white justify-center items-center h-full">
       <Animated.View
         style={{
           transform: [{ scale: scaleAnim }],
@@ -64,15 +63,9 @@ export default function SplashScreen() {
           alignItems: 'center',
         }}
       >
-        <View className="w-30 h-30 rounded-[30px] bg-secondary justify-center items-center mb-6 shadow-lg">
-          <Smartphone size={64} color="#fff" strokeWidth={2} />
+        <View className="justify-center items-center shadow-lg">
+          <CronLogo className="w-[150px]" />
         </View>
-        <Text className="text-4xl font-bold text-foreground mb-2">
-          Welcome to Cron!
-        </Text>
-        <Text className="text-base text-foreground-secondary font-normal">
-          Payments, simplified.
-        </Text>
       </Animated.View>
     </View>
   );
