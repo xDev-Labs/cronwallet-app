@@ -1,74 +1,25 @@
+import { CryptoIcon } from '@/components/CryptoIcon';
+import { Text as UIText } from '@/components/ui/text';
 import { router, useLocalSearchParams } from 'expo-router';
-import { ChevronDown, Clock, MoveVertical as MoreVertical, ShieldCheck, X } from 'lucide-react-native';
-import { useState } from 'react';
-import { ActivityIndicator, Alert, Image, TouchableOpacity, View } from 'react-native';
+import { ChevronLeft, ChevronRight, Lock } from 'lucide-react-native';
+import { Image, Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import * as LocalAuthentication from 'expo-local-authentication';
-import { Text } from '@/components/ui/text';
-import { mockContacts, mockUserAccount } from '../../data/mockData';
+import { mockContacts } from '../../data/mockData';
 
 export default function PaymentConfirmScreen() {
     const { contactId, amount } = useLocalSearchParams();
     const contact = mockContacts.find(c => c.id === contactId);
-    const [isProcessing, setIsProcessing] = useState(false);
 
     if (!contact) {
         return null;
     }
 
-    const handlePayment = async () => {
-        try {
-            // Check if biometric authentication is available
-            const hasHardware = await LocalAuthentication.hasHardwareAsync();
-            const isEnrolled = await LocalAuthentication.isEnrolledAsync();
-            const authTypes = await LocalAuthentication.supportedAuthenticationTypesAsync();
-
-            if (!hasHardware) {
-                Alert.alert('Error', 'Biometric authentication is not available on this device.');
-                return;
-            }
-
-            if (!isEnrolled) {
-                Alert.alert('Error', 'No biometric authentication is enrolled on this device. Please set up Face ID or Touch ID in Settings.');
-                return;
-            }
-
-            // Determine authentication method
-            const hasFaceID = authTypes.includes(LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION);
-            const hasTouchID = authTypes.includes(LocalAuthentication.AuthenticationType.FINGERPRINT);
-
-            const promptMessage = hasFaceID
-                ? 'Scan your face to confirm payment'
-                : hasTouchID
-                ? 'Scan your fingerprint to confirm payment'
-                : 'Authenticate to confirm payment';
-
-            // Authenticate with Face ID
-            const result = await LocalAuthentication.authenticateAsync({
-                promptMessage,
-                fallbackLabel: 'Use Passcode',
-                cancelLabel: 'Cancel',
-                disableDeviceFallback: false,
-            });
-
-            if (!result.success) {
-                Alert.alert('Authentication Failed', 'Payment cancelled. Please try again.');
-                return;
-            }
-
-            // Proceed with payment after successful authentication
-            setIsProcessing(true);
-            setTimeout(() => {
-                setIsProcessing(false);
-                router.push({
-                    pathname: './payment-success' as any,
-                    params: { contactId, amount },
-                });
-            }, 2000);
-        } catch (error) {
-            Alert.alert('Error', 'An error occurred during authentication. Please try again.');
-            console.error('Biometric authentication error:', error);
-        }
+    const handleSlideToConfirm = () => {
+        // Navigate to payment success screen
+        router.push({
+            pathname: './payment-success' as any,
+            params: { contactId, amount },
+        });
     };
 
     const renderAvatar = () => {
@@ -76,95 +27,132 @@ export default function PaymentConfirmScreen() {
             return (
                 <Image
                     source={{ uri: contact.avatarUrl }}
-                    className="w-20 h-20 rounded-full mb-4"
+                    className="w-12 h-12 rounded-full"
                 />
             );
         }
 
         const initial = contact.name.charAt(0).toUpperCase();
+        const colors = ['#E91E63', '#9C27B0', '#FF5722', '#2196F3', '#4CAF50'];
+        const colorIndex = contact.name.charCodeAt(0) % colors.length;
+
         return (
-            <View className="w-20 h-20 rounded-full justify-center items-center mb-4 bg-[#4CAF50]">
-                <Text className="text-foreground text-[32px] font-bold">{initial}</Text>
+            <View
+                className="w-12 h-12 rounded-full items-center justify-center"
+                style={{ backgroundColor: colors[colorIndex] }}
+            >
+                <UIText className="text-white text-xl font-bold">{initial}</UIText>
             </View>
         );
     };
 
     return (
-        <SafeAreaView edges={['top']} className="flex-1 bg-background">
-            <View className="flex-row items-center justify-between px-4 py-3">
-                <TouchableOpacity
-                    className="p-2"
+        <SafeAreaView className="flex-1 bg-white">
+            {/* Header */}
+            <View className="flex-row items-center px-4 py-4">
+                <Pressable
                     onPress={() => router.back()}
+                    className="p-2"
                     hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 >
-                    <X size={28} color="#fff" pointerEvents="none" />
-                </TouchableOpacity>
-                <View className="flex-row gap-2">
-                    <TouchableOpacity className="p-1">
-                        <Clock size={24} color="#fff" />
-                    </TouchableOpacity>
-                    <TouchableOpacity className="p-1">
-                        <MoreVertical size={24} color="#fff" />
-                    </TouchableOpacity>
-                </View>
+                    <ChevronLeft size={24} color="#000" />
+                </Pressable>
+                <UIText className="text-xl font-sans font-bold text-foreground-dark ml-4">
+                    Transfer Summary
+                </UIText>
             </View>
 
-            <View className="flex-1 items-center pt-10">
-                <View className="items-center mb-10">
-                    {renderAvatar()}
-                    <Text className="text-foreground text-xl font-semibold mb-2">Paying {contact.bankingName}</Text>
-                    <View className="flex-row items-center gap-1.5 mb-1">
-                        <ShieldCheck size={16} color="#4CAF50" fill="#4CAF50" />
-                        <Text className="text-foreground-secondary text-sm">Banking name: {contact.bankingName}</Text>
-                    </View>
-                    <Text className="text-foreground-secondary text-sm">{contact.phone}</Text>
-                </View>
-
-                <View className="flex-row items-center justify-center mb-6">
-                    <Text className="text-foreground text-[64px] font-light">₹</Text>
-                    <Text className="text-foreground text-[64px] font-light ml-2">{amount}</Text>
-                </View>
-
-                <TouchableOpacity className="py-2 px-5">
-                    <Text className="text-foreground-secondary text-base">Add note</Text>
-                </TouchableOpacity>
-            </View>
-
-            <View className="px-4 pb-6">
-                <View className="mb-4">
-                    <Text className="text-foreground text-base mb-3">Choose account to pay with</Text>
-                    <TouchableOpacity className="flex-row items-center bg-[#1C1C1E] p-4 rounded-xl gap-3">
-                        <Image
-                            source={{ uri: 'https://images.pexels.com/photos/164501/pexels-photo-164501.jpeg?auto=compress&cs=tinysrgb&w=100' }}
-                            className="w-10 h-10 rounded-lg"
-                        />
-                        <View className="flex-1">
-                            <Text className="text-foreground text-base font-medium mb-1">{mockUserAccount.bankName} ····{mockUserAccount.accountNumber}</Text>
-                            <Text className="text-[#2196F3] text-sm">Balance: Check now</Text>
+            <View className="flex-1 px-4">
+                {/* Receiver Details */}
+                <View className="mb-6">
+                    <UIText className="text-lg font-sans font-semibold text-foreground-dark mb-3">
+                        Receiver Details
+                    </UIText>
+                    <View className="bg-white rounded-xl p-4 border border-gray-100">
+                        <View className="flex-row items-center">
+                            {renderAvatar()}
+                            <View className="ml-3 flex-1">
+                                <View className="flex-row items-center mb-1">
+                                    <View className="w-4 h-4 bg-[#4A3DFF] rounded mr-2" />
+                                    <UIText className="text-black font-sans text-base font-semibold">
+                                        {contact.name}@1341
+                                    </UIText>
+                                </View>
+                                <UIText className="text-foreground-secondary text-sm font-sans">
+                                    {contact.phone}
+                                </UIText>
+                            </View>
                         </View>
-                        <ChevronDown size={24} color="#8E8E93" />
-                    </TouchableOpacity>
+                    </View>
                 </View>
 
-                <TouchableOpacity
-                    className="bg-[#A8D5FF] py-4 rounded-[28px] items-center mb-4 min-h-[56px] justify-center"
-                    onPress={handlePayment}
-                    disabled={isProcessing}
+                {/* Transfer Details */}
+                <View className="mb-6">
+                    <UIText className="text-lg font-semibold text-foreground-dark mb-3">
+                        Transfer Details
+                    </UIText>
+                    <View className="bg-white rounded-xl p-4 border border-gray-100">
+                        {/* You Send */}
+                        <View className="flex-row items-center justify-between mb-4">
+                            <View className="flex-row items-center">
+                                <Image
+                                    source={{ uri: 'https://flagcdn.com/w20/us.png' }}
+                                    className="w-6 h-4 mr-2"
+                                />
+                                <UIText className="text-black font-sans ml-2">USD</UIText>
+                            </View>
+                            <UIText className="text-[#4A3DFF] text-3xl font-bold">
+                                {amount || '100.00'}
+                            </UIText>
+                        </View>
+
+                        {/* Receiver Gets */}
+                        <View className="flex-row items-center justify-between mb-4">
+                            <View className="flex-row items-center">
+                                <CryptoIcon symbol="solana" size={32} variant="branded" />
+                                <UIText className="text-black font-sans ml-2">SOL</UIText>
+                            </View>
+                            <UIText className="text-[#4A3DFF] text-3xl font-bold">
+                                0.40
+                            </UIText>
+                        </View>
+
+                        {/* Fees Section */}
+                        <View className="border-2 border-dashed border-green-500 rounded-xl p-3">
+                            <View className="flex-row items-center justify-between">
+                                <View className="flex-1">
+                                    <View className="flex-row items-center mb-1">
+                                        <Lock size={16} color="#000" />
+                                        <UIText className="text-foreground-secondary font-sans text-sm ml-2">
+                                            Estimated fees
+                                        </UIText>
+                                    </View>
+                                    <UIText className="text-black font-sans text-sm">
+                                        Included in USD amount:
+                                    </UIText>
+                                </View>
+                                <UIText className="text-green-500 font-bold text-lg">
+                                    FREE
+                                </UIText>
+                            </View>
+                        </View>
+                    </View>
+                </View>
+            </View>
+
+            {/* Slide to Confirm Button */}
+            <View className="px-4 pb-4">
+                <Pressable
+                    onPress={handleSlideToConfirm}
+                    className="bg-gray-100 rounded-xl p-4 flex-row items-center justify-center active:opacity-80"
                 >
-                    {isProcessing ? (
-                        <ActivityIndicator color="#000" />
-                    ) : (
-                        <Text className="text-background text-lg font-semibold">Pay ₹{amount}</Text>
-                    )}
-                </TouchableOpacity>
-
-                <View className="items-center">
-                    <Image
-                        source={{ uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/UPI-Logo-vector.svg/200px-UPI-Logo-vector.svg.png' }}
-                        className="w-[100px] h-[30px] tint-[#8E8E93]"
-                        resizeMode="contain"
-                    />
-                </View>
+                    <View className="w-8 h-8 bg-[#4A3DFF] rounded-lg items-center justify-center mr-3">
+                        <ChevronRight size={16} color="#fff" />
+                    </View>
+                    <UIText className="text-gray-500 text-base font-medium">
+                        SLIDE TO CONFIRM
+                    </UIText>
+                </Pressable>
             </View>
         </SafeAreaView>
     );

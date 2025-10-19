@@ -1,12 +1,13 @@
-import { Button } from '@/components/ui/button';
 import { CryptoIcon } from '@/components/CryptoIcon';
-import { router } from 'expo-router';
+import { Button } from '@/components/ui/button';
+import { router, useLocalSearchParams } from 'expo-router';
 import { ChevronDown, ChevronLeft } from 'lucide-react-native';
 import { useRef, useState } from 'react';
 import { Animated, Image, Modal, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function PaymentInitiateScreen() {
+    const { contactId } = useLocalSearchParams();
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [selectedCoin, setSelectedCoin] = useState({ name: 'SOL', symbol: 'solana', rate: 0.40 });
     const slideAnim = useRef(new Animated.Value(0)).current;
@@ -39,6 +40,13 @@ export default function PaymentInitiateScreen() {
     const selectCoin = (coin: any) => {
         setSelectedCoin(coin);
         closeModal();
+    };
+
+    const handlePayPress = () => {
+        router.push({
+            pathname: './payment-confirm' as any,
+            params: { contactId, amount: '100.00' },
+        });
     };
 
     return (
@@ -120,7 +128,7 @@ export default function PaymentInitiateScreen() {
                     elevation: 8
                 }}
             >
-                <Button className='w-full'>Make Transfer</Button>
+                <Button className='w-full' onPress={handlePayPress}>Make Transfer</Button>
             </View>
 
             {/* Coin Selection Modal */}
