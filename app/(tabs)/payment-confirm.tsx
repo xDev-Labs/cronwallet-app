@@ -143,7 +143,10 @@ export default function PaymentConfirmScreen() {
 
             {/* Slide to Confirm Button */}
             <View className="px-4 pb-4">
-                <SlideToConfirm onConfirm={handleSlideToConfirm} />
+                <SlideToConfirm
+                    key={`${contactId}-${amount}`}
+                    onConfirm={handleSlideToConfirm}
+                />
             </View>
         </SafeAreaView>
     );
