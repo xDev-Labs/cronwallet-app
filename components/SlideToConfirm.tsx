@@ -130,7 +130,7 @@ export const SlideToConfirm = ({ onConfirm, text = 'SLIDE TO CONFIRM' }: SlideTo
               height: SLIDER_BUTTON_SIZE,
             },
           ]}
-          className="bg-[#4A3DFF] rounded-lg items-center justify-center"
+          className="bg-[#4A3DFF] rounded-xl items-center justify-center"
         >
           <ChevronRight size={24} color="#fff" strokeWidth={3} />
         </Animated.View>
