@@ -7,12 +7,14 @@ import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
     Image,
+    Keyboard,
     KeyboardAvoidingView,
     Platform,
-    SafeAreaView,
     StatusBar,
+    TouchableWithoutFeedback,
     View
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const CronLogo = () => (
     <View className="flex-1 w-full items-center justify-center">
@@ -57,61 +59,63 @@ export default function PhoneAuthScreen() {
                 className="flex-1"
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             >
-                <View className="flex-1 justify-between bg-background-light mt-20">
-                    {/* Header (Logo) */}
-                    <View className="items-start px-6 pt-15 pb-10">
-                        <CronLogo />
-                    </View>
+                <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                    <View className="flex-1 justify-between bg-background-light mt-20">
+                        {/* Header (Logo) */}
+                        <View className="items-start px-6 pt-15 pb-10">
+                            <CronLogo />
+                        </View>
 
-                    {/* Content Area */}
-                    <View className="flex-1 px-6 mt-5">
-                        <Text variant="h3" className="text-foreground-dark">
-                            Phone Number
-                        </Text>
-                        <Text variant="caption" className="text-foreground-tertiary mb-8 font-sans">
-                            What is your phone number
-                        </Text>
+                        {/* Content Area */}
+                        <View className="flex-1 px-6 mt-5">
+                            <Text variant="h3" className="text-foreground-dark">
+                                Phone Number
+                            </Text>
+                            <Text variant="caption" className="text-foreground-tertiary mb-8 font-sans">
+                                What is your phone number
+                            </Text>
 
-                        {/* Phone Input Field Container */}
-                        <View className={`flex-row items-center h-14 rounded-xl border-2 px-2.5 ${isFocused
-                            ? 'border-border-focus bg-background-light'
-                            : 'border-border-light bg-gray-100'
-                            }`}>
-                            {/* Country Code Selector */}
-                            <CountryPicker
-                                selectedCountry={selectedCountry}
-                                onSelectCountry={setSelectedCountry}
-                            />
+                            {/* Phone Input Field Container */}
+                            <View className={`flex-row items-center h-14 rounded-xl border-2 px-2.5 ${isFocused
+                                ? 'border-border-focus bg-background-light'
+                                : 'border-border-light bg-gray-100'
+                                }`}>
+                                {/* Country Code Selector */}
+                                <CountryPicker
+                                    selectedCountry={selectedCountry}
+                                    onSelectCountry={setSelectedCountry}
+                                />
 
-                            {/* Separator Line */}
-                            <View className="w-px h-3/5 bg-gray-300 mx-2" />
+                                {/* Separator Line */}
+                                <View className="w-px h-3/5 bg-gray-300 mx-2" />
 
-                            {/* Phone Number Input */}
-                            <Input
-                                className="flex-1 h-full border-0 bg-transparent px-2 text-foreground-dark"
-                                placeholder="00000 00000"
-                                placeholderTextColor="#A0A0A0"
-                                keyboardType="phone-pad"
-                                maxLength={10}
-                                value={phoneNumber}
-                                onChangeText={handlePhoneNumberChange}
-                                onFocus={() => setIsFocused(true)}
-                                onBlur={() => setIsFocused(false)}
-                            />
+                                {/* Phone Number Input */}
+                                <Input
+                                    className="flex-1 h-full border-0 bg-transparent px-2 text-foreground-dark"
+                                    placeholder="00000 00000"
+                                    placeholderTextColor="#A0A0A0"
+                                    keyboardType="phone-pad"
+                                    maxLength={10}
+                                    value={phoneNumber}
+                                    onChangeText={handlePhoneNumberChange}
+                                    onFocus={() => setIsFocused(true)}
+                                    onBlur={() => setIsFocused(false)}
+                                />
+                            </View>
+                        </View>
+
+                        {/* Next Button Container */}
+                        <View className={`px-6 pt-2.5 ${Platform.OS === 'ios' ? 'pb-7.5' : 'pb-5'}`}>
+                            <Button
+                                onPress={handleNext}
+                                disabled={!isButtonEnabled}
+                                className="shadow-lg shadow-primary/20 font-medium mb-4"
+                            >
+                                Next
+                            </Button>
                         </View>
                     </View>
-
-                    {/* Next Button Container */}
-                    <View className={`px-6 pt-2.5 ${Platform.OS === 'ios' ? 'pb-7.5' : 'pb-5'}`}>
-                        <Button
-                            onPress={handleNext}
-                            disabled={!isButtonEnabled}
-                            className="shadow-lg shadow-primary/20 font-medium"
-                        >
-                            Next
-                        </Button>
-                    </View>
-                </View>
+                </TouchableWithoutFeedback>
             </KeyboardAvoidingView>
         </SafeAreaView>
     );

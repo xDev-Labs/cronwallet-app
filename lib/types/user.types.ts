@@ -5,6 +5,7 @@ export interface User {
   username?: string;
   avatar?: string; // Emoji avatar
   hasCompletedOnboarding: boolean;
+  biometricEnabled?: boolean;
   createdAt: string;
 }
 

@@ -65,7 +65,7 @@ export default function OTPVerificationScreen() {
         // Simulate OTP verification (use 123456 as correct OTP)
         if (otp === '123456') {
             router.replace({
-                pathname: '/(auth)/create-passcode',
+                pathname: '/(auth)/biometric-setup',
                 params: {
                     phoneNumber,
                     countryCode
@@ -143,7 +143,7 @@ export default function OTPVerificationScreen() {
                                 <Button
                                     onPress={handleVerify}
                                     disabled={!isVerifyEnabled}
-                                    className="shadow-lg shadow-primary/20 font-medium"
+                                    className="shadow-lg shadow-primary/20 font-medium mb-4"
                                 >
                                     Verify
                                 </Button>

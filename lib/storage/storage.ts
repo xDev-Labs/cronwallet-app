@@ -1,12 +1,13 @@
+import type { User } from '@/lib/types/user.types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
-import type { User } from '@/lib/types/user.types';
 
 // Storage Keys
 export const STORAGE_KEYS = {
   USER_PROFILE: 'cron_user_profile',
   HAS_COMPLETED_ONBOARDING: 'cron_onboarding_complete',
   PASSCODE: 'cron_passcode', // Secure
+  BIOMETRIC_ENABLED: 'cron_biometric_enabled', // Secure
 } as const;
 
 // AsyncStorage utilities for non-sensitive data
@@ -115,6 +116,35 @@ export const secureStorage = {
       await SecureStore.deleteItemAsync(STORAGE_KEYS.PASSCODE);
     } catch (error) {
       console.error('Error removing passcode from secure storage:', error);
+      throw error;
+    }
+  },
+
+  // Biometric Settings
+  async saveBiometricEnabled(enabled: boolean): Promise<void> {
+    try {
+      await SecureStore.setItemAsync(STORAGE_KEYS.BIOMETRIC_ENABLED, enabled.toString());
+    } catch (error) {
+      console.error('Error saving biometric setting to secure storage:', error);
+      throw error;
+    }
+  },
+
+  async getBiometricEnabled(): Promise<boolean> {
+    try {
+      const value = await SecureStore.getItemAsync(STORAGE_KEYS.BIOMETRIC_ENABLED);
+      return value === 'true';
+    } catch (error) {
+      console.error('Error getting biometric setting from secure storage:', error);
+      return false;
+    }
+  },
+
+  async removeBiometricSetting(): Promise<void> {
+    try {
+      await SecureStore.deleteItemAsync(STORAGE_KEYS.BIOMETRIC_ENABLED);
+    } catch (error) {
+      console.error('Error removing biometric setting from secure storage:', error);
       throw error;
     }
   },

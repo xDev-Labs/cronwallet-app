@@ -126,7 +126,7 @@ export default function UsernameScreen() {
                             <Button
                                 onPress={handleContinue}
                                 disabled={!isButtonEnabled}
-                                className="shadow-lg shadow-primary/20 font-medium"
+                                className="shadow-lg shadow-primary/20 font-medium mb-4"
                             >
                                 Continue
                             </Button>

@@ -2,6 +2,7 @@ import { ChevronRight } from '@/components/icons/ChevronRight';
 import { RosetteDiscount } from '@/components/icons/RosetteDiscount';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
+import { clearAllStorage } from '@/lib/storage/storage';
 import { router } from 'expo-router';
 import { Bell, Home, QrCode, Send, Smartphone } from 'lucide-react-native';
 import { Image, Pressable, ScrollView, View } from 'react-native';
@@ -141,6 +142,7 @@ export default function HomeScreen() {
         <View className="px-4 py-4">
           <Pressable
             className="bg-[#4A3DFF] flex-row items-center justify-between rounded-xl px-6 py-4"
+            onPress={() => clearAllStorage()}
           >
             <View className="flex-row items-center">
               <Text className="text-white font-bold text-base mr-2">
