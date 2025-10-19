@@ -1,6 +1,6 @@
+import { clearAllStorage, storage } from '@/lib/storage/storage';
+import type { AuthState, User } from '@/lib/types/user.types';
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import type { User, AuthState } from '@/lib/types/user.types';
-import { storage, clearAllStorage } from '@/lib/storage/storage';
 
 interface AuthContextType extends AuthState {
   saveUser: (user: User) => Promise<void>;
@@ -8,6 +8,7 @@ interface AuthContextType extends AuthState {
   completeOnboarding: () => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
+  setBiometricAuthenticated: (authenticated: boolean) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -17,6 +18,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     user: null,
     isAuthenticated: false,
     isLoading: true,
+    isBiometricAuthenticated: false,
   });
 
   // Load user data on mount
@@ -27,10 +29,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const loadUserData = async () => {
     try {
       const user = await storage.getUser();
+      // Always start with biometric authentication as false (session-based)
       setState({
         user,
         isAuthenticated: !!user,
         isLoading: false,
+        isBiometricAuthenticated: false,
       });
     } catch (error) {
       console.error('Error loading user data:', error);
@@ -38,6 +42,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user: null,
         isAuthenticated: false,
         isLoading: false,
+        isBiometricAuthenticated: false,
       });
     }
   };
@@ -49,6 +54,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user,
         isAuthenticated: true,
         isLoading: false,
+        isBiometricAuthenticated: false,
       });
     } catch (error) {
       console.error('Error saving user:', error);
@@ -88,6 +94,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const setBiometricAuthenticated = (authenticated: boolean) => {
+    console.log('setBiometricAuthenticated', authenticated);
+    // Only update in-memory state (session-based, not persisted)
+    setState(prev => ({
+      ...prev,
+      isBiometricAuthenticated: authenticated,
+    }));
+  };
+
   const logout = async () => {
     try {
       await clearAllStorage();
@@ -95,6 +110,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user: null,
         isAuthenticated: false,
         isLoading: false,
+        isBiometricAuthenticated: false,
       });
     } catch (error) {
       console.error('Error logging out:', error);
@@ -113,6 +129,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     completeOnboarding,
     logout,
     refreshUser,
+    setBiometricAuthenticated,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

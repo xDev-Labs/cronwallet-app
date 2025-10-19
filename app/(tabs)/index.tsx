@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { clearAllStorage } from '@/lib/storage/storage';
 import { router } from 'expo-router';
-import { Bell, Home, QrCode, Send, Smartphone } from 'lucide-react-native';
+import { Bell, QrCode, Send, Smartphone } from 'lucide-react-native';
 import { Image, Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -45,19 +45,6 @@ const ActionCard = ({
   </Pressable>
 );
 
-const EmptyState = () => (
-  <View className="flex-1 items-center justify-center px-6">
-    <View className="w-24 h-24 rounded-full bg-gray-100 items-center justify-center mb-4">
-      <Home size={40} color="#9CA3AF" strokeWidth={1.5} />
-    </View>
-    <Text className="text-xl font-bold text-foreground-dark mb-2">
-      No transactions yet
-    </Text>
-    <Text className="text-base text-foreground-tertiary text-center">
-      Start your first payment
-    </Text>
-  </View>
-);
 
 export default function HomeScreen() {
   const hasNotifications = true; // Change this based on actual notification state

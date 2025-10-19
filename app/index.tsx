@@ -1,13 +1,13 @@
+import { Text } from '@/components/ui/text';
+import { useAuth } from '@/lib/contexts/AuthContext';
 import { useRouter } from 'expo-router';
 import { Smartphone } from 'lucide-react-native';
 import { useEffect, useRef } from 'react';
 import { Animated, View } from 'react-native';
-import { Text } from '@/components/ui/text';
-import { useAuth } from '@/lib/contexts/AuthContext';
 
 export default function SplashScreen() {
   const router = useRouter();
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, isBiometricAuthenticated } = useAuth();
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
 
@@ -37,7 +37,12 @@ export default function SplashScreen() {
         // Route based on user state
         if (user) {
           if (user.hasCompletedOnboarding) {
-            router.replace('/(tabs)');
+            // Check if biometric is enabled and not already authenticated in this session
+            if (user.biometricEnabled && !isBiometricAuthenticated) {
+              router.replace('/(auth)/biometric-lock');
+            } else {
+              router.replace('/(tabs)');
+            }
           } else {
             router.replace('/(onboarding)/username');
           }
@@ -48,7 +53,7 @@ export default function SplashScreen() {
 
       return () => clearTimeout(timer);
     }
-  }, [isLoading, user]);
+  }, [isLoading, user, isBiometricAuthenticated]);
 
   return (
     <View className="flex-1 bg-background-secondary justify-center items-center">
