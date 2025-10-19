@@ -1,7 +1,8 @@
 import { CryptoIcon } from '@/components/CryptoIcon';
+import { SlideToConfirm } from '@/components/SlideToConfirm';
 import { Text as UIText } from '@/components/ui/text';
 import { router, useLocalSearchParams } from 'expo-router';
-import { ChevronLeft, ChevronRight, Lock } from 'lucide-react-native';
+import { ChevronLeft, Lock } from 'lucide-react-native';
 import { Image, Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { mockContacts } from '../../data/mockData';
@@ -142,17 +143,7 @@ export default function PaymentConfirmScreen() {
 
             {/* Slide to Confirm Button */}
             <View className="px-4 pb-4">
-                <Pressable
-                    onPress={handleSlideToConfirm}
-                    className="bg-gray-100 rounded-xl p-4 flex-row items-center justify-center active:opacity-80"
-                >
-                    <View className="w-8 h-8 bg-[#4A3DFF] rounded-lg items-center justify-center mr-3">
-                        <ChevronRight size={16} color="#fff" />
-                    </View>
-                    <UIText className="text-gray-500 text-base font-medium">
-                        SLIDE TO CONFIRM
-                    </UIText>
-                </Pressable>
+                <SlideToConfirm onConfirm={handleSlideToConfirm} />
             </View>
         </SafeAreaView>
     );
