@@ -72,7 +72,7 @@ export default function PaymentInitiateScreen() {
     ];
 
     return (
-        <SafeAreaView className="flex-1 bg-background">
+        <SafeAreaView edges={['top']} className="flex-1 bg-background">
             <View className="flex-row items-center justify-between px-4 py-3">
                 <TouchableOpacity
                     className="p-2"

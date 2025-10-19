@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function RewardsScreen() {
   return (
-    <SafeAreaView className="flex-1 bg-background-light">
+    <SafeAreaView edges={['top']} className="flex-1 bg-background-light">
       <View className="flex-1 items-center justify-center px-6">
         <View className="w-24 h-24 rounded-full bg-gray-100 items-center justify-center mb-4">
           <Gift size={40} color="#9CA3AF" strokeWidth={1.5} />

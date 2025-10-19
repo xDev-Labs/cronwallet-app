@@ -62,7 +62,7 @@ export default function HomeScreen() {
   const hasNotifications = true; // Change this based on actual notification state
 
   return (
-    <SafeAreaView className="flex-1 bg-background-light">
+    <SafeAreaView edges={['top']} className="flex-1 bg-background-light">
       {/* Header */}
       <View className="flex-row items-center justify-between px-6 py-4 bg-white">
         <CronLogo />

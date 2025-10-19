@@ -19,7 +19,7 @@ export default function ProfileScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background-light">
+    <SafeAreaView edges={['top']} className="flex-1 bg-background-light">
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         <View className="items-center py-8">
           {/* Avatar */}

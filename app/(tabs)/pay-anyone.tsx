@@ -74,7 +74,7 @@ export default function PayAnyoneScreen() {
     return (
         <>
             <Stack.Screen options={{ headerShown: false }} />
-            <SafeAreaView className="flex-1 bg-background-light">
+            <SafeAreaView edges={['top']} className="flex-1 bg-background-light">
                 <KeyboardAvoidingView
                     className="flex-1"
                     behavior={Platform.OS === 'ios' ? 'padding' : 'height'}

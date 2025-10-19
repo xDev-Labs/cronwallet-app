@@ -4,6 +4,8 @@ export interface Contact {
     phone: string;
     avatarUrl?: string;
     bankingName: string;
+    cronId?: string;
+    joinedDate?: string;
 }
 
 export interface Transaction {

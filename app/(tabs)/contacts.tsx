@@ -71,7 +71,7 @@ export default function ContactsScreen() {
     return (
       <>
         <Stack.Screen options={{ headerShown: false }} />
-        <SafeAreaView className="flex-1 bg-background">
+        <SafeAreaView edges={['top']} className="flex-1 bg-background">
           <View className="flex-row items-center px-4 py-4 border-b border-border">
             <TouchableOpacity
               className="mr-4"
@@ -94,7 +94,7 @@ export default function ContactsScreen() {
     return (
       <>
         <Stack.Screen options={{ headerShown: false }} />
-        <SafeAreaView className="flex-1 bg-background">
+        <SafeAreaView edges={['top']} className="flex-1 bg-background">
           <View className="flex-row items-center px-4 py-4 border-b border-border">
             <TouchableOpacity
               className="mr-4"

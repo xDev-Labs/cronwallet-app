@@ -79,7 +79,7 @@ export default function OTPVerificationScreen() {
     const isVerifyEnabled = otp.length === 6;
 
     return (
-        <SafeAreaView className="flex-1 bg-background-light">
+        <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-background-light">
             <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
             <KeyboardAvoidingView
                 className="flex-1"

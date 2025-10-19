@@ -24,7 +24,7 @@ export default function PaymentSuccessScreen() {
     const formattedDate = `${currentDate.getDate()} ${currentDate.toLocaleString('en-US', { month: 'long' })} ${currentDate.getFullYear()}, ${currentDate.toLocaleString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}`;
 
     return (
-        <SafeAreaView className="flex-1 bg-background">
+        <SafeAreaView edges={['top']} className="flex-1 bg-background">
             <View className="flex-1 px-4 pt-[60px]">
                 <View className="items-center mb-10">
                     <View className="mb-8">
