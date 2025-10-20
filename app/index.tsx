@@ -1,8 +1,10 @@
 import { CronLogo } from '@/components/common/CronLogo';
 import { useAuth } from '@/lib/contexts/AuthContext';
+import '@react-native-firebase/app';
 import { useRouter } from 'expo-router';
 import { useEffect, useRef } from 'react';
 import { Animated, View } from 'react-native';
+
 
 export default function SplashScreen() {
   const router = useRouter();

@@ -3,10 +3,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
 import { countries, type Country } from '@/lib/constants/countries';
+import auth from '@react-native-firebase/auth';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
-    Image,
+    Alert, Image,
     Keyboard,
     KeyboardAvoidingView,
     Platform,
@@ -15,6 +16,7 @@ import {
     View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
 
 const CronLogo = () => (
     <View className="flex-1 w-full items-center justify-center">
@@ -39,15 +41,33 @@ export default function PhoneAuthScreen() {
         setPhoneNumber(digitsOnly);
     };
 
-    const handleNext = () => {
-        console.log('Sending OTP to:', selectedCountry.dialCode, phoneNumber);
-        router.push({
-            pathname: '/(auth)/otp-verification',
-            params: {
-                countryCode: selectedCountry.dialCode,
-                phoneNumber
-            }
-        });
+    const handleNext = async () => {
+        try {
+            // Construct phone number with country code
+            const phone = `${selectedCountry.dialCode}${phoneNumber}`;
+            console.log('Sending OTP to:', phone);
+
+            // Send OTP using React Native Firebase
+            const confirmation = await auth().signInWithPhoneNumber(phone);
+            console.log('Verification ID:', confirmation.verificationId);
+
+            // Navigate to OTP verification screen
+            router.push({
+                pathname: '/(auth)/otp-verification',
+                params: {
+                    countryCode: selectedCountry.dialCode,
+                    phoneNumber,
+                    verificationId: confirmation.verificationId
+                }
+            });
+        } catch (error) {
+            console.error('Phone authentication error:', error);
+            Alert.alert(
+                'Authentication Error',
+                'Failed to send OTP. Please check your phone number and try again.',
+                [{ text: 'OK' }]
+            );
+        }
     };
 
     const isButtonEnabled = phoneNumber.length >= 10;

@@ -15,6 +15,7 @@ import './global.css';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { AuthProvider } from '@/lib/contexts/AuthContext';
+import '@react-native-firebase/app';
 
 // Keep splash screen visible while fonts load
 SplashScreen.preventAutoHideAsync();

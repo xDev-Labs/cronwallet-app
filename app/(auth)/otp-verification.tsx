@@ -1,19 +1,20 @@
 import CodeInput from '@/components/CodeInput';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
+import auth from '@react-native-firebase/auth';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
-    Image,
+    Alert, Image,
     Keyboard,
     KeyboardAvoidingView,
     Platform,
     Pressable,
-    SafeAreaView,
     StatusBar,
     TouchableWithoutFeedback,
     View
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const CronLogo = () => (
     <View className="flex-1 w-full items-center justify-center">
@@ -27,18 +28,21 @@ const CronLogo = () => (
 
 export default function OTPVerificationScreen() {
     const router = useRouter();
-    const { countryCode, phoneNumber } = useLocalSearchParams();
+    const { countryCode, phoneNumber, verificationId } = useLocalSearchParams();
     const [otp, setOtp] = useState('');
     const [error, setError] = useState(false);
     const [countdown, setCountdown] = useState(30);
     const [canResend, setCanResend] = useState(false);
+    const [isVerifying, setIsVerifying] = useState(false);
 
     useEffect(() => {
         if (countdown > 0) {
             const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
             return () => clearTimeout(timer);
+        } else {
+            setCanResend(true);
+            return undefined;
         }
-        setCanResend(true);
     }, [countdown]);
 
     const formatTime = (seconds: number) => {
@@ -57,26 +61,55 @@ export default function OTPVerificationScreen() {
         }
     };
 
-    const handleVerify = () => {
-        if (otp.length !== 6) return;
+    const handleVerify = async () => {
+        if (otp.length !== 6 || isVerifying) return;
 
         setError(false);
+        setIsVerifying(true);
 
-        // Simulate OTP verification (use 123456 as correct OTP)
-        if (otp === '123456') {
-            router.replace({
-                pathname: '/(auth)/biometric-setup',
-                params: {
-                    phoneNumber,
-                    countryCode
+        try {
+            if (verificationId) {
+                // Real Firebase OTP verification
+                const credential = auth.PhoneAuthProvider.credential(verificationId as string, otp);
+                const userCredential = await auth().signInWithCredential(credential);
+
+                console.log('OTP verification successful:', userCredential.user);
+
+                router.replace({
+                    pathname: '/(auth)/biometric-setup',
+                    params: {
+                        phoneNumber,
+                        countryCode
+                    }
+                });
+            } else {
+                // Fallback to simulation for testing
+                if (otp === '123456') {
+                    router.replace({
+                        pathname: '/(auth)/biometric-setup',
+                        params: {
+                            phoneNumber,
+                            countryCode
+                        }
+                    });
+                } else {
+                    setError(true);
                 }
-            });
-        } else {
+            }
+        } catch (error) {
+            console.error('OTP verification error:', error);
             setError(true);
+            Alert.alert(
+                'Verification Failed',
+                'Invalid OTP. Please check the code and try again.',
+                [{ text: 'OK' }]
+            );
+        } finally {
+            setIsVerifying(false);
         }
     };
 
-    const isVerifyEnabled = otp.length === 6;
+    const isVerifyEnabled = otp.length === 6 && !isVerifying;
 
     return (
         <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-background-light">
@@ -145,7 +178,7 @@ export default function OTPVerificationScreen() {
                                     disabled={!isVerifyEnabled}
                                     className="shadow-lg shadow-primary/20 font-medium mb-4"
                                 >
-                                    Verify
+                                    {isVerifying ? 'Verifying...' : 'Verify'}
                                 </Button>
                             </View>
                         </View>
