@@ -1,7 +1,8 @@
 // Environment Configuration
 export const ENV_CONFIG = {
   API_BASE_URL:
-    process.env.EXPO_PUBLIC_API_BASE_URL || "https://your-api-domain.com/api",
+    process.env.EXPO_PUBLIC_API_BASE_URL || "",
+  TOKEN_API_URL: process.env.EXPO_PUBLIC_TOKEN_API_URL || "",
   IS_DEVELOPMENT: __DEV__,
   IS_PRODUCTION: !__DEV__,
 };
@@ -20,3 +21,5 @@ export const API_CONFIG = {
   },
   TIMEOUT: 10000, // 10 seconds
 };
+
+export const TOKEN_API_URL = ENV_CONFIG.TOKEN_API_URL;

@@ -1,7 +1,7 @@
 import { CryptoIcon } from '@/components/CryptoIcon';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { TOKEN_API_URL } from '@/lib/constants/const';
+import { TOKEN_API_URL } from '@/lib/config/environment';
 import { router, useLocalSearchParams } from 'expo-router';
 import { ChevronDown, ChevronLeft } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
@@ -96,7 +96,7 @@ export default function PaymentInitiateScreen() {
             // Step 1: Convert to USD if currency is not USD
             if (currency.toLowerCase() !== 'usd') {
                 const currencyResponse = await fetch(
-                    `https://cron-token-api.vercel.app/currency?from=${currency.toLowerCase()}&to=usd&amount=${inputAmount}`
+                    `${TOKEN_API_URL}/currency?from=${currency.toLowerCase()}&to=usd&amount=${inputAmount}`
                 );
                 const currencyData = await currencyResponse.json();
                 usdAmount = currencyData.convertedAmount || currencyData.result || inputAmount;
@@ -104,7 +104,7 @@ export default function PaymentInitiateScreen() {
 
             // Step 2: Convert USD to selected token using USDC
             const tokenResponse = await fetch(
-                `https://cron-token-api.vercel.app/token?from=usdc&to=${token.toLowerCase()}&amount=${usdAmount}`
+                `${TOKEN_API_URL}/token?from=usdc&to=${token.toLowerCase()}&amount=${usdAmount}`
             );
             const tokenData = await tokenResponse.json();
             console.log('tokenData', tokenData);
