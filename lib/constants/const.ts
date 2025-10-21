@@ -1,1 +1,0 @@
-export const TOKEN_API_URL = 'https://cron-token-api.vercel.app';

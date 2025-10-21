@@ -1,7 +1,8 @@
+import { CoinSelectionItem } from '@/components/CoinSelectionItem';
 import { CryptoIcon } from '@/components/CryptoIcon';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { TOKEN_API_URL } from '@/lib/constants/const';
+import { TOKEN_API_URL } from '@/lib/config/environment';
 import { router, useLocalSearchParams } from 'expo-router';
 import { ChevronDown, ChevronLeft } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
@@ -21,7 +22,6 @@ export default function PaymentInitiateScreen() {
     const [amount, setAmount] = useState('');
     const [convertedAmount, setConvertedAmount] = useState('0.00');
     const [isLoading, setIsLoading] = useState(false);
-    const [coinRates, setCoinRates] = useState<Record<string, string>>({});
 
     const coins = [
         { name: 'Solana', symbol: 'sol', rate: 0.20 },
@@ -96,7 +96,7 @@ export default function PaymentInitiateScreen() {
             // Step 1: Convert to USD if currency is not USD
             if (currency.toLowerCase() !== 'usd') {
                 const currencyResponse = await fetch(
-                    `https://cron-token-api.vercel.app/currency?from=${currency.toLowerCase()}&to=usd&amount=${inputAmount}`
+                    `${TOKEN_API_URL}/currency?from=${currency.toLowerCase()}&to=usd&amount=${inputAmount}`
                 );
                 const currencyData = await currencyResponse.json();
                 usdAmount = currencyData.convertedAmount || currencyData.result || inputAmount;
@@ -104,7 +104,7 @@ export default function PaymentInitiateScreen() {
 
             // Step 2: Convert USD to selected token using USDC
             const tokenResponse = await fetch(
-                `https://cron-token-api.vercel.app/token?from=usdc&to=${token.toLowerCase()}&amount=${usdAmount}`
+                `${TOKEN_API_URL}/token?from=usdc&to=${token.toLowerCase()}&amount=${usdAmount}`
             );
             const tokenData = await tokenResponse.json();
             console.log('tokenData', tokenData);
@@ -119,61 +119,13 @@ export default function PaymentInitiateScreen() {
         }
     };
 
-    const convertAllCoins = async (inputAmount: string, currency: string) => {
-        if (!inputAmount || parseFloat(inputAmount) === 0) {
-            setCoinRates({});
-            return;
-        }
-
-        try {
-            let usdAmount = inputAmount;
-
-            // Step 1: Convert to USD if currency is not USD
-            if (currency.toLowerCase() !== 'usd') {
-                const currencyResponse = await fetch(
-                    `${TOKEN_API_URL}/currency?from=${currency.toLowerCase()}&to=usd&amount=${inputAmount}`
-                );
-                const currencyData = await currencyResponse.json();
-                usdAmount = currencyData.convertedAmount || currencyData.result || inputAmount;
-            }
-
-            // Step 2: Convert USD to all tokens
-            const ratesPromises = coins.map(async (coin) => {
-                try {
-                    const tokenResponse = await fetch(
-                        `${TOKEN_API_URL}/token?from=usdc&to=${coin.symbol.toLowerCase()}&amount=${usdAmount}`
-                    );
-                    const tokenData = await tokenResponse.json();
-                    const finalAmount = tokenData.convertedAmount || tokenData.result || '0.00';
-                    return { symbol: coin.symbol, rate: parseFloat(finalAmount).toFixed(2) };
-                } catch (error) {
-                    console.error(`Error converting to ${coin.symbol}:`, error);
-                    return { symbol: coin.symbol, rate: '0.00' };
-                }
-            });
-
-            const rates = await Promise.all(ratesPromises);
-            const ratesMap = rates.reduce((acc, { symbol, rate }) => {
-                acc[symbol] = rate;
-                return acc;
-            }, {} as Record<string, string>);
-
-            setCoinRates(ratesMap);
-        } catch (error) {
-            console.error('Conversion error for all coins:', error);
-            setCoinRates({});
-        }
-    };
-
     // Debounced conversion effect
     useEffect(() => {
         const timer = setTimeout(() => {
             if (amount) {
                 convertAmount(amount, selectedCurrency.code, selectedCoin.symbol.toLowerCase());
-                convertAllCoins(amount, selectedCurrency.code);
             } else {
                 setConvertedAmount('0.00');
-                setCoinRates({});
             }
         }, 500);
 
@@ -312,21 +264,14 @@ export default function PaymentInitiateScreen() {
                             <Text className="text-black text-xl font-bold mb-6">Select Coin</Text>
 
                             {coins.map((coin, index) => (
-                                <TouchableOpacity
+                                <CoinSelectionItem
                                     key={index}
-                                    className="flex-row items-center justify-between py-4 border-b border-gray-100"
+                                    coin={coin}
+                                    amount={amount}
+                                    currency={selectedCurrency.code}
                                     onPress={() => selectCoin(coin)}
-                                >
-                                    <View className="flex-row items-center">
-                                        <CryptoIcon symbol={coin.name.toLowerCase()} size={32} variant="branded" />
-                                        <Text className="text-black text-base font-medium ml-3">{coin.name}</Text>
-                                    </View>
-                                    {coinRates[coin.symbol] ? (
-                                        <Text className="text-[#4A3DFF] text-base font-medium">≈ {coinRates[coin.symbol]}</Text>
-                                    ) : (
-                                        <Text className="text-gray-400 text-base font-medium">-</Text>
-                                    )}
-                                </TouchableOpacity>
+                                    isSelected={selectedCoin.symbol === coin.symbol}
+                                />
                             ))}
                         </View>
                     </Animated.View>
