@@ -6,6 +6,10 @@ import {
   type UserCreateResponse,
   type UserUpdateResponse,
 } from "@/lib/config/api";
+import type {
+  CreateTransactionDto,
+  Transaction,
+} from "@/lib/types/transaction.types";
 
 class ApiError extends Error {
   constructor(
@@ -143,6 +147,52 @@ class ApiService {
       {
         method: "PUT",
         body: JSON.stringify(updateData),
+      }
+    );
+  }
+
+  // Transaction methods
+  async getTransactionByHash(hash: string): Promise<ApiResponse<Transaction>> {
+    return this.makeRequest<Transaction>(
+      `${API_CONFIG.ENDPOINTS.TRANSACTION.GET_BY_HASH}/${hash}`,
+      {
+        method: "GET",
+      }
+    );
+  }
+
+  async getTransactionsByUserId(
+    userId: string,
+    page: number = 1,
+    limit: number = 10
+  ): Promise<
+    ApiResponse<{
+      userId: string;
+      transactions: Transaction[];
+      pagination: {
+        page: number;
+        limit: number;
+        total: number;
+        totalPages: number;
+      };
+    }>
+  > {
+    return this.makeRequest(
+      `${API_CONFIG.ENDPOINTS.TRANSACTION.GET_BY_USER_ID}/${userId}?page=${page}&limit=${limit}`,
+      {
+        method: "GET",
+      }
+    );
+  }
+
+  async createTransaction(
+    transactionData: CreateTransactionDto
+  ): Promise<ApiResponse<Transaction>> {
+    return this.makeRequest<Transaction>(
+      API_CONFIG.ENDPOINTS.TRANSACTION.CREATE,
+      {
+        method: "POST",
+        body: JSON.stringify(transactionData),
       }
     );
   }

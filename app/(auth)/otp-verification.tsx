@@ -4,6 +4,7 @@ import { Text } from "@/components/ui/text";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { ApiError, apiService } from "@/lib/services/api";
 import { storage } from "@/lib/storage/storage";
+import { fetchAndStoreUserTransactions } from "@/lib/utils/transactionService";
 import { mapBackendUserToUser } from "@/lib/utils/userMapping";
 import auth from "@react-native-firebase/auth";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -115,6 +116,19 @@ export default function OTPVerificationScreen() {
             mappedUserData.cron_id !== ""
           ) {
             await storage.setOnboardingComplete(true);
+
+            // Fetch and store user's last 10 transactions
+            try {
+              await fetchAndStoreUserTransactions(mappedUserData.user_id);
+              console.log("Transactions fetched and stored for returning user");
+            } catch (error) {
+              console.warn(
+                "Failed to fetch transactions for returning user:",
+                error
+              );
+              // Continue even if transaction fetch fails
+            }
+
             // Returning user with cron_id - go directly to tabs
             router.replace("/(tabs)");
             return;
@@ -154,6 +168,20 @@ export default function OTPVerificationScreen() {
                 mappedUserData.cron_id &&
                 mappedUserData.cron_id !== ""
               ) {
+                // Fetch and store user's last 10 transactions
+                try {
+                  await fetchAndStoreUserTransactions(mappedUserData.user_id);
+                  console.log(
+                    "Transactions fetched and stored for returning user (test mode)"
+                  );
+                } catch (error) {
+                  console.warn(
+                    "Failed to fetch transactions for returning user (test mode):",
+                    error
+                  );
+                  // Continue even if transaction fetch fails
+                }
+
                 // Returning user with cron_id - go directly to tabs
                 router.replace("/(tabs)");
                 return;
@@ -184,7 +212,7 @@ export default function OTPVerificationScreen() {
         Alert.alert(
           "Verification Failed",
           error.message ||
-          "An error occurred during verification. Please try again.",
+            "An error occurred during verification. Please try again.",
           [{ text: "OK" }]
         );
       } else {
@@ -261,8 +289,9 @@ export default function OTPVerificationScreen() {
                   </Text>
                   <Pressable onPress={handleResend} disabled={!canResend}>
                     <Text
-                      className={`text-sm font-semibold font-sans ${canResend ? "text-primary" : "text-foreground-tertiary"
-                        }`}
+                      className={`text-sm font-semibold font-sans ${
+                        canResend ? "text-primary" : "text-foreground-tertiary"
+                      }`}
                     >
                       Resend OTP
                     </Text>
