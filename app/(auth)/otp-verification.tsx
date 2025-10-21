@@ -184,7 +184,7 @@ export default function OTPVerificationScreen() {
         Alert.alert(
           "Verification Failed",
           error.message ||
-            "An error occurred during verification. Please try again.",
+          "An error occurred during verification. Please try again.",
           [{ text: "OK" }]
         );
       } else {
@@ -230,7 +230,7 @@ export default function OTPVerificationScreen() {
                   variant="caption"
                   className="text-foreground-tertiary mb-8 font-sans"
                 >
-                  We've sent you a 6 digit code on{" "}
+                  We&apos;ve sent you a 6 digit code on{" "}
                   <Text className="text-foreground-dark font-medium">
                     {countryCode} {phoneNumber}
                   </Text>
@@ -261,9 +261,8 @@ export default function OTPVerificationScreen() {
                   </Text>
                   <Pressable onPress={handleResend} disabled={!canResend}>
                     <Text
-                      className={`text-sm font-semibold font-sans ${
-                        canResend ? "text-primary" : "text-foreground-tertiary"
-                      }`}
+                      className={`text-sm font-semibold font-sans ${canResend ? "text-primary" : "text-foreground-tertiary"
+                        }`}
                     >
                       Resend OTP
                     </Text>

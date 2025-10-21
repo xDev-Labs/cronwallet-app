@@ -15,7 +15,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 interface PhoneContact {
   id: string;
   name: string;
-  phoneNumbers?: Array<{ number?: string }>;
+  phoneNumbers?: { number?: string }[];
 }
 
 export default function ContactsScreen() {
