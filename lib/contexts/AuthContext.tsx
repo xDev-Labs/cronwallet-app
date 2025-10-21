@@ -1,6 +1,6 @@
-import { clearAllStorage, storage } from '@/lib/storage/storage';
-import type { AuthState, User } from '@/lib/types/user.types';
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import { clearAllStorage, storage } from "@/lib/storage/storage";
+import type { AuthState, User } from "@/lib/types/user.types";
+import React, { createContext, useContext, useEffect, useState } from "react";
 
 interface AuthContextType extends AuthState {
   saveUser: (user: User) => Promise<void>;
@@ -37,7 +37,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isBiometricAuthenticated: false,
       });
     } catch (error) {
-      console.error('Error loading user data:', error);
+      console.error("Error loading user data:", error);
       setState({
         user: null,
         isAuthenticated: false,
@@ -56,8 +56,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isLoading: false,
         isBiometricAuthenticated: false,
       });
+      console.log("Saved user:", user);
     } catch (error) {
-      console.error('Error saving user:', error);
+      console.error("Error saving user:", error);
       throw error;
     }
   };
@@ -65,7 +66,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const updateUserProfile = async (updates: Partial<User>) => {
     try {
       if (!state.user) {
-        throw new Error('No user to update');
+        throw new Error("No user to update");
       }
 
       const updatedUser = { ...state.user, ...updates };
@@ -75,7 +76,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user: updatedUser,
       });
     } catch (error) {
-      console.error('Error updating user profile:', error);
+      console.error("Error updating user profile:", error);
       throw error;
     }
   };
@@ -83,21 +84,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const completeOnboarding = async () => {
     try {
       if (!state.user) {
-        throw new Error('No user found');
+        throw new Error("No user found");
       }
 
-      await updateUserProfile({ hasCompletedOnboarding: true });
+      // Note: Backend doesn't have hasCompletedOnboarding field
+      // We'll just mark onboarding as complete locally
       await storage.setOnboardingComplete(true);
+      // Console HAS_COMPLETED_ONBOARDING
+      console.log("HAS_COMPLETED_ONBOARDING", await storage.hasCompletedOnboarding());
     } catch (error) {
-      console.error('Error completing onboarding:', error);
+      console.error("Error completing onboarding:", error);
       throw error;
     }
   };
 
   const setBiometricAuthenticated = (authenticated: boolean) => {
-    console.log('setBiometricAuthenticated', authenticated);
+    console.log("setBiometricAuthenticated", authenticated);
     // Only update in-memory state (session-based, not persisted)
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       isBiometricAuthenticated: authenticated,
     }));
@@ -113,7 +117,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isBiometricAuthenticated: false,
       });
     } catch (error) {
-      console.error('Error logging out:', error);
+      console.error("Error logging out:", error);
       throw error;
     }
   };
@@ -138,7 +142,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 }

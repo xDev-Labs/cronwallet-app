@@ -1,139 +1,251 @@
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Text } from '@/components/ui/text';
-import { useAuth } from '@/lib/contexts/AuthContext';
-import { router } from 'expo-router';
-import React, { useState } from 'react';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Text } from "@/components/ui/text";
+import { useAuth } from "@/lib/contexts/AuthContext";
+import { ApiError, apiService } from "@/lib/services/api";
+import { mapBackendUserToUser } from "@/lib/utils/userMapping";
+import { router } from "expo-router";
+import React, { useEffect, useState } from "react";
 import {
-    Image,
-    Keyboard,
-    KeyboardAvoidingView,
-    Platform,
-    SafeAreaView,
-    StatusBar,
-    TouchableWithoutFeedback,
-    View
-} from 'react-native';
+  Image,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  StatusBar,
+  TouchableWithoutFeedback,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const CronLogo = () => (
-    <View className="flex-1 w-full items-center justify-center">
-        <Image
-            source={require('@/assets/images/cron-black-logo.png')}
-            className="w-[100px] h-8"
-            resizeMode="contain"
-        />
-    </View>
+  <View className="flex-1 w-full items-center justify-center">
+    <Image
+      source={require("@/assets/images/cron-black-logo.png")}
+      className="w-[100px] h-8"
+      resizeMode="contain"
+    />
+  </View>
 );
 
 export default function UsernameScreen() {
-    const [username, setUsername] = useState('');
-    const [error, setError] = useState('');
-    const [isFocused, setIsFocused] = useState(false);
-    const { updateUserProfile } = useAuth();
+  const [username, setUsername] = useState("");
+  const [error, setError] = useState("");
+  const [isFocused, setIsFocused] = useState(false);
+  const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
+  const [availabilityMessage, setAvailabilityMessage] = useState("");
+  const [isAvailable, setIsAvailable] = useState(false);
+  const { updateUserProfile, user } = useAuth();
 
-    const validateUsername = (text: string): string | null => {
-        if (text.length < 3) {
-            return 'Username must be at least 3 characters';
-        }
-        if (text.length > 20) {
-            return 'Username must be less than 20 characters';
-        }
-        if (!/^[a-zA-Z0-9_]+$/.test(text)) {
-            return 'Username can only contain letters, numbers, and underscores';
-        }
-        return null;
-    };
+  const validateUsername = (text: string): string | null => {
+    if (text.length < 3) {
+      return "Username must be at least 3 characters";
+    }
+    if (text.length > 20) {
+      return "Username must be less than 20 characters";
+    }
+    if (!/^[a-zA-Z0-9_]+$/.test(text)) {
+      return "Username can only contain letters, numbers, and underscores";
+    }
+    return null;
+  };
 
-    const handleUsernameChange = (text: string) => {
-        // Remove spaces and special characters except underscore
-        const cleaned = text.toLowerCase().replace(/[^a-z0-9_]/g, '');
-        setUsername(cleaned);
-        setError('');
-    };
+  const handleUsernameChange = (text: string) => {
+    // Remove spaces and special characters except underscore
+    const cleaned = text.toLowerCase().replace(/[^a-z0-9_]/g, "");
+    setUsername(cleaned);
+    setError("");
+    setAvailabilityMessage("");
+    setIsAvailable(false);
+  };
 
-    const handleContinue = async () => {
-        const validationError = validateUsername(username);
-        if (validationError) {
-            setError(validationError);
-            return;
-        }
+  // Check cron ID availability with debounce
+  useEffect(() => {
+    if (username.length >= 3) {
+      const timeoutId = setTimeout(async () => {
+        await checkCronIdAvailability(username);
+      }, 500); // 500ms debounce
 
-        try {
-            await updateUserProfile({ username });
-            router.push('/(onboarding)/avatar');
-        } catch (err) {
-            setError('Failed to save username. Please try again.');
-            console.error('Error saving username:', err);
-        }
-    };
+      return () => clearTimeout(timeoutId);
+    } else {
+      setAvailabilityMessage("");
+      setIsAvailable(false);
+      return undefined;
+    }
+  }, [username]);
 
-    const isButtonEnabled = username.length >= 3;
+  const checkCronIdAvailability = async (cronId: string) => {
+    if (cronId.length < 3) return;
 
-    return (
-        <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-background-light">
-            <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-            <KeyboardAvoidingView
-                className="flex-1"
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    setIsCheckingAvailability(true);
+    setAvailabilityMessage("");
+
+    try {
+      const response = await apiService.checkCronIdAvailability(cronId);
+
+      if (response.success && response.data) {
+        setIsAvailable(response.data.available);
+        setAvailabilityMessage(response.message);
+      }
+    } catch (error) {
+      console.error("Error checking cron ID availability:", error);
+      if (error instanceof ApiError) {
+        setAvailabilityMessage(error.message);
+      } else {
+        setAvailabilityMessage(
+          "Unable to check availability. Please try again."
+        );
+      }
+      setIsAvailable(false);
+    } finally {
+      setIsCheckingAvailability(false);
+    }
+  };
+
+  const handleContinue = async () => {
+    const validationError = validateUsername(username);
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
+    if (!isAvailable) {
+      setError("Please select an available username.");
+      return;
+    }
+    console.log(user);
+    if (!user?.user_id) {
+      setError("User not found. Please try logging in again.");
+      return;
+    }
+
+    try {
+      // Register the cron ID with the backend
+      const response = await apiService.registerCronId(user.user_id, username);
+
+      if (response.success && response.data) {
+        console.log("Register response data:", response.data);
+
+        // Handle different response structures
+        const userData = response.data.user || response.data;
+        console.log("User data to map:", userData);
+
+        // Map the updated user data from backend
+        const updatedUserData = mapBackendUserToUser(userData);
+
+        // Update local user profile with the complete updated data
+        await updateUserProfile(updatedUserData);
+        router.push("/(onboarding)/avatar");
+      } else {
+        setError("Failed to register username. Please try again.");
+      }
+    } catch (err) {
+      console.error("Error registering username:", err);
+      if (err instanceof ApiError) {
+        setError(err.message);
+      } else {
+        setError("Failed to register username. Please try again.");
+      }
+    }
+  };
+
+  const isButtonEnabled =
+    username.length >= 3 && isAvailable && !isCheckingAvailability;
+
+  return (
+    <SafeAreaView
+      edges={["top", "bottom"]}
+      className="flex-1 bg-background-light"
+    >
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+      <KeyboardAvoidingView
+        className="flex-1"
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View className="flex-1 justify-between bg-background-light mt-20">
+            {/* Header (Logo) */}
+            <View className="items-start px-6 pt-15 pb-10">
+              <CronLogo />
+            </View>
+
+            {/* Content Area */}
+            <View className="flex-1 px-6 mt-5">
+              <Text variant="h3" className="text-foreground-dark">
+                Claim your username
+              </Text>
+              <Text
+                variant="caption"
+                className="text-foreground-tertiary mb-8 font-sans"
+              >
+                Create a unique username for your CRON account
+              </Text>
+
+              {/* Username Input Field */}
+              <View
+                className={`flex-row items-center h-14 rounded-xl border-2 px-4 ${
+                  isFocused
+                    ? "border-border-focus bg-background-light"
+                    : "border-border-light bg-gray-100"
+                }`}
+              >
+                <Text className="text-base font-semibold text-foreground-tertiary mr-1">
+                  @
+                </Text>
+                <Input
+                  className="flex-1 h-full border-0 bg-transparent px-2 text-foreground-dark"
+                  placeholder="username"
+                  placeholderTextColor="#A0A0A0"
+                  value={username}
+                  onChangeText={handleUsernameChange}
+                  onFocus={() => setIsFocused(true)}
+                  onBlur={() => setIsFocused(false)}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  maxLength={20}
+                />
+              </View>
+
+              {/* Availability Status */}
+              {username.length >= 3 && (
+                <View className="mt-2">
+                  {isCheckingAvailability ? (
+                    <Text className="text-foreground-tertiary text-sm font-sans">
+                      Checking availability...
+                    </Text>
+                  ) : availabilityMessage ? (
+                    <Text
+                      className={`text-sm font-sans ${
+                        isAvailable ? "text-green-600" : "text-error"
+                      }`}
+                    >
+                      {availabilityMessage}
+                    </Text>
+                  ) : null}
+                </View>
+              )}
+
+              {error ? (
+                <Text className="text-error text-sm mt-2 font-sans">
+                  {error}
+                </Text>
+              ) : null}
+            </View>
+
+            {/* Continue Button Container */}
+            <View
+              className={`px-6 pt-2.5 ${Platform.OS === "ios" ? "pb-7.5" : "pb-5"}`}
             >
-                <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                    <View className="flex-1 justify-between bg-background-light mt-20">
-                        {/* Header (Logo) */}
-                        <View className="items-start px-6 pt-15 pb-10">
-                            <CronLogo />
-                        </View>
-
-                        {/* Content Area */}
-                        <View className="flex-1 px-6 mt-5">
-                            <Text variant="h3" className="text-foreground-dark">
-                                Claim your username
-                            </Text>
-                            <Text variant="caption" className="text-foreground-tertiary mb-8 font-sans">
-                                Create a unique username for your CRON account
-                            </Text>
-
-                            {/* Username Input Field */}
-                            <View className={`flex-row items-center h-14 rounded-xl border-2 px-4 ${isFocused
-                                ? 'border-border-focus bg-background-light'
-                                : 'border-border-light bg-gray-100'
-                                }`}>
-                                <Text className="text-base font-semibold text-foreground-tertiary mr-1">
-                                    @
-                                </Text>
-                                <Input
-                                    className="flex-1 h-full border-0 bg-transparent px-2 text-foreground-dark"
-                                    placeholder="username"
-                                    placeholderTextColor="#A0A0A0"
-                                    value={username}
-                                    onChangeText={handleUsernameChange}
-                                    onFocus={() => setIsFocused(true)}
-                                    onBlur={() => setIsFocused(false)}
-                                    autoCapitalize="none"
-                                    autoCorrect={false}
-                                    maxLength={20}
-                                />
-                            </View>
-
-                            {error ? (
-                                <Text className="text-error text-sm mt-2 font-sans">
-                                    {error}
-                                </Text>
-                            ) : null}
-                        </View>
-
-                        {/* Continue Button Container */}
-                        <View className={`px-6 pt-2.5 ${Platform.OS === 'ios' ? 'pb-7.5' : 'pb-5'}`}>
-                            <Button
-                                onPress={handleContinue}
-                                disabled={!isButtonEnabled}
-                                className="shadow-lg shadow-primary/20 font-medium mb-4"
-                            >
-                                Continue
-                            </Button>
-                        </View>
-                    </View>
-                </TouchableWithoutFeedback>
-            </KeyboardAvoidingView>
-        </SafeAreaView>
-    );
+              <Button
+                onPress={handleContinue}
+                disabled={!isButtonEnabled}
+                className="shadow-lg shadow-primary/20 font-medium mb-4"
+              >
+                Continue
+              </Button>
+            </View>
+          </View>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
 }
