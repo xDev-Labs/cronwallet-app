@@ -15,6 +15,9 @@ export interface Transaction {
   status: TxStatus; // ENUM, Not Null, Default: 'pending'
   created_at: string; // TIMESTAMP, Not Null, Default: CURRENT_TIMESTAMP
   completed_at?: string; // TIMESTAMP
+  receiver?: {
+    phone_number: string;
+  };
 }
 
 export interface CreateTransactionDto {
@@ -25,6 +28,9 @@ export interface CreateTransactionDto {
   token: TxToken[];
   chain_id: number;
   status?: TxStatus;
+  receiver?: {
+    phone_number: string;
+  };
 }
 
 export interface UpdateTransactionDto {

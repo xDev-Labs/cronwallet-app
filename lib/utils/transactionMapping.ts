@@ -11,7 +11,7 @@ import type {
 export function mapBackendTransactionToTransaction(
   backendTransaction: any
 ): Transaction {
-//   console.log("Backend Transaction Data:", backendTransaction);
+  //   console.log("Backend Transaction Data:", backendTransaction);
 
   // Handle case where backendTransaction is undefined or null
   if (!backendTransaction) {
@@ -29,6 +29,11 @@ export function mapBackendTransactionToTransaction(
     status: backendTransaction.status || "pending",
     created_at: backendTransaction.created_at,
     completed_at: backendTransaction.completed_at,
+    receiver: backendTransaction.receiver
+      ? {
+          phone_number: backendTransaction.receiver.phone_number,
+        }
+      : undefined,
   };
 }
 

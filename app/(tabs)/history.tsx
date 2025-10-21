@@ -113,50 +113,53 @@ export default function HistoryScreen() {
     }
   };
 
-  const renderTransaction = ({ item }: { item: Transaction }) => (
-    <View className="bg-white rounded-xl p-4 mb-3 shadow-sm border border-gray-100">
-      <View className="flex-row justify-between items-start mb-2">
-        <View className="flex-1">
-          <Text className="text-base font-semibold text-foreground-dark">
-            {formatAmount(item.amount)}
-          </Text>
-          <Text className="text-sm text-foreground-tertiary">
-            {item.transaction_hash.slice(0, 8)}...
-            {item.transaction_hash.slice(-8)}
-          </Text>
-        </View>
-        <View className="items-end">
-          <Text
-            className={`text-sm font-medium ${getStatusColor(item.status)}`}
-          >
-            {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
-          </Text>
-          <Text className="text-xs text-foreground-tertiary">
-            {formatDate(item.created_at)}
-          </Text>
-        </View>
-      </View>
+  const getTransactionDirection = (item: Transaction) => {
+    return item.sender_uid === user?.user_id ? "sent" : "received";
+  };
 
-      <View className="flex-row justify-between items-center">
-        <View>
-          <Text className="text-xs text-foreground-tertiary">From</Text>
-          <Text className="text-sm text-foreground-dark">
-            {item.sender_uid.slice(0, 8)}...
-          </Text>
-        </View>
-        <View>
-          <Text className="text-xs text-foreground-tertiary">To</Text>
-          <Text className="text-sm text-foreground-dark">
-            {item.receiver_uid.slice(0, 8)}...
-          </Text>
-        </View>
-        <View>
-          <Text className="text-xs text-foreground-tertiary">Chain</Text>
-          <Text className="text-sm text-foreground-dark">{item.chain_id}</Text>
+  const renderTransaction = ({ item }: { item: Transaction }) => {
+    const direction = getTransactionDirection(item);
+    const isSent = direction === "sent";
+
+    return (
+      <View className="bg-white rounded-xl p-4 mb-3 shadow-sm border border-gray-100">
+        <View className="flex-row justify-between items-center">
+          <View className="flex-1">
+            <View className="flex-row items-center mb-1">
+              <Text
+                className={`text-lg font-bold ${isSent ? "text-red-600" : "text-green-600"}`}
+              >
+                {isSent ? "-" : "+"}
+              </Text>
+              <Text
+                className={`text-lg font-bold ml-1 ${isSent ? "text-red-600" : "text-green-600"}`}
+              >
+                {formatAmount(item.amount)}
+              </Text>
+            </View>
+            <Text className="text-sm text-foreground-tertiary">
+              {isSent ? "Sent to" : "Received from"}{" "}
+              {item.receiver?.phone_number || "Unknown"}
+            </Text>
+          </View>
+          <View className="items-end">
+            <View
+              className={`px-2 py-1 rounded-full ${getStatusColor(item.status)} bg-opacity-10`}
+            >
+              <Text
+                className={`text-xs font-medium ${getStatusColor(item.status)}`}
+              >
+                {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+              </Text>
+            </View>
+            <Text className="text-xs text-foreground-tertiary mt-1">
+              {formatDate(item.created_at)}
+            </Text>
+          </View>
         </View>
       </View>
-    </View>
-  );
+    );
+  };
 
   if (isLoading) {
     return (
