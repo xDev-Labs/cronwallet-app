@@ -39,7 +39,7 @@ const AVATAR_COLORS = [
 
 export default function AvatarScreen() {
     const [selectedAvatar, setSelectedAvatar] = useState<string>(AVATAR_COLORS[0].color);
-    const { updateUserProfile, completeOnboarding } = useAuth();
+    const { updateUserProfile } = useAuth();
 
     const handleGetStarted = async () => {
         if (!selectedAvatar) {
@@ -48,10 +48,9 @@ export default function AvatarScreen() {
 
         try {
             await updateUserProfile({ avatar: selectedAvatar });
-            await completeOnboarding();
-            router.replace('/(tabs)');
+            router.push('/(onboarding)/setting-up');
         } catch (err) {
-            console.error('Error completing onboarding:', err);
+            console.error('Error saving avatar:', err);
         }
     };
 
