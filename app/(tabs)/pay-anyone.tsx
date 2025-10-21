@@ -1,27 +1,57 @@
 import { Text } from '@/components/ui/text';
 import { Contact } from '@/lib/types';
+import * as Contacts from 'expo-contacts';
 import { router, Stack } from 'expo-router';
 import { ChevronLeft, User } from 'lucide-react-native';
-import { useMemo, useState } from 'react';
-import { FlatList, Image, KeyboardAvoidingView, Platform, Pressable, TextInput, View } from 'react-native';
+import { useEffect, useMemo, useState } from 'react';
+import { ActivityIndicator, FlatList, Image, KeyboardAvoidingView, Platform, Pressable, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { mockContacts } from '../../data/mockData';
 
 export default function PayAnyoneScreen() {
     const [searchQuery, setSearchQuery] = useState('');
+    const [contacts, setContacts] = useState<Contact[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [hasPermission, setHasPermission] = useState<boolean | null>(null);
+
+    useEffect(() => {
+        (async () => {
+            const { status } = await Contacts.requestPermissionsAsync();
+            setHasPermission(status === 'granted');
+
+            if (status === 'granted') {
+                const { data } = await Contacts.getContactsAsync({
+                    fields: [Contacts.Fields.PhoneNumbers],
+                });
+
+                if (data.length > 0) {
+                    // Convert phone contacts to app Contact format
+                    const mappedContacts: Contact[] = data
+                        .filter(contact => contact.phoneNumbers && contact.phoneNumbers.length > 0)
+                        .map(contact => ({
+                            id: contact.id,
+                            name: contact.name || 'Unknown',
+                            phone: contact.phoneNumbers?.[0]?.number || '',
+                            bankingName: contact.name || 'Unknown',
+                        }));
+                    setContacts(mappedContacts);
+                }
+            }
+            setLoading(false);
+        })();
+    }, []);
 
     const filteredContacts = useMemo(() => {
         if (!searchQuery.trim()) {
-            return mockContacts;
+            return contacts;
         }
 
         const query = searchQuery.toLowerCase();
-        return mockContacts.filter(contact =>
+        return contacts.filter(contact =>
             contact.name.toLowerCase().includes(query) ||
             contact.phone.toLowerCase().includes(query) ||
-            contact.bankingName.toLowerCase().includes(query)
+            (contact.bankingName && contact.bankingName.toLowerCase().includes(query))
         );
-    }, [searchQuery]);
+    }, [searchQuery, contacts]);
 
     const handleContactPress = (contact: Contact) => {
         router.push({
@@ -70,6 +100,44 @@ export default function PayAnyoneScreen() {
             </View>
         </Pressable>
     );
+
+    if (loading) {
+        return (
+            <>
+                <Stack.Screen options={{ headerShown: false }} />
+                <SafeAreaView edges={['top']} className="flex-1 bg-background-light">
+                    <Pressable onPress={() => router.back()} className="px-4 py-3">
+                        <ChevronLeft size={24} color="#000" />
+                    </Pressable>
+                    <View className="flex-1 justify-center items-center">
+                        <ActivityIndicator size="large" color="#4A3DFF" />
+                    </View>
+                </SafeAreaView>
+            </>
+        );
+    }
+
+    if (hasPermission === false) {
+        return (
+            <>
+                <Stack.Screen options={{ headerShown: false }} />
+                <SafeAreaView edges={['top']} className="flex-1 bg-background-light">
+                    <Pressable onPress={() => router.back()} className="px-4 py-3">
+                        <ChevronLeft size={24} color="#000" />
+                    </Pressable>
+                    <View className="flex-1 justify-center items-center px-8">
+                        <User size={64} color="#8E8E93" />
+                        <Text variant="h4" className="text-foreground-dark mt-4 text-center">
+                            Contacts Permission Required
+                        </Text>
+                        <Text variant="caption" className="text-foreground-secondary mt-2 text-center">
+                            Please grant access to your contacts to view and select them for payments.
+                        </Text>
+                    </View>
+                </SafeAreaView>
+            </>
+        );
+    }
 
     return (
         <>

@@ -6,16 +6,12 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import { Image, ScrollView, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { mockContacts, mockTransactions } from '../../data/mockData';
+import { mockTransactions } from '../../data/mockData';
 
 export default function RecipientScreen() {
     const { contactId } = useLocalSearchParams();
-    const contact = mockContacts.find(c => c.id === contactId);
-    const transactions = mockTransactions.filter(t => t.contactId === contactId);
+    const transactions = mockTransactions
 
-    if (!contact) {
-        return null;
-    }
 
     const handlePayPress = () => {
         router.push({
@@ -33,20 +29,11 @@ export default function RecipientScreen() {
 
 
     const renderAvatar = () => {
-        if (contact.avatarUrl) {
-            return (
-                <Image
-                    source={{ uri: contact.avatarUrl }}
-                    className="w-12 h-12 rounded-full"
-                />
-            );
-        }
-
-        const initial = contact.name.charAt(0).toUpperCase();
         return (
-            <View className="w-12 h-12 rounded-full justify-center items-center bg-[#4CAF50]">
-                <Text className="text-white text-xl font-bold">{initial}</Text>
-            </View>
+            <Image
+                source={{ uri: "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=200" }}
+                className="w-12 h-12 rounded-full"
+            />
         );
     };
 
@@ -64,8 +51,8 @@ export default function RecipientScreen() {
                 <View className="flex-row items-center flex-1 ml-3">
                     {renderAvatar()}
                     <View className="ml-3 flex-1">
-                        <Text className="text-black text-lg font-semibold">{contact.name}</Text>
-                        <Text className="text-foreground-secondary text-sm mt-0.5">{contact.phone}</Text>
+                        <Text className="text-black text-lg font-semibold">Shiyas GEC</Text>
+                        <Text className="text-foreground-secondary text-sm mt-0.5">+91 94463 59757</Text>
                     </View>
                 </View>
 
@@ -81,19 +68,15 @@ export default function RecipientScreen() {
                 {/* Centered Profile Section */}
                 <View className="items-center px-4 py-6">
                     {renderAvatar()}
-                    <Text className="text-black text-2xl font-semibold mt-4">{contact.name}</Text>
+                    <Text className="text-black text-2xl font-semibold mt-4">Shiyas GEC</Text>
 
-                    {contact.cronId && (
-                        <View className="flex-row items-center mt-2 ">
-                            <Text className="text-black text-base font-sans">CRON ID : {contact.cronId}</Text>
-                        </View>
-                    )}
+                    <View className="flex-row items-center mt-2 ">
+                        <Text className="text-black text-base font-sans">CRON ID : loremipsum</Text>
+                    </View>
 
-                    <Text className="text-black text-base mt-2 font-sans">{contact.phone}</Text>
+                    <Text className="text-black text-base mt-2 font-sans">+91 94463 59757</Text>
 
-                    {contact.joinedDate && (
-                        <Text className="text-foreground-secondary text-sm mt-1 font-sans">Joined {contact.joinedDate}</Text>
-                    )}
+                    <Text className="text-foreground-secondary text-sm mt-1 font-sans">Joined October 2025</Text>
                 </View>
 
 
