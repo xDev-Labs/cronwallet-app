@@ -62,13 +62,13 @@ export const mockContacts: Contact[] = [
     },
 ];
 
-export const mockTransactions: Transaction[] = [
+export const mockTransactions: any[] = [
     {
         id: '1',
         contactId: '2',
         amount: 100,
         type: 'received',
-        status: 'paid',
+        status: 'completed',
         createdAt: new Date('2025-09-15T13:37:00'),
     },
     {

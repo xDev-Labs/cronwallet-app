@@ -1,25 +1,30 @@
 // Auth types
 export type {
   AuthState,
-  User,
-  PhoneAuthData,
+  BiometricAuthData,
   OTPVerificationData,
   PasscodeData,
-  BiometricAuthData,
-} from './auth.types';
+  PhoneAuthData,
+  User,
+} from "./auth.types";
 
 // Payment types
+export type { Contact, UserAccount } from "./payment.types";
+
+// Transaction types
 export type {
-  Contact,
+  CreateTransactionDto,
   Transaction,
-  UserAccount,
-} from './payment.types';
+  TxStatus,
+  TxToken,
+  UpdateTransactionDto,
+} from "./transaction.types";
 
 // Common types
 export type {
   ApiResponse,
-  PaginatedResponse,
-  LoadingState,
   ErrorState,
+  LoadingState,
+  PaginatedResponse,
   RouteParams,
-} from './common.types';
+} from "./common.types";

@@ -1,13 +1,9 @@
 import { Text } from "@/components/ui/text";
 import { useAuth } from "@/lib/contexts/AuthContext";
+import { storage } from "@/lib/storage/storage";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  Image,
-  StatusBar,
-  View,
-} from "react-native";
+import { ActivityIndicator, Image, StatusBar, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 const CronLogo = () => (
   <View className="items-center justify-center">
@@ -28,14 +24,23 @@ export default function SettingUpScreen() {
       try {
         setStatus("Finalizing your profile...");
 
-       // TODO: Make an setup required
+        // TODO: Make an setup required
 
         // Simulate final setup process
         await new Promise((resolve) => setTimeout(resolve, 1500));
 
         // Complete onboarding locally
         await completeOnboarding();
-
+        try {
+          await storage.saveLatestTransactions([]);
+          console.log("Transactions fetched and stored for returning user");
+        } catch (error) {
+          console.warn(
+            "Failed to fetch transactions for returning user:",
+            error
+          );
+          // Continue even if transaction fetch fails
+        }
         // Navigate to home
         router.replace("/(tabs)");
       } catch (err) {
