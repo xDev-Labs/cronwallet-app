@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Cron Wallet App** - A React Native payment application built with Expo Router that integrates with Solana blockchain. The app handles phone-based authentication, passcode security, Face ID/biometric authentication, and peer-to-peer payments.
+**Cron Wallet App** - A React Native payment application built with Expo Router that integrates with Solana blockchain. The app handles phone-based authentication with Firebase, username/avatar onboarding, passcode security, Face ID/biometric authentication, and peer-to-peer crypto payments with live currency conversion.
 
 ## Development Commands
 
@@ -33,12 +33,18 @@ bun run lint
 ### Routing Structure (Expo Router v6)
 File-based routing using Expo Router with typed routes enabled:
 
-- **`/app/index.tsx`** - Splash screen, navigates to auth
+- **`/app/index.tsx`** - Splash screen with authentication routing logic
 - **`/app/(auth)/`** - Authentication flow (phone → OTP → create passcode → confirm passcode)
+- **`/app/(onboarding)/`** - Onboarding flow (username → avatar → setting-up)
 - **`/app/(tabs)/`** - Main app screens after authentication (payment home, contacts, payment flows)
-- **`/app/_layout.tsx`** - Root layout with navigation theme provider
+- **`/app/_layout.tsx`** - Root layout with AuthProvider and navigation theme
 
-Routes use parentheses `(auth)` and `(tabs)` for route groups without affecting URL structure.
+Routes use parentheses `(auth)`, `(onboarding)`, and `(tabs)` for route groups without affecting URL structure.
+
+**Flow Sequence:**
+1. Auth: phone-auth → otp-verification → create-passcode → confirm-passcode
+2. Onboarding: username → avatar → setting-up
+3. Main app: (tabs)
 
 ### Styling System - NativeWind v4
 
@@ -149,15 +155,31 @@ const handlePhoneNumberChange = (text: string) => {
 />
 ```
 
-### Authentication Flow
-1. Phone number entry (`phone-auth.tsx`)
-2. OTP verification (`otp-verification.tsx`) - accepts "1234" for testing
-3. Create 4-digit passcode (`create-passcode.tsx`)
-4. Confirm passcode (`confirm-passcode.tsx`)
-5. Navigate to main app (`/(tabs)`)
+### Authentication & State Management
+
+**AuthContext** (`/lib/contexts/AuthContext.tsx`) - Global authentication state:
+- Manages user session with `expo-secure-store`
+- Provides: `user`, `isAuthenticated`, `isLoading`, `isBiometricAuthenticated`
+- Methods: `saveUser()`, `updateUserProfile()`, `completeOnboarding()`, `logout()`, `setBiometricAuthenticated()`
+- User data persists across app restarts
+- Biometric auth is session-based (not persisted)
+
+**Authentication Flow:**
+1. Firebase phone authentication via SMS OTP
+2. Backend user creation/retrieval (`apiService.createUser()`)
+3. Local passcode setup (4-digit PIN stored in secure storage)
+4. Onboarding: Username availability check → Avatar selection → Account setup
+5. Main app with biometric authentication for payments
+
+**API Service** (`/lib/services/api.ts`):
+- Singleton pattern with timeout handling (10s)
+- Base URL from environment: `EXPO_PUBLIC_API_BASE_URL`
+- Endpoints: `createUser`, `getUserById`, `checkCronIdAvailability`, `registerCronId`, `updateUser`
+- Custom `ApiError` class for error handling
+- User mapping: Backend format → Frontend format (`mapBackendUserToUser()`)
 
 ### Biometric Authentication
-Uses `expo-local-authentication` for Face ID/fingerprint on payment confirmation screen.
+Uses `expo-local-authentication` for Face ID/fingerprint on payment confirmation screen. State is session-based and cleared on app restart.
 
 ### Navigation
 ```typescript
@@ -182,13 +204,42 @@ router.push({
 4. **Import paths** - Always use `@/*` alias (configured in tsconfig.json)
 5. **SafeAreaView** - Prefer `SafeAreaView` from `react-native-safe-area-context`, not `react-native`
 
+### Payment & Currency Conversion
+
+**Live Token Conversion** (`payment-initiate.tsx`):
+- Token API base URL: `EXPO_PUBLIC_TOKEN_API_URL` (from environment)
+- Conversion flow: Currency → USD → Token (via USDC)
+- 500ms debounce on amount input to reduce API calls
+- Parallel conversion for all tokens in modal using `Promise.all()`
+- Endpoints:
+  - `/currency?from={currency}&to=usd&amount={amount}` - Currency conversion
+  - `/token?from=usdc&to={token}&amount={usdAmount}` - Token conversion
+- Supported currencies: USD, INR, AED
+- Supported tokens: SOL, USDT, USDC
+- Error handling: Shows "0.00" on API failure
+
+**Pattern for API calls:**
+```typescript
+// Step 1: Convert currency to USD (if not USD)
+const currencyResponse = await fetch(`${TOKEN_API_URL}/currency?from=inr&to=usd&amount=100`);
+
+// Step 2: Convert USD to token via USDC
+const tokenResponse = await fetch(`${TOKEN_API_URL}/token?from=usdc&to=sol&amount=100`);
+```
+
 ## Blockchain Integration
 
 - Solana Web3.js (`@solana/web3.js`) and SPL Token libraries included
 - Payment transaction logic to be implemented
-- Mock data currently in `/data/mockData.ts`
+- Crypto icons from `@web3icons/core` with CryptoIcon component
+
+## Environment Variables
+
+Required in `.env` or Expo environment:
+- `EXPO_PUBLIC_API_BASE_URL` - Backend API base URL
+- `EXPO_PUBLIC_TOKEN_API_URL` - Token conversion API URL
 
 ## Testing Credentials
 
-- **OTP Code**: `1234` (hardcoded for development)
-- **Mock contacts**: Defined in `/data/mockData.ts`
+- **OTP Code**: `1234` (hardcoded for development in Firebase)
+- **Username**: Must be unique, checked against backend via `/user/cron-id/check/{cronId}`
