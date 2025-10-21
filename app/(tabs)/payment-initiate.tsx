@@ -107,7 +107,6 @@ export default function PaymentInitiateScreen() {
                 `${TOKEN_API_URL}/token?from=usdc&to=${token.toLowerCase()}&amount=${usdAmount}`
             );
             const tokenData = await tokenResponse.json();
-            console.log('tokenData', tokenData);
             const finalAmount = tokenData.convertedAmount || tokenData.result || '0.00';
 
             setConvertedAmount(parseFloat(finalAmount).toFixed(2));
