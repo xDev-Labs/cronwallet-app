@@ -9,9 +9,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { mockTransactions } from '../../data/mockData';
 
 export default function RecipientScreen() {
-    const { contactId } = useLocalSearchParams();
-    const transactions = mockTransactions
-
+    const { contactId, contactName, contactPhone, contactAvatarUrl, contactCronId, contactJoinedDate } = useLocalSearchParams();
+    const transactions = mockTransactions.filter(t => t.contactId === contactId);
 
     const handlePayPress = () => {
         router.push({
@@ -29,11 +28,27 @@ export default function RecipientScreen() {
 
 
     const renderAvatar = () => {
+        if (contactAvatarUrl && typeof contactAvatarUrl === 'string' && contactAvatarUrl.trim()) {
+            return (
+                <Image
+                    source={{ uri: contactAvatarUrl }}
+                    className="w-12 h-12 rounded-full"
+                />
+            );
+        }
+
+        const name = typeof contactName === 'string' ? contactName : 'Unknown';
+        const initial = name.charAt(0).toUpperCase();
+        const colors = ['#E91E63', '#9C27B0', '#FF5722', '#2196F3', '#4CAF50'];
+        const colorIndex = name.charCodeAt(0) % colors.length;
+
         return (
-            <Image
-                source={{ uri: "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=200" }}
-                className="w-12 h-12 rounded-full"
-            />
+            <View
+                className="w-12 h-12 rounded-full items-center justify-center"
+                style={{ backgroundColor: colors[colorIndex] }}
+            >
+                <Text className="text-white text-xl font-bold">{initial}</Text>
+            </View>
         );
     };
 
@@ -51,8 +66,8 @@ export default function RecipientScreen() {
                 <View className="flex-row items-center flex-1 ml-3">
                     {renderAvatar()}
                     <View className="ml-3 flex-1">
-                        <Text className="text-black text-lg font-semibold">Shiyas GEC</Text>
-                        <Text className="text-foreground-secondary text-sm mt-0.5">+91 94463 59757</Text>
+                        <Text className="text-black text-lg font-semibold">{contactName || 'Unknown'}</Text>
+                        <Text className="text-foreground-secondary text-sm mt-0.5">{contactPhone || 'No phone'}</Text>
                     </View>
                 </View>
 
@@ -68,15 +83,19 @@ export default function RecipientScreen() {
                 {/* Centered Profile Section */}
                 <View className="items-center px-4 py-6">
                     {renderAvatar()}
-                    <Text className="text-black text-2xl font-semibold mt-4">Shiyas GEC</Text>
+                    <Text className="text-black text-2xl font-semibold mt-4">{contactName || 'Unknown'}</Text>
 
-                    <View className="flex-row items-center mt-2 ">
-                        <Text className="text-black text-base font-sans">CRON ID : loremipsum</Text>
-                    </View>
+                    {contactCronId && (
+                        <View className="flex-row items-center mt-2">
+                            <Text className="text-black text-base font-sans">CRON ID : {contactCronId}</Text>
+                        </View>
+                    )}
 
-                    <Text className="text-black text-base mt-2 font-sans">+91 94463 59757</Text>
+                    <Text className="text-black text-base mt-2 font-sans">{contactPhone || 'No phone'}</Text>
 
-                    <Text className="text-foreground-secondary text-sm mt-1 font-sans">Joined October 2025</Text>
+                    {contactJoinedDate && (
+                        <Text className="text-foreground-secondary text-sm mt-1 font-sans">Joined {contactJoinedDate}</Text>
+                    )}
                 </View>
 
 
