@@ -1,14 +1,15 @@
-import { CronLogo } from '@/components/common/CronLogo';
-import { useAuth } from '@/lib/contexts/AuthContext';
-import '@react-native-firebase/app';
-import { useRouter } from 'expo-router';
-import { useEffect, useRef } from 'react';
-import { Animated, View } from 'react-native';
-
+import { CronLogo } from "@/components/common/CronLogo";
+import { useAuth } from "@/lib/contexts/AuthContext";
+import { storage } from "@/lib/storage/storage";
+import "@react-native-firebase/app";
+import { useRouter } from "expo-router";
+import { useEffect, useRef, useState } from "react";
+import { Animated, View } from "react-native";
 
 export default function SplashScreen() {
   const router = useRouter();
   const { user, isLoading, isBiometricAuthenticated } = useAuth();
+  const [onboardingComplete, setOnboardingComplete] = useState(false);
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
 
@@ -32,29 +33,44 @@ export default function SplashScreen() {
     }).start();
   }, []);
 
+  // Check onboarding status
+  useEffect(() => {
+    const checkOnboardingStatus = async () => {
+      try {
+        const isComplete = await storage.hasCompletedOnboarding();
+        setOnboardingComplete(isComplete);
+      } catch (error) {
+        console.error("Error checking onboarding status:", error);
+        setOnboardingComplete(false);
+      }
+    };
+
+    checkOnboardingStatus();
+  }, []);
+
   useEffect(() => {
     if (!isLoading) {
       const timer = setTimeout(() => {
         // Route based on user state
         if (user) {
-          if (user.hasCompletedOnboarding) {
+          if (onboardingComplete) {
             // Check if biometric is enabled and not already authenticated in this session
-            if (user.biometricEnabled && !isBiometricAuthenticated) {
-              router.replace('/(auth)/biometric-lock');
+            if (user.face_id_enabled && !isBiometricAuthenticated) {
+              router.replace("/(auth)/biometric-lock");
             } else {
-              router.replace('/(tabs)');
+              router.replace("/(tabs)");
             }
           } else {
-            router.replace('/(onboarding)/username');
+            router.replace("/(onboarding)/username");
           }
         } else {
-          router.replace('/(auth)/phone-auth');
+          router.replace("/(auth)/phone-auth");
         }
       }, 2500);
 
       return () => clearTimeout(timer);
     }
-  }, [isLoading, user, isBiometricAuthenticated]);
+  }, [isLoading, user, isBiometricAuthenticated, onboardingComplete]);
 
   return (
     <View className=" bg-white justify-center items-center h-full">
@@ -62,7 +78,7 @@ export default function SplashScreen() {
         style={{
           transform: [{ scale: scaleAnim }],
           opacity: opacityAnim,
-          alignItems: 'center',
+          alignItems: "center",
         }}
       >
         <View className="justify-center items-center shadow-lg">
