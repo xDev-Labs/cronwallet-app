@@ -1,10 +1,8 @@
 import { Text } from "@/components/ui/text";
 import { useAuth } from "@/lib/contexts/AuthContext";
+import { apiService } from "@/lib/services/api";
 import type { Transaction } from "@/lib/types/transaction.types";
-import {
-  getUserTransactions,
-  refreshUserTransactions,
-} from "@/lib/utils/transactionService";
+import { mapBackendTransactionToTransaction } from "@/lib/utils/transactionMapping";
 import { Clock, RefreshCw } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import {
@@ -21,31 +19,63 @@ export default function HistoryScreen() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMoreData, setHasMoreData] = useState(true);
+  const [totalPages, setTotalPages] = useState(1);
 
-  const loadTransactions = async () => {
+  const loadTransactions = async (
+    page: number = 1,
+    isRefresh: boolean = false
+  ) => {
     if (!user?.user_id) return;
 
     try {
-      const userTransactions = await getUserTransactions(user.user_id);
-      setTransactions(userTransactions);
+      if (isRefresh) {
+        setIsRefreshing(true);
+      } else if (page === 1) {
+        setIsLoading(true);
+      } else {
+        setIsLoadingMore(true);
+      }
+
+      const response = await apiService.getTransactionsByUserId(
+        user.user_id,
+        page,
+        10
+      );
+
+      if (response.success && response.data) {
+        const newTransactions = response.data.transactions.map(
+          (backendTx: any) => mapBackendTransactionToTransaction(backendTx)
+        );
+
+        if (page === 1 || isRefresh) {
+          setTransactions(newTransactions);
+        } else {
+          setTransactions((prev) => [...prev, ...newTransactions]);
+        }
+
+        setCurrentPage(page);
+        setTotalPages(response.data.pagination.totalPages);
+        setHasMoreData(page < response.data.pagination.totalPages);
+      }
     } catch (error) {
       console.error("Error loading transactions:", error);
     } finally {
       setIsLoading(false);
+      setIsRefreshing(false);
+      setIsLoadingMore(false);
     }
   };
 
   const handleRefresh = async () => {
-    if (!user?.user_id) return;
+    await loadTransactions(1, true);
+  };
 
-    setIsRefreshing(true);
-    try {
-      const refreshedTransactions = await refreshUserTransactions(user.user_id);
-      setTransactions(refreshedTransactions);
-    } catch (error) {
-      console.error("Error refreshing transactions:", error);
-    } finally {
-      setIsRefreshing(false);
+  const loadMoreTransactions = async () => {
+    if (!isLoadingMore && hasMoreData && user?.user_id) {
+      await loadTransactions(currentPage + 1);
     }
   };
 
@@ -197,6 +227,30 @@ export default function HistoryScreen() {
               tintColor="#4A3DFF"
             />
           }
+          onEndReached={loadMoreTransactions}
+          onEndReachedThreshold={0.1}
+          ListFooterComponent={() => {
+            if (isLoadingMore) {
+              return (
+                <View className="py-4 items-center">
+                  <ActivityIndicator size="small" color="#4A3DFF" />
+                  <Text className="text-sm text-foreground-tertiary mt-2">
+                    Loading more transactions...
+                  </Text>
+                </View>
+              );
+            }
+            if (!hasMoreData && transactions.length > 0) {
+              return (
+                <View className="py-4 items-center">
+                  <Text className="text-sm text-foreground-tertiary">
+                    No more transactions
+                  </Text>
+                </View>
+              );
+            }
+            return null;
+          }}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 20 }}
         />
