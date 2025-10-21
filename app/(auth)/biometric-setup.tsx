@@ -1,5 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
+import { useAuth } from "@/lib/contexts/AuthContext";
+import { ApiError, apiService } from "@/lib/services/api";
+import { mapBackendUserToUser } from "@/lib/utils/userMapping";
 
 import * as LocalAuthentication from "expo-local-authentication";
 import { useRouter } from "expo-router";
@@ -26,6 +29,7 @@ const CronLogo = () => (
 
 export default function BiometricSetupScreen() {
   const router = useRouter();
+  const { user, updateUserProfile } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [biometricType, setBiometricType] = useState<
     "faceId" | "fingerprint" | "none"
@@ -87,17 +91,40 @@ export default function BiometricSetupScreen() {
       });
 
       if (result.success) {
-        // Save user with biometric enabled
-        // const newUser: User = {
-        //     id: Date.now().toString(),
-        //     phoneNumber: (phoneNumber as string) || '',
-        //     countryCode: (countryCode as string) || '',
-        //     hasCompletedOnboarding: false,
-        //     biometricEnabled: true,
-        //     createdAt: new Date().toISOString(),
-        // };
+        // Update user in backend with face_id_enabled = true
+        if (user?.user_id) {
+          try {
+            const response = await apiService.updateUser(user.user_id, {
+              face_id_enabled: true,
+            });
 
-        // await saveUser(newUser);
+            if (response.success && response.data) {
+              console.log("Biometric update response:", response.data);
+
+              // Handle different response structures
+              const userData = response.data.user || response.data;
+              console.log("User data to map:", userData);
+
+              // Map the updated user data from backend
+              const updatedUserData = mapBackendUserToUser(userData);
+
+              // Update local user profile with the complete updated data
+              await updateUserProfile(updatedUserData);
+            }
+          } catch (err) {
+            console.error("Error updating biometric status:", err);
+            if (err instanceof ApiError) {
+              Alert.alert("Error", err.message);
+            } else {
+              Alert.alert(
+                "Error",
+                "Failed to update biometric settings. Please try again."
+              );
+            }
+            return;
+          }
+        }
+
         router.replace("/(onboarding)/username");
       } else {
         Alert.alert(
