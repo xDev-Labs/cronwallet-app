@@ -50,8 +50,8 @@ export default function RecipientScreen() {
 
       // Scroll to bottom after transactions are loaded
       setTimeout(() => {
-        scrollViewRef.current?.scrollToEnd({ animated: true });
-      }, 100);
+        scrollViewRef.current?.scrollToEnd({ animated: false });
+      }, 10);
     } catch (error) {
       console.error("Error loading transactions:", error);
     } finally {
