@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { ApiError, apiService } from "@/lib/services/api";
+import { storage } from "@/lib/storage/storage";
 import { mapBackendUserToUser } from "@/lib/utils/userMapping";
 import auth from "@react-native-firebase/auth";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -104,8 +105,23 @@ export default function OTPVerificationScreen() {
 
           console.log("User created/found:", userData);
           console.log("Is new user:", response.data.isNewUser);
+
+          // Check if user is new or returning
+          const isNewUser = response.data.isNewUser;
+
+          if (
+            !isNewUser &&
+            mappedUserData.cron_id &&
+            mappedUserData.cron_id !== ""
+          ) {
+            await storage.setOnboardingComplete(true);
+            // Returning user with cron_id - go directly to tabs
+            router.replace("/(tabs)");
+            return;
+          }
         }
 
+        // New user or user without cron_id - continue with onboarding
         router.replace({
           pathname: "/(auth)/biometric-setup",
           params: {
@@ -129,6 +145,19 @@ export default function OTPVerificationScreen() {
               const mappedUserData = mapBackendUserToUser(userData);
 
               await saveUser(mappedUserData);
+
+              // Check if user is new or returning
+              const isNewUser = response.data.isNewUser;
+
+              if (
+                !isNewUser &&
+                mappedUserData.cron_id &&
+                mappedUserData.cron_id !== ""
+              ) {
+                // Returning user with cron_id - go directly to tabs
+                router.replace("/(tabs)");
+                return;
+              }
             }
           } catch (apiError) {
             console.warn(

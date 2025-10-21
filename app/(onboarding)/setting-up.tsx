@@ -1,6 +1,5 @@
 import { Text } from "@/components/ui/text";
 import { useAuth } from "@/lib/contexts/AuthContext";
-import { apiService } from "@/lib/services/api";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
