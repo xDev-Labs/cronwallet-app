@@ -1,21 +1,38 @@
 import { CryptoIcon } from '@/components/CryptoIcon';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { TOKEN_API_URL } from '@/lib/constants/const';
 import { router, useLocalSearchParams } from 'expo-router';
 import { ChevronDown, ChevronLeft } from 'lucide-react-native';
-import { useRef, useState } from 'react';
-import { Animated, Image, Modal, Text, TouchableOpacity, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Animated, Image, Modal, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function PaymentInitiateScreen() {
     const { contactId } = useLocalSearchParams();
     const [isModalVisible, setIsModalVisible] = useState(false);
-    const [selectedCoin, setSelectedCoin] = useState({ name: 'SOL', symbol: 'solana', rate: 0.40 });
+    const [selectedCoin, setSelectedCoin] = useState({ name: 'Solana', symbol: 'sol', rate: 0.40 });
     const slideAnim = useRef(new Animated.Value(0)).current;
 
+    const [isCurrencyModalVisible, setIsCurrencyModalVisible] = useState(false);
+    const [selectedCurrency, setSelectedCurrency] = useState({ name: 'USD', code: 'USD', flag: 'us' });
+    const currencySlideAnim = useRef(new Animated.Value(0)).current;
+
+    const [amount, setAmount] = useState('');
+    const [convertedAmount, setConvertedAmount] = useState('0.00');
+    const [isLoading, setIsLoading] = useState(false);
+    const [coinRates, setCoinRates] = useState<Record<string, string>>({});
+
     const coins = [
-        { name: 'Solana', symbol: 'solana', rate: 0.20 },
+        { name: 'Solana', symbol: 'sol', rate: 0.20 },
         { name: 'USDT', symbol: 'usdt', rate: 100 },
         { name: 'USDC', symbol: 'usdc', rate: 100 }
+    ];
+
+    const currencies = [
+        { name: 'US Dollar', code: 'USD', flag: 'us' },
+        { name: 'Indian Rupee', code: 'INR', flag: 'in' },
+        { name: 'UAE Dirham', code: 'AED', flag: 'ae' }
     ];
 
     const openModal = () => {
@@ -42,10 +59,131 @@ export default function PaymentInitiateScreen() {
         closeModal();
     };
 
+    const openCurrencyModal = () => {
+        setIsCurrencyModalVisible(true);
+        Animated.timing(currencySlideAnim, {
+            toValue: 1,
+            duration: 300,
+            useNativeDriver: true,
+        }).start();
+    };
+
+    const closeCurrencyModal = () => {
+        Animated.timing(currencySlideAnim, {
+            toValue: 0,
+            duration: 300,
+            useNativeDriver: true,
+        }).start(() => {
+            setIsCurrencyModalVisible(false);
+        });
+    };
+
+    const selectCurrency = (currency: any) => {
+        setSelectedCurrency(currency);
+        closeCurrencyModal();
+    };
+
+    const convertAmount = async (inputAmount: string, currency: string, token: string) => {
+        if (!inputAmount || parseFloat(inputAmount) === 0) {
+            setConvertedAmount('0.00');
+            return;
+        }
+
+        setIsLoading(true);
+        try {
+            let usdAmount = inputAmount;
+
+            // Step 1: Convert to USD if currency is not USD
+            if (currency.toLowerCase() !== 'usd') {
+                const currencyResponse = await fetch(
+                    `https://cron-token-api.vercel.app/currency?from=${currency.toLowerCase()}&to=usd&amount=${inputAmount}`
+                );
+                const currencyData = await currencyResponse.json();
+                usdAmount = currencyData.convertedAmount || currencyData.result || inputAmount;
+            }
+
+            // Step 2: Convert USD to selected token using USDC
+            const tokenResponse = await fetch(
+                `https://cron-token-api.vercel.app/token?from=usdc&to=${token.toLowerCase()}&amount=${usdAmount}`
+            );
+            const tokenData = await tokenResponse.json();
+            console.log('tokenData', tokenData);
+            const finalAmount = tokenData.convertedAmount || tokenData.result || '0.00';
+
+            setConvertedAmount(parseFloat(finalAmount).toFixed(2));
+        } catch (error) {
+            console.error('Conversion error:', error);
+            setConvertedAmount('0.00');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const convertAllCoins = async (inputAmount: string, currency: string) => {
+        if (!inputAmount || parseFloat(inputAmount) === 0) {
+            setCoinRates({});
+            return;
+        }
+
+        try {
+            let usdAmount = inputAmount;
+
+            // Step 1: Convert to USD if currency is not USD
+            if (currency.toLowerCase() !== 'usd') {
+                const currencyResponse = await fetch(
+                    `${TOKEN_API_URL}/currency?from=${currency.toLowerCase()}&to=usd&amount=${inputAmount}`
+                );
+                const currencyData = await currencyResponse.json();
+                usdAmount = currencyData.convertedAmount || currencyData.result || inputAmount;
+            }
+
+            // Step 2: Convert USD to all tokens
+            const ratesPromises = coins.map(async (coin) => {
+                try {
+                    const tokenResponse = await fetch(
+                        `${TOKEN_API_URL}/token?from=usdc&to=${coin.symbol.toLowerCase()}&amount=${usdAmount}`
+                    );
+                    const tokenData = await tokenResponse.json();
+                    const finalAmount = tokenData.convertedAmount || tokenData.result || '0.00';
+                    return { symbol: coin.symbol, rate: parseFloat(finalAmount).toFixed(2) };
+                } catch (error) {
+                    console.error(`Error converting to ${coin.symbol}:`, error);
+                    return { symbol: coin.symbol, rate: '0.00' };
+                }
+            });
+
+            const rates = await Promise.all(ratesPromises);
+            const ratesMap = rates.reduce((acc, { symbol, rate }) => {
+                acc[symbol] = rate;
+                return acc;
+            }, {} as Record<string, string>);
+
+            setCoinRates(ratesMap);
+        } catch (error) {
+            console.error('Conversion error for all coins:', error);
+            setCoinRates({});
+        }
+    };
+
+    // Debounced conversion effect
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (amount) {
+                convertAmount(amount, selectedCurrency.code, selectedCoin.symbol.toLowerCase());
+                convertAllCoins(amount, selectedCurrency.code);
+            } else {
+                setConvertedAmount('0.00');
+                setCoinRates({});
+            }
+        }, 500);
+
+        return () => clearTimeout(timer);
+    }, [amount, selectedCurrency.code, selectedCoin.name]);
+
     const handlePayPress = () => {
         router.push({
             pathname: './payment-confirm' as any,
-            params: { contactId, amount: '100.00' },
+            params: { contactId, amount: amount || '0.00' },
         });
     };
 
@@ -65,24 +203,33 @@ export default function PaymentInitiateScreen() {
                     <Text className="font-sans text-black text-base mb-3">You send exactly</Text>
                     <View className="flex-row items-center justify-between">
                         <View className="flex-1 mr-4">
-                            <TouchableOpacity className="w-2/3 bg-gray-100 rounded-xl p-4 flex-row items-center justify-between">
+                            <TouchableOpacity
+                                className="w-2/3 bg-gray-100 rounded-xl p-4 flex-row items-center justify-between"
+                                onPress={openCurrencyModal}
+                            >
                                 <View className="flex-row items-center">
                                     <Image
-                                        source={{ uri: 'https://flagcdn.com/w20/us.png' }}
+                                        source={{ uri: `https://flagcdn.com/w20/${selectedCurrency.flag}.png` }}
                                         className="w-6 h-4 mr-2"
                                     />
-                                    <Text className="text-black font-medium">USD</Text>
+                                    <Text className="text-black font-medium">{selectedCurrency.code}</Text>
                                 </View>
                                 <ChevronDown size={16} color="#000" />
                             </TouchableOpacity>
                         </View>
-                        <Text className="w-1/3 text-right text-[#4A3DFF] text-4xl font-bold">100.00</Text>
+                        <Input
+                            className="w-1/3 text-right text-[#4A3DFF] text-4xl font-bold bg-white border-0"
+                            placeholder="0.00"
+                            value={amount}
+                            onChangeText={setAmount}
+                            keyboardType="decimal-pad"
+                        />
                     </View>
                 </View>
 
                 {/* Recipient gets section */}
                 <View className="mb-8">
-                    <Text className="text-black text-base mb-3">Recipient gets</Text>
+                    <Text className="text-black font-sans text-base mb-3">Recipient gets</Text>
                     <View className="flex-row items-center justify-between">
                         <View className="flex-1 mr-4">
                             <TouchableOpacity
@@ -90,13 +237,19 @@ export default function PaymentInitiateScreen() {
                                 onPress={openModal}
                             >
                                 <View className="flex-row items-center">
-                                    <CryptoIcon symbol={selectedCoin.symbol} size={24} variant="branded" />
-                                    <Text className="text-black font-medium ml-2">{selectedCoin.name}</Text>
+                                    <CryptoIcon symbol={selectedCoin.name.toLowerCase()} size={24} variant="branded" />
+                                    <Text className="text-black font-medium ml-2">{selectedCoin.symbol.toUpperCase()}</Text>
                                 </View>
                                 <ChevronDown size={16} color="#000" />
                             </TouchableOpacity>
                         </View>
-                        <Text className="w-1/3 text-right text-[#4A3DFF] text-4xl font-bold">{selectedCoin.rate}</Text>
+                        <View className="w-1/3 items-end justify-center">
+                            {isLoading ? (
+                                <ActivityIndicator size="small" color="#4A3DFF" />
+                            ) : (
+                                <Text className="text-right text-[#4A3DFF] text-4xl font-bold">{convertedAmount}</Text>
+                            )}
+                        </View>
                     </View>
                 </View>
 
@@ -165,10 +318,64 @@ export default function PaymentInitiateScreen() {
                                     onPress={() => selectCoin(coin)}
                                 >
                                     <View className="flex-row items-center">
-                                        <CryptoIcon symbol={coin.symbol} size={32} variant="branded" />
+                                        <CryptoIcon symbol={coin.name.toLowerCase()} size={32} variant="branded" />
                                         <Text className="text-black text-base font-medium ml-3">{coin.name}</Text>
                                     </View>
-                                    <Text className="text-[#4A3DFF] text-base font-medium">≈ {coin.rate}</Text>
+                                    {coinRates[coin.symbol] ? (
+                                        <Text className="text-[#4A3DFF] text-base font-medium">≈ {coinRates[coin.symbol]}</Text>
+                                    ) : (
+                                        <Text className="text-gray-400 text-base font-medium">-</Text>
+                                    )}
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+                    </Animated.View>
+                </View>
+            </Modal>
+
+            {/* Currency Selection Modal */}
+            <Modal
+                visible={isCurrencyModalVisible}
+                transparent={true}
+                animationType="none"
+                onRequestClose={closeCurrencyModal}
+            >
+                <View className="flex-1 justify-end bg-black/50">
+                    <TouchableOpacity
+                        className="flex-1"
+                        onPress={closeCurrencyModal}
+                        activeOpacity={1}
+                    />
+                    <Animated.View
+                        className="bg-white rounded-t-3xl"
+                        style={{
+                            transform: [{
+                                translateY: currencySlideAnim.interpolate({
+                                    inputRange: [0, 1],
+                                    outputRange: [400, 0]
+                                })
+                            }]
+                        }}
+                    >
+                        <View className="p-6">
+                            <Text className="text-black text-xl font-bold mb-6">Select Currency</Text>
+
+                            {currencies.map((currency, index) => (
+                                <TouchableOpacity
+                                    key={index}
+                                    className="flex-row items-center justify-between py-4 border-b border-gray-100"
+                                    onPress={() => selectCurrency(currency)}
+                                >
+                                    <View className="flex-row items-center">
+                                        <Image
+                                            source={{ uri: `https://flagcdn.com/w40/${currency.flag}.png` }}
+                                            className="w-8 h-6 mr-3"
+                                        />
+                                        <View>
+                                            <Text className="text-black text-base font-medium">{currency.code}</Text>
+                                            <Text className="text-gray-500 text-sm">{currency.name}</Text>
+                                        </View>
+                                    </View>
                                 </TouchableOpacity>
                             ))}
                         </View>
