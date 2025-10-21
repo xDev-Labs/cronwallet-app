@@ -4,6 +4,22 @@ import type { Transaction } from "@/lib/types/transaction.types";
 import { mapBackendTransactionToTransaction } from "@/lib/utils/transactionMapping";
 
 /**
+ * Normalizes phone number by removing special characters and adding +91 prefix if needed
+ */
+function normalizePhoneNumber(phone: string): string {
+  // Remove all special characters: spaces, hyphens, parentheses, etc.
+  const cleaned = phone.replace(/[\s\-\(\)\+]/g, "");
+
+  // If phone doesn't start with +, add +91 prefix
+  if (!phone.startsWith("+")) {
+    return `+91${cleaned}`;
+  }
+
+  // If it already has + prefix, return as is
+  return phone;
+}
+
+/**
  * Fetches the last 10 transactions for a user and stores them in local storage
  */
 export async function fetchAndStoreUserTransactions(
@@ -93,6 +109,51 @@ export async function addUserTransaction(
     console.log("Transaction added to local storage");
   } catch (error) {
     console.error("Error adding transaction to storage:", error);
+    throw error;
+  }
+}
+
+/**
+ * Fetches transactions between a user and a specific contact
+ */
+export async function getTransactionsBetweenUsers(
+  userId: string,
+  contactPhone: string
+): Promise<Transaction[]> {
+  try {
+    // Normalize phone number: remove special characters and add +91 prefix if needed
+    const normalizedPhone = normalizePhoneNumber(contactPhone);
+
+    console.log("Fetching transactions between users:", {
+      userId,
+      originalPhone: contactPhone,
+      normalizedPhone,
+    });
+
+    // Fetch transactions from backend with receiver filter
+    const response = await apiService.getTransactionsByUserId(
+      userId,
+      1,
+      50,
+      normalizedPhone
+    );
+
+    if (response.success && response.data) {
+      console.log("Backend transactions response:", response.data);
+
+      // Map backend transactions to our Transaction model
+      const transactions: Transaction[] = response.data.transactions.map(
+        (backendTx: any) => mapBackendTransactionToTransaction(backendTx)
+      );
+
+    //   console.log("Mapped transactions between users:", transactions);
+      return transactions;
+    } else {
+      console.warn("No transactions found between users");
+      return [];
+    }
+  } catch (error) {
+    console.error("Error fetching transactions between users:", error);
     throw error;
   }
 }

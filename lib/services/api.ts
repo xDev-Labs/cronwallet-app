@@ -164,7 +164,8 @@ class ApiService {
   async getTransactionsByUserId(
     userId: string,
     page: number = 1,
-    limit: number = 10
+    limit: number = 10,
+    receiver?: string
   ): Promise<
     ApiResponse<{
       userId: string;
@@ -177,12 +178,15 @@ class ApiService {
       };
     }>
   > {
-    return this.makeRequest(
-      `${API_CONFIG.ENDPOINTS.TRANSACTION.GET_BY_USER_ID}/${userId}?page=${page}&limit=${limit}`,
-      {
-        method: "GET",
-      }
-    );
+    let url = `${API_CONFIG.ENDPOINTS.TRANSACTION.GET_BY_USER_ID}/${userId}?page=${page}&limit=${limit}`;
+
+    if (receiver) {
+      url += `&receiver=${encodeURIComponent(receiver)}`;
+    }
+
+    return this.makeRequest(url, {
+      method: "GET",
+    });
   }
 
   async createTransaction(

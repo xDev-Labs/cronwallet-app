@@ -11,7 +11,7 @@ import type {
 export function mapBackendTransactionToTransaction(
   backendTransaction: any
 ): Transaction {
-  console.log("Backend Transaction Data:", backendTransaction);
+//   console.log("Backend Transaction Data:", backendTransaction);
 
   // Handle case where backendTransaction is undefined or null
   if (!backendTransaction) {
