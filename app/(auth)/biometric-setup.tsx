@@ -1,9 +1,12 @@
+import 'react-native-get-random-values';
+
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { ApiError, apiService } from "@/lib/services/api";
 import { mapBackendUserToUser } from "@/lib/utils/userMapping";
 
+import * as bip39 from 'bip39';
 import * as LocalAuthentication from "expo-local-authentication";
 import { useRouter } from "expo-router";
 import { ScanFace, Shield, Smartphone } from "lucide-react-native";
@@ -15,7 +18,10 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
+import * as Keychain from 'react-native-keychain';
 import { SafeAreaView } from "react-native-safe-area-context";
+
+global.Buffer = global.Buffer || require('buffer').Buffer
 
 const CronLogo = () => (
   <View className="flex-1 w-full items-center justify-center">
@@ -40,6 +46,40 @@ export default function BiometricSetupScreen() {
   useEffect(() => {
     checkBiometricAvailability();
   }, []);
+
+  const generateAndStoreSeedPhrase = async () => {
+    try {
+      // Store the seed phrase securely with biometric protection
+      const options = {
+        accessControl: Keychain.ACCESS_CONTROL.BIOMETRY_ANY,
+        accessible: Keychain.ACCESSIBLE.WHEN_PASSCODE_SET_THIS_DEVICE_ONLY,
+        authenticationType: Keychain.AUTHENTICATION_TYPE.BIOMETRICS,
+        securityLevel: Keychain.SECURITY_LEVEL.SECURE_HARDWARE,
+        service: 'bip39_seed_phrase',
+      };
+      // Generate a 128-bit (12-word) BIP39 seed phrase
+      let mnemonic = bip39.generateMnemonic();
+
+      // Store the mnemonic in keychain
+      const result = await Keychain.setGenericPassword(
+        'bip39_seed_phrase',
+        mnemonic,
+        options
+      );
+
+      // Clear variable from memory
+      mnemonic = '';
+
+      // Verify storage was successful
+      if (result) {
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error generating or storing seed phrase:', error);
+      return false;
+    }
+  }
 
   const checkBiometricAvailability = async () => {
     try {
@@ -91,6 +131,14 @@ export default function BiometricSetupScreen() {
       });
 
       if (result.success) {
+        const isSeedPhraseStored = await generateAndStoreSeedPhrase();
+        if (!isSeedPhraseStored) {
+          Alert.alert(
+            "Error",
+            "Failed to generate and store seed phrase. Please try again."
+          );
+          return;
+        }
         // Update user in backend with face_id_enabled = true
         if (user?.user_id) {
           try {
