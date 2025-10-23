@@ -33,7 +33,8 @@ export default function PayAnyoneScreen() {
                             phone: contact.phoneNumbers?.[0]?.number || '',
                             bankingName: contact.name || 'Unknown',
                         }));
-                    setContacts(mappedContacts);
+                    let sortedContacts = mappedContacts.sort((a, b) => a.name.localeCompare(b.name));
+                    setContacts(sortedContacts);
                 }
             }
             setLoading(false);
