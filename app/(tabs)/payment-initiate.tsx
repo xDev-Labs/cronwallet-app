@@ -22,7 +22,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function PaymentInitiateScreen() {
-    const { contactId } = useLocalSearchParams();
+    const { contactId, contactName, contactPhone, contactAvatarUrl, contactCronId } = useLocalSearchParams();
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [selectedCoin, setSelectedCoin] = useState({ name: 'Solana', symbol: 'sol', rate: 0.40 });
     const slideAnim = useRef(new Animated.Value(0)).current;
@@ -146,7 +146,19 @@ export default function PaymentInitiateScreen() {
     const handlePayPress = () => {
         router.push({
             pathname: './payment-confirm' as any,
-            params: { contactId, amount: amount || '0.00' },
+            params: {
+                contactId,
+                contactName,
+                contactPhone,
+                contactAvatarUrl,
+                contactCronId,
+                amount: amount || '0.00',
+                convertedAmount,
+                coinName: selectedCoin.name,
+                coinSymbol: selectedCoin.symbol,
+                currencyCode: selectedCurrency.code,
+                currencyFlag: selectedCurrency.flag,
+            },
         });
     };
 
@@ -160,7 +172,7 @@ export default function PaymentInitiateScreen() {
                     <View className="flex-1">
                         {/* Header */}
                         <View className="flex-row items-center px-4 py-3">
-                            <TouchableOpacity className="p-2" onPress={() => router.push({ pathname: '/(tabs)/recipient' as any, params: { contactId } })}>
+                            <TouchableOpacity className="p-2" onPress={() => router.push({ pathname: '/(tabs)/recipient' as any, params: { contactId, contactName, contactPhone, contactAvatarUrl, contactCronId } })}>
                                 <ChevronLeft size={28} color="#000" pointerEvents="none" />
                             </TouchableOpacity>
                         </View>

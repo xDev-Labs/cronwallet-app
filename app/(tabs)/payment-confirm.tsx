@@ -5,37 +5,56 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { ChevronLeft, Lock } from 'lucide-react-native';
 import { Image, Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { mockContacts } from '../../data/mockData';
 
 export default function PaymentConfirmScreen() {
-    const { contactId, amount } = useLocalSearchParams();
-    const contact = mockContacts.find(c => c.id === contactId);
-
-    if (!contact) {
-        return null;
-    }
+    const {
+        contactId,
+        contactName,
+        contactPhone,
+        contactAvatarUrl,
+        contactCronId,
+        amount,
+        convertedAmount,
+        coinName,
+        coinSymbol,
+        currencyCode,
+        currencyFlag,
+    } = useLocalSearchParams();
 
     const handleSlideToConfirm = () => {
         // Navigate to payment success screen
         router.push({
             pathname: './payment-success' as any,
-            params: { contactId, amount },
+            params: {
+                contactId,
+                contactName,
+                contactPhone,
+                contactAvatarUrl,
+                contactCronId,
+                amount,
+                convertedAmount,
+                coinName,
+                coinSymbol,
+                currencyCode,
+                currencyFlag,
+            },
         });
     };
 
     const renderAvatar = () => {
-        if (contact.avatarUrl) {
+        if (contactAvatarUrl && typeof contactAvatarUrl === 'string' && contactAvatarUrl.trim()) {
             return (
                 <Image
-                    source={{ uri: contact.avatarUrl }}
+                    source={{ uri: contactAvatarUrl }}
                     className="w-12 h-12 rounded-full"
                 />
             );
         }
 
-        const initial = contact.name.charAt(0).toUpperCase();
+        const name = typeof contactName === 'string' ? contactName : 'Unknown';
+        const initial = name.charAt(0).toUpperCase();
         const colors = ['#E91E63', '#9C27B0', '#FF5722', '#2196F3', '#4CAF50'];
-        const colorIndex = contact.name.charCodeAt(0) % colors.length;
+        const colorIndex = name.charCodeAt(0) % colors.length;
 
         return (
             <View
@@ -52,7 +71,16 @@ export default function PaymentConfirmScreen() {
             {/* Header */}
             <View className="flex-row items-center px-4 py-4">
                 <Pressable
-                    onPress={() => router.push({ pathname: '/(tabs)/payment-initiate' as any, params: { contactId } })}
+                    onPress={() => router.push({
+                        pathname: '/(tabs)/payment-initiate' as any,
+                        params: {
+                            contactId,
+                            contactName,
+                            contactPhone,
+                            contactAvatarUrl,
+                            contactCronId,
+                        }
+                    })}
                     className="p-2"
                     hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 >
@@ -76,11 +104,11 @@ export default function PaymentConfirmScreen() {
                                 <View className="flex-row items-center mb-1">
                                     <View className="w-4 h-4 bg-[#4A3DFF] rounded mr-2" />
                                     <UIText className="text-black font-sans text-base font-semibold">
-                                        {contact.name}@1341
+                                        {contactCronId || `${contactName}@1341`}
                                     </UIText>
                                 </View>
                                 <UIText className="text-foreground-secondary text-sm font-sans">
-                                    {contact.phone}
+                                    {contactPhone || 'No phone'}
                                 </UIText>
                             </View>
                         </View>
@@ -97,24 +125,24 @@ export default function PaymentConfirmScreen() {
                         <View className="flex-row items-center justify-between mb-4">
                             <View className="flex-row items-center">
                                 <Image
-                                    source={{ uri: 'https://flagcdn.com/w20/us.png' }}
+                                    source={{ uri: `https://flagcdn.com/w20/${currencyFlag || 'us'}.png` }}
                                     className="w-6 h-4 mr-2"
                                 />
-                                <UIText className="text-black font-sans ml-2">USD</UIText>
+                                <UIText className="text-black font-sans ml-2">{currencyCode || 'USD'}</UIText>
                             </View>
                             <UIText className="text-[#4A3DFF] text-3xl font-bold">
-                                {amount || '100.00'}
+                                {amount || '0.00'}
                             </UIText>
                         </View>
 
                         {/* Receiver Gets */}
                         <View className="flex-row items-center justify-between mb-4">
                             <View className="flex-row items-center">
-                                <CryptoIcon symbol="solana" size={32} variant="branded" />
-                                <UIText className="text-black font-sans ml-2">SOL</UIText>
+                                <CryptoIcon symbol={(coinName as string)?.toLowerCase() || 'solana'} size={32} variant="branded" />
+                                <UIText className="text-black font-sans ml-2">{(coinSymbol as string)?.toUpperCase() || 'SOL'}</UIText>
                             </View>
                             <UIText className="text-[#4A3DFF] text-3xl font-bold">
-                                0.40
+                                {convertedAmount || '0.00'}
                             </UIText>
                         </View>
 
