@@ -7,7 +7,7 @@ import * as Keychain from 'react-native-keychain';
 
 
 // Helper function to sign a Solana transaction
-export async function signSolanaTransaction(transaction: Transaction): Promise<Transaction> {
+export async function signSolanaTransaction(transaction: Transaction, partialSign: boolean = false): Promise<Transaction> {
 
   const credentials = await Keychain.getGenericPassword({
     service: 'bip39_seed_phrase',
@@ -16,17 +16,21 @@ export async function signSolanaTransaction(transaction: Transaction): Promise<T
       cancel: 'Cancel',
     },
   });
-  if(credentials){
+  if (credentials) {
     const seed = bip39.mnemonicToSeedSync(credentials.password);
     const hdMaster = slip10.fromMasterSeed(new Uint8Array(seed));
     const derived = hdMaster.derive("m/44'/501'/0'/0'");
     const privateKey = Uint8Array.from(derived.privateKey);
     const keypair = Keypair.fromSeed(privateKey);
 
-    transaction.sign(keypair);
-  
+    if (partialSign) {
+      transaction.partialSign(keypair);
+    } else {
+      transaction.sign(keypair);
+    }
+
     return transaction;
-  }else{
+  } else {
     throw new Error('No credentials found');
-  }  
+  }
 }
