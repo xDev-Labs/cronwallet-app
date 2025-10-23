@@ -16,9 +16,9 @@ interface SlideToConfirmProps {
   text?: string;
 }
 
-const SLIDER_HEIGHT = 64;
+const SLIDER_HEIGHT = 56;
 const SLIDER_BUTTON_SIZE = 56;
-const SLIDER_PADDING = 4;
+const SLIDER_PADDING = 0;
 
 export const SlideToConfirm = ({ onConfirm, text = 'SLIDE TO CONFIRM' }: SlideToConfirmProps) => {
   const offset = useSharedValue(0);
@@ -95,6 +95,10 @@ export const SlideToConfirm = ({ onConfirm, text = 'SLIDE TO CONFIRM' }: SlideTo
     };
   });
 
+  const animatedTrackStyle = useAnimatedStyle(() => ({
+    width: offset.value + SLIDER_BUTTON_SIZE,
+  }));
+
   const handleLayout = (event: any) => {
     const { width } = event.nativeEvent.layout;
     // Max translate is container width minus button size minus padding
@@ -107,6 +111,20 @@ export const SlideToConfirm = ({ onConfirm, text = 'SLIDE TO CONFIRM' }: SlideTo
       className="bg-gray-100 rounded-xl overflow-hidden"
       style={{ height: SLIDER_HEIGHT }}
     >
+      {/* Black Progress Track */}
+      <Animated.View
+        style={[
+          animatedTrackStyle,
+          {
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            height: SLIDER_HEIGHT,
+          },
+        ]}
+        className="bg-primary rounded-xl"
+      />
+
       {/* Background Text */}
       <Animated.View
         className="absolute inset-0 flex-row items-center justify-center"
