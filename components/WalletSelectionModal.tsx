@@ -22,6 +22,9 @@ interface WalletSelectionModalProps {
   onClose: () => void;
 }
 
+// Dummy wallet address for testing
+const DUMMY_WALLET_ADDRESS = "3DPRv8DgXhDvAge2WJuub3ZXnkdCPmxp2HSVJKTCJ7LW";
+
 const WALLETS: Wallet[] = [
   {
     id: "phantom",
@@ -85,13 +88,18 @@ export const WalletSelectionModal: React.FC<WalletSelectionModalProps> = ({
 
   const handleWalletPress = async (wallet: Wallet) => {
     try {
-      // Try to open the wallet app first
+      // Try to open the wallet app first with the pre-filled address
       const canOpen = await Linking.canOpenURL(wallet.scheme);
       if (canOpen) {
-        await Linking.openURL(wallet.scheme);
+        // Create deep link with the wallet address pre-filled
+        const deepLinkWithAddress = `solana:${DUMMY_WALLET_ADDRESS}`;
+        console.log(
+          `Opening ${wallet.name} with deep link:`,
+          deepLinkWithAddress
+        );
+        await Linking.openURL(deepLinkWithAddress);
       } else {
         // If the app is not installed, open the app store
-        // For now, we'll open the deep link which should redirect to app store
         await Linking.openURL(wallet.deepLink);
       }
     } catch (error) {
