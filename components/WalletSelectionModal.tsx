@@ -1,4 +1,5 @@
 import { Text } from "@/components/ui/text";
+import { useAuth } from "@/lib/contexts/AuthContext";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -23,7 +24,6 @@ interface WalletSelectionModalProps {
 }
 
 // Dummy wallet address for testing
-const DUMMY_WALLET_ADDRESS = "3DPRv8DgXhDvAge2WJuub3ZXnkdCPmxp2HSVJKTCJ7LW";
 
 const WALLETS: Wallet[] = [
   {
@@ -46,6 +46,7 @@ export const WalletSelectionModal: React.FC<WalletSelectionModalProps> = ({
   visible,
   onClose,
 }) => {
+  const { user } = useAuth();
   const [installedWallets, setInstalledWallets] = useState<Wallet[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -88,11 +89,20 @@ export const WalletSelectionModal: React.FC<WalletSelectionModalProps> = ({
 
   const handleWalletPress = async (wallet: Wallet) => {
     try {
+      // Get the user's wallet address
+      const userWalletAddress =
+        user?.primary_address || user?.wallet_address?.[0];
+
+      if (!userWalletAddress) {
+        console.log("No wallet address found for user");
+        return;
+      }
+
       // Try to open the wallet app first with the pre-filled address
       const canOpen = await Linking.canOpenURL(wallet.scheme);
       if (canOpen) {
-        // Create deep link with the wallet address pre-filled
-        const deepLinkWithAddress = `solana:${DUMMY_WALLET_ADDRESS}`;
+        // Create deep link with the user's wallet address
+        const deepLinkWithAddress = `solana:${userWalletAddress}`;
         console.log(
           `Opening ${wallet.name} with deep link:`,
           deepLinkWithAddress
