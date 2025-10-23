@@ -111,7 +111,7 @@ export default function PhoneAuthScreen() {
 
                                 {/* Phone Number Input */}
                                 <Input
-                                    className="flex-1 h-full border-0 bg-transparent px-2 text-foreground-dark"
+                                    className="flex-1 h-full font-sans border-0 bg-transparent px-2 text-foreground-dark"
                                     placeholder="00000 00000"
                                     placeholderTextColor="#A0A0A0"
                                     keyboardType="phone-pad"
