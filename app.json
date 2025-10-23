@@ -26,8 +26,8 @@
       "googleServicesFile": "./google-services.json",
       "queries": {
         "schemes": [
-          "phantom-ul",
-          "backpack-ul"
+          "phantom",
+          "backpack"
         ]
       }
     },

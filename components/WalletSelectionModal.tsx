@@ -38,7 +38,7 @@ const WALLETS: Wallet[] = [
     name: "Backpack",
     icon: require("@/assets/icons/backpack.png"),
     deepLink: "https://backpack.app/ul",
-    scheme: "backpack-ul://",
+    scheme: "backpack://",
   },
 ];
 
