@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { History, Home, User } from 'lucide-react-native';
+import { History, Home, User, Wallet } from 'lucide-react-native';
 import React from 'react';
 
 import { HapticTab } from '@/components/haptic-tab';
@@ -53,6 +53,13 @@ export default function TabLayout() {
         }}
       />
       {/* Hide other existing screens from tabs */}
+      <Tabs.Screen
+        name="balance"
+        options={{
+          href: null,
+          tabBarStyle: { display: 'none' },
+        }}
+      />
       <Tabs.Screen
         name="payment-confirm"
         options={{
