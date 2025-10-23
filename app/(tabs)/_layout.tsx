@@ -63,12 +63,6 @@ export default function TabLayout() {
       />
       {/* Hide other existing screens from tabs */}
       <Tabs.Screen
-        name="contacts"
-        options={{
-          href: null,
-        }}
-      />
-      <Tabs.Screen
         name="payment-confirm"
         options={{
           href: null,
