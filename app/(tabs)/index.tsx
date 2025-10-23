@@ -2,9 +2,11 @@ import { ChevronRight } from '@/components/icons/ChevronRight';
 import { RosetteDiscount } from '@/components/icons/RosetteDiscount';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
+import { WalletSelectionModal } from '@/components/WalletSelectionModal';
 import { clearAllStorage } from '@/lib/storage/storage';
 import { router } from 'expo-router';
 import { Bell, QrCode, Send, Smartphone } from 'lucide-react-native';
+import { useState } from 'react';
 import { Image, Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -48,6 +50,7 @@ const ActionCard = ({
 
 export default function HomeScreen() {
   const hasNotifications = true; // Change this based on actual notification state
+  const [isWalletModalVisible, setIsWalletModalVisible] = useState(false);
 
   return (
     <SafeAreaView edges={['top']} className="flex-1 bg-background-light">
@@ -93,7 +96,11 @@ export default function HomeScreen() {
           </View>
 
           {/* Add Funds Button */}
-          <Button className="w-full align-center" size="icon">
+          <Button
+            className="w-full align-center"
+            size="icon"
+            onPress={() => setIsWalletModalVisible(true)}
+          >
             Add Funds
           </Button>
         </View>
@@ -144,6 +151,12 @@ export default function HomeScreen() {
         </View>
 
       </ScrollView>
+
+      {/* Wallet Selection Modal */}
+      <WalletSelectionModal
+        visible={isWalletModalVisible}
+        onClose={() => setIsWalletModalVisible(false)}
+      />
     </SafeAreaView>
   );
 }
