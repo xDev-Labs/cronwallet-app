@@ -1,17 +1,20 @@
-import { UserIcon } from "@/components/icons/UserIcon";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { ApiError, apiService } from "@/lib/services/api";
-import { mapBackendUserToUser } from "@/lib/utils/userMapping";
+import { generateFileName, validateImageFile } from "@/lib/utils/fileValidation";
+import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
+import { Camera } from "lucide-react-native";
 import React, { useState } from "react";
 import {
+  ActivityIndicator,
+  Alert,
   Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
-  ScrollView,
   StatusBar,
   View,
 } from "react-native";
@@ -27,28 +30,60 @@ const CronLogo = () => (
   </View>
 );
 
-const AVATAR_COLORS = [
-  { id: "1", color: "#4A3DFF", name: "Primary Blue" },
-  { id: "2", color: "#9C27B0", name: "Purple" },
-  { id: "3", color: "#E91E63", name: "Pink" },
-  { id: "4", color: "#4CAF50", name: "Green" },
-  { id: "5", color: "#FF9800", name: "Orange" },
-  { id: "6", color: "#F44336", name: "Red" },
-  { id: "7", color: "#FFC107", name: "Yellow" },
-  { id: "8", color: "#009688", name: "Teal" },
-  { id: "9", color: "#3F51B5", name: "Indigo" },
-];
 
 export default function AvatarScreen() {
-  const [selectedAvatar, setSelectedAvatar] = useState<string>(
-    AVATAR_COLORS[0].color
-  );
+  const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<any>(null);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState("");
   const { updateUserProfile, user } = useAuth();
 
+  const pickImage = async () => {
+    try {
+      setError('');
+
+      // Request permission
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+      if (status !== 'granted') {
+        Alert.alert('Permission needed', 'Please grant permission to access your photos');
+        return;
+      }
+
+      // Launch image picker
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: 'images' as any,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 1.0, // Use max quality to avoid compression issues
+        base64: false, // Don't need base64 for FormData upload
+        exif: false,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        const asset = result.assets[0];
+        const imageUri = asset.uri;
+
+        // Validate the selected file
+        const validation = validateImageFile(imageUri);
+        if (!validation.isValid) {
+          setError(validation.error || 'Invalid file selected');
+          return;
+        }
+
+        setSelectedAvatar(imageUri);
+        setSelectedFile(asset);
+      }
+    } catch (err) {
+      console.error('Error picking image:', err);
+      setError('Failed to pick image. Please try again.');
+    }
+  };
+
   const handleGetStarted = async () => {
-    if (!selectedAvatar) {
+    if (!selectedAvatar || !selectedFile) {
+      setError("Please select an avatar image.");
       return;
     }
 
@@ -58,43 +93,56 @@ export default function AvatarScreen() {
     }
 
     setIsUpdating(true);
+    setIsUploading(true);
     setError("");
 
     try {
-      // Update user in backend with avatar_url
-      const response = await apiService.updateUser(user.user_id, {
-        avatar_url: selectedAvatar,
-      });
+      // Use the original file name from the asset or generate one
+      let fileName = selectedFile.fileName || `avatar_${user.user_id}_${Date.now()}.jpg`;
 
-      if (response.success && response.data) {
-        console.log("Update response data:", response.data);
+      // Upload to backend API
+      const uploadResponse = await apiService.uploadAvatar(
+        user.user_id,
+        selectedAvatar,
+        fileName
+      );
 
-        // Handle different response structures
-        const userData = response.data.user || response.data;
-        console.log("User data to map:", userData);
-
-        // Map the updated user data from backend
-        const updatedUserData = mapBackendUserToUser(userData);
-
-        // Update local user profile with the complete updated data
-        await updateUserProfile(updatedUserData);
-        router.push("/(onboarding)/setting-up");
-      } else {
-        setError("Failed to save avatar. Please try again.");
+      if (!uploadResponse.success || !uploadResponse.data?.avatarUrl) {
+        throw new Error(uploadResponse.message || 'Failed to upload avatar');
       }
+
+      const avatarUrl = uploadResponse.data.avatarUrl;
+      setIsUploading(false);
+
+      // Update user profile with new avatar URL
+      const updatedUserData = {
+        ...user,
+        avatar_url: avatarUrl
+      };
+
+      // Update local user profile
+      await updateUserProfile(updatedUserData);
+
+      // Navigate to next screen
+      router.push("/(onboarding)/setting-up");
+
     } catch (err) {
-      console.error("Error saving avatar:", err);
+      console.error("Error uploading avatar:", err);
+      setIsUploading(false);
+
       if (err instanceof ApiError) {
         setError(err.message);
+      } else if (err instanceof Error) {
+        setError(err.message);
       } else {
-        setError("Failed to save avatar. Please try again.");
+        setError("Failed to upload avatar. Please try again.");
       }
     } finally {
       setIsUpdating(false);
     }
   };
 
-  const isButtonEnabled = selectedAvatar !== "" && !isUpdating;
+  const isButtonEnabled = selectedAvatar !== null && !isUpdating && !isUploading;
 
   return (
     <SafeAreaView
@@ -114,55 +162,56 @@ export default function AvatarScreen() {
 
           {/* Content Area */}
           <View className="flex-1 px-6 mt-5">
-            {/* <Text variant="h3" className="text-foreground-dark mb-2">
-                            Choose your avatar
-                        </Text>
-                        <Text variant="caption" className="text-foreground-tertiary mb-8 font-sans">
-                            Pick a color that represents you
-                        </Text> */}
-
-            {/* Large Preview Avatar */}
-            <View className="items-center mb-12">
-              <View
-                className="w-32 h-32 rounded-full items-center justify-center shadow-lg border-4 border-primary"
-                style={{ backgroundColor: selectedAvatar }}
-              >
-                <UserIcon size={64} color="#FFFFFF" />
-              </View>
-            </View>
-
             <Text
-              variant="h4"
+              variant="h3"
               className="text-foreground-dark mb-2 text-center"
             >
               Choose your avatar
             </Text>
+            <Text variant="caption" className="text-foreground-tertiary mb-8 font-sans text-center">
+              Upload a photo to personalize your profile
+            </Text>
 
-            {/* Avatar Grid */}
-            <ScrollView
-              showsVerticalScrollIndicator={false}
-              className="flex-1"
-              contentContainerStyle={{ paddingVertical: 20 }}
-            >
-              <View className="flex-row flex-wrap justify-center gap-5">
-                {AVATAR_COLORS.map((avatar) => (
-                  <Pressable
-                    key={avatar.id}
-                    onPress={() => setSelectedAvatar(avatar.color)}
-                    className="w-24 h-24 rounded-full items-center justify-center border"
-                    style={{
-                      backgroundColor: "#F8F8F8",
-                      borderColor: "#12062B26",
-                    }}
-                  >
-                    {/* <UserIcon
-                                            size={36}
-                                            color="#FFFFFF"
-                                        /> */}
-                  </Pressable>
-                ))}
+            {/* Large Preview Avatar with Edit Icon */}
+            <View className="items-center mb-12">
+              <View className="relative">
+                <Avatar size="lg" className="border-4 border-primary">
+                  {selectedAvatar ? (
+                    <AvatarImage source={{ uri: selectedAvatar }} />
+                  ) : (
+                    <AvatarFallback>{user?.cron_id?.charAt(0).toUpperCase() || 'U'}</AvatarFallback>
+                  )}
+                </Avatar>
+
+                {/* Edit Icon Button */}
+                <Pressable
+                  onPress={pickImage}
+                  className="absolute bottom-0 right-0 bg-primary rounded-full p-2 shadow-lg"
+                  style={{ transform: [{ translateX: 5 }, { translateY: 5 }] }}
+                >
+                  <Camera size={20} color="#FFFFFF" />
+                </Pressable>
               </View>
-            </ScrollView>
+            </View>
+
+            {/* Upload Status */}
+            {isUploading && (
+              <View className="items-center mb-4">
+                <ActivityIndicator size="small" color="#4A3DFF" />
+                <Text className="text-foreground-tertiary text-sm mt-2 font-sans">
+                  Uploading avatar...
+                </Text>
+              </View>
+            )}
+
+            {/* File Info */}
+            {selectedFile && !isUploading && (
+              <View className="items-center mb-4">
+                <Text className="text-foreground-secondary text-sm font-sans">
+                  Image selected
+                </Text>
+              </View>
+            )}
 
             {/* Error Message */}
             {error ? (
@@ -181,21 +230,8 @@ export default function AvatarScreen() {
               disabled={!isButtonEnabled}
               className="shadow-lg shadow-primary/20 font-medium"
             >
-              {isUpdating ? "Saving..." : "Get Started"}
+              {isUpdating ? "Saving..." : isUploading ? "Uploading..." : "Get Started"}
             </Button>
-          </View>
-          <View
-            className={`px-6 pt-2.5 ${Platform.OS === "ios" ? "pb-7.5" : "pb-5"}`}
-          >
-            {/* <Button
-              onPress={handleGetStarted}
-              disabled={!isButtonEnabled}
-              className=""
-              variant="outline"
-              // className="shadow-lg shadow-primary/20 font-medium"
-            >
-              Skip for now
-            </Button> */}
           </View>
         </View>
       </KeyboardAvoidingView>
