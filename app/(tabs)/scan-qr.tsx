@@ -19,7 +19,7 @@ export default function ScanQRScreen() {
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [canScan, setCanScan] = useState(false); // Start as false
+  const [canScan, setCanScan] = useState(false);
   const isHandlingRef = useRef(false);
   const isMountedRef = useRef(true);
 
@@ -212,81 +212,89 @@ export default function ScanQRScreen() {
   }
 
   return (
-    <View className="flex-1 bg-black">
-      <StatusBar barStyle="light-content" backgroundColor="#000000" />
+    <View className="flex-1 bg-white">
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
-      {/* Header */}
-      <SafeAreaView edges={["top"]}>
-        <View className="flex-row items-center justify-between px-6 py-4">
-          <Pressable
-            onPress={() => router.back()}
-            className="active:opacity-70"
-          >
-            <ArrowLeft size={24} color="#FFFFFF" strokeWidth={2} />
-          </Pressable>
-          <Text className="text-lg font-semibold text-white">Scan QR Code</Text>
-          <View className="w-6" />
-        </View>
-      </SafeAreaView>
+      {/* Show camera only when canScan is true */}
+      {canScan ? (
+        <>
+          <StatusBar barStyle="light-content" backgroundColor="#000000" />
+          {/* Header */}
+          <SafeAreaView edges={["top"]} className="bg-black">
+            <View className="flex-row items-center justify-between px-6 py-4">
+              <Pressable
+                onPress={() => router.back()}
+                className="active:opacity-70"
+              >
+                <ArrowLeft size={24} color="#FFFFFF" strokeWidth={2} />
+              </Pressable>
+              <Text className="text-lg font-semibold text-white">
+                Scan QR Code
+              </Text>
+              <View className="w-6" />
+            </View>
+          </SafeAreaView>
 
-      {/* Camera View */}
-      <View className="flex-1">
-        {canScan && (
-          <CameraView
-            style={{ flex: 1 }}
-            facing="back"
-            onBarcodeScanned={handleBarCodeScanned}
-            barcodeScannerSettings={{
-              barcodeTypes: ["qr"],
-            }}
-          >
-            {/* Scanning Overlay */}
-            <View className="flex-1 items-center justify-center">
-              {/* Top overlay */}
-              <View className="absolute top-0 left-0 right-0 h-1/4 bg-black/60" />
+          {/* Camera View */}
+          <View className="flex-1">
+            <CameraView
+              style={{ flex: 1 }}
+              facing="back"
+              onBarcodeScanned={handleBarCodeScanned}
+              barcodeScannerSettings={{
+                barcodeTypes: ["qr"],
+              }}
+            >
+              {/* Scanning Overlay */}
+              <View className="flex-1 items-center justify-center">
+                {/* Top overlay */}
+                <View className="absolute top-0 left-0 right-0 h-1/4 bg-black/60" />
 
-              {/* Bottom overlay */}
-              <View className="absolute bottom-0 left-0 right-0 h-1/4 bg-black/60" />
+                {/* Bottom overlay */}
+                <View className="absolute bottom-0 left-0 right-0 h-1/4 bg-black/60" />
 
-              {/* Left overlay */}
-              <View className="absolute left-0 top-1/4 bottom-1/4 w-12 bg-black/60" />
+                {/* Left overlay */}
+                <View className="absolute left-0 top-1/4 bottom-1/4 w-12 bg-black/60" />
 
-              {/* Right overlay */}
-              <View className="absolute right-0 top-1/4 bottom-1/4 w-12 bg-black/60" />
+                {/* Right overlay */}
+                <View className="absolute right-0 top-1/4 bottom-1/4 w-12 bg-black/60" />
 
-              {/* Scanning frame */}
-              <View className="w-72 h-72 border-4 border-primary rounded-3xl">
-                {/* Corner indicators */}
-                <View className="absolute -top-1 -left-1 w-12 h-12 border-t-8 border-l-8 border-white rounded-tl-3xl" />
-                <View className="absolute -top-1 -right-1 w-12 h-12 border-t-8 border-r-8 border-white rounded-tr-3xl" />
-                <View className="absolute -bottom-1 -left-1 w-12 h-12 border-b-8 border-l-8 border-white rounded-bl-3xl" />
-                <View className="absolute -bottom-1 -right-1 w-12 h-12 border-b-8 border-r-8 border-white rounded-br-3xl" />
-              </View>
+                {/* Scanning frame */}
+                <View className="w-72 h-72 border-4 border-primary rounded-3xl">
+                  {/* Corner indicators */}
+                  <View className="absolute -top-1 -left-1 w-12 h-12 border-t-8 border-l-8 border-white rounded-tl-3xl" />
+                  <View className="absolute -top-1 -right-1 w-12 h-12 border-t-8 border-r-8 border-white rounded-tr-3xl" />
+                  <View className="absolute -bottom-1 -left-1 w-12 h-12 border-b-8 border-l-8 border-white rounded-bl-3xl" />
+                  <View className="absolute -bottom-1 -right-1 w-12 h-12 border-b-8 border-r-8 border-white rounded-br-3xl" />
+                </View>
 
-              {/* Instructions */}
-              <View className="absolute bottom-24 left-0 right-0 px-6">
-                <View className="bg-black/70 rounded-2xl px-6 py-4">
-                  <Text className="text-white text-center text-base font-medium">
-                    {isProcessing
-                      ? "Processing QR code..."
-                      : "Position the QR code within the frame"}
-                  </Text>
+                {/* Instructions */}
+                <View className="absolute bottom-24 left-0 right-0 px-6">
+                  <View className="bg-black/70 rounded-2xl px-6 py-4">
+                    <Text className="text-white text-center text-base font-medium">
+                      Position the QR code within the frame
+                    </Text>
+                  </View>
                 </View>
               </View>
-            </View>
-
-            {/* Processing indicator */}
-            {isProcessing && (
-              <View className="absolute inset-0 bg-black/80 items-center justify-center">
-                <ActivityIndicator size="large" color="#4A3DFF" />
-                <Text className="text-white text-lg font-semibold mt-4">
+            </CameraView>
+          </View>
+        </>
+      ) : (
+        <>
+          {/* White loading screen */}
+          <SafeAreaView edges={["top"]} className="flex-1 bg-white">
+            <View className="flex-1 items-center justify-center">
+              <ActivityIndicator size="large" color="#4A3DFF" />
+              {isProcessing && (
+                <Text className="text-foreground-dark text-base font-medium mt-4">
                   Loading recipient details...
                 </Text>
-              </View>
-            )}
-          </CameraView>
-        )}
-      </View>
+              )}
+            </View>
+          </SafeAreaView>
+        </>
+      )}
     </View>
   );
 }
