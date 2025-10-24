@@ -23,7 +23,13 @@
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "package": "com.shiyasmohd.cronwalletapp",
-      "googleServicesFile": "./google-services.json"
+      "googleServicesFile": "./google-services.json",
+      "queries": {
+        "schemes": [
+          "phantom",
+          "backpack"
+        ]
+      }
     },
     "web": {
       "output": "static",
