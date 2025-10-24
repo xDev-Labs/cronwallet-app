@@ -52,6 +52,7 @@ export default function HomeScreen() {
   const hasNotifications = true; // Change this based on actual notification state
   const [isWalletModalVisible, setIsWalletModalVisible] = useState(false);
   const { user } = useAuth();
+
   return (
     <SafeAreaView edges={["top"]} className="flex-1 bg-background-light">
       {/* Header */}
@@ -71,19 +72,14 @@ export default function HomeScreen() {
           <View className="flex-row items-center justify-between mb-6">
             {/* Left Side: Avatar + User Info */}
             <View className="flex-row items-center">
-              <View
-                className="w-12 h-12 rounded-full items-center justify-center border mr-4"
-                style={{
-                  backgroundColor: "#F8F8F8",
-                  borderColor: "#12062B26",
-                }}
+              <Image
+                source={{ uri: user?.avatar_url }}
+                className="w-12 h-12 rounded-full items-center justify-center mr-4"
+                resizeMode="cover"
               />
               <View>
                 <Text className="text-white text-lg font-semibold">
-                  christopaul322
-                </Text>
-                <Text className="text-white text-sm opacity-80">
-                  +91 98639 19301
+                  @{user?.cron_id}
                 </Text>
               </View>
             </View>
@@ -102,13 +98,13 @@ export default function HomeScreen() {
             size="icon"
             onPress={async () => {
               try {
-                  const userWalletAddress =
-                    user?.primary_address || user?.wallet_address?.[0];
+                const userWalletAddress =
+                  user?.primary_address || user?.wallet_address?.[0];
 
-                  if (!userWalletAddress) {
-                    console.log("No wallet address found for user");
-                    return;
-                  }
+                if (!userWalletAddress) {
+                  console.log("No wallet address found for user");
+                  return;
+                }
                 await Linking.openURL(
                   `solana:${userWalletAddress}`
                 );
