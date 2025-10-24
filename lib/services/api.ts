@@ -1,5 +1,6 @@
 import {
   API_CONFIG,
+  UserByAddressResponse,
   UserByPhoneNumberResponse,
   UserOnboardResponse,
   type ApiResponse,
@@ -124,7 +125,17 @@ class ApiService {
       }
     );
   }
-
+  // Get user by address
+  async getUserByAddress(
+    address: string
+  ): Promise<ApiResponse<UserByAddressResponse["user"]>> {
+    return this.makeRequest<UserByAddressResponse["user"]>(
+      `${API_CONFIG.ENDPOINTS.USER.GET_BY_ADDRESS}/${address}`,
+      {
+        method: "GET",
+      }
+    );
+  }
   // Check if cron ID is available
   async checkCronIdAvailability(
     cronId: string
@@ -172,16 +183,16 @@ class ApiService {
     fileName: string
   ): Promise<ApiResponse<{ user: any; avatarUrl: string }>> {
     const formData = new FormData();
-    
+
     // For React Native, create proper file object with URI
     const fileObject = {
       uri: imageUri,
-      type: 'image/jpeg',
+      type: "image/jpeg",
       name: fileName,
     };
-    
-    formData.append('avatar', fileObject as any);
-    
+
+    formData.append("avatar", fileObject as any);
+
     const url = `${this.baseURL}${API_CONFIG.ENDPOINTS.USER.UPLOAD_AVATAR}/${userId}/avatar`;
 
     try {
@@ -189,7 +200,7 @@ class ApiService {
       const timeoutId = setTimeout(() => controller.abort(), this.timeout);
 
       const response = await fetch(url, {
-        method: 'PUT',
+        method: "PUT",
         body: formData,
         signal: controller.signal,
         // Don't set Content-Type header - let browser handle it for FormData
@@ -228,13 +239,18 @@ class ApiService {
     userId: string,
     walletAddress: string,
     smartWalletAddress: string,
-    encodedTransaction: string,
+    encodedTransaction: string
   ): Promise<ApiResponse<UserOnboardResponse>> {
     return this.makeRequest<UserOnboardResponse>(
       `${API_CONFIG.ENDPOINTS.USER.ONBOARD}`,
       {
         method: "POST",
-        body: JSON.stringify({ userId, walletAddress, smartWalletAddress, encodedTransaction }),
+        body: JSON.stringify({
+          userId,
+          walletAddress,
+          smartWalletAddress,
+          encodedTransaction,
+        }),
       }
     );
   }

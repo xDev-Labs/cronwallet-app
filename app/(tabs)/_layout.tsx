@@ -1,8 +1,8 @@
-import { Tabs } from 'expo-router';
-import { History, Home, User, Wallet } from 'lucide-react-native';
-import React from 'react';
+import { Tabs } from "expo-router";
+import { History, Home, User } from "lucide-react-native";
+import React from "react";
 
-import { HapticTab } from '@/components/haptic-tab';
+import { HapticTab } from "@/components/haptic-tab";
 
 export default function TabLayout() {
   return (
@@ -98,6 +98,13 @@ export default function TabLayout() {
         name="qr-code"
         options={{
           href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="scan-qr"
+        options={{
+          href: null,
+          tabBarStyle: { display: "none" },
         }}
       />
     </Tabs>
