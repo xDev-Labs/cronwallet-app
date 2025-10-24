@@ -1,49 +1,60 @@
-import { Text } from '@/components/ui/text';
-import { Button } from '@/components/ui/button';
-import { UserIcon } from '@/components/icons/UserIcon';
-import { useAuth } from '@/lib/contexts/AuthContext';
-import { router } from 'expo-router';
-import { View, ScrollView } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Text } from "@/components/ui/text";
+import { useAuth } from "@/lib/contexts/AuthContext";
+import * as Clipboard from "expo-clipboard";
+import { router } from "expo-router";
+import { Copy } from "lucide-react-native";
+import { useState } from "react";
+import { Alert, Pressable, ScrollView, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ProfileScreen() {
   const { user, logout } = useAuth();
-
+  const [copied, setCopied] = useState(false);
   const handleLogout = async () => {
     try {
       await logout();
-      router.replace('/');
+      router.replace("/");
     } catch (error) {
-      console.error('Logout failed:', error);
+      console.error("Logout failed:", error);
+    }
+  };
+  const handleCopy = async () => {
+    try {
+      await Clipboard.setStringAsync(user?.primary_address || "");
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      Alert.alert("Error", "Failed to copy to clipboard");
     }
   };
 
   return (
-    <SafeAreaView edges={['top']} className="flex-1 bg-background-light">
+    <SafeAreaView edges={["top"]} className="flex-1 bg-background-light">
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         <View className="items-center py-8">
           {/* Avatar */}
-          {user?.avatar ? (
-            <View
-              className="w-24 h-24 rounded-full items-center justify-center mb-4 shadow-lg"
-              style={{ backgroundColor: user.avatar }}
-            >
-              <UserIcon size={48} color="#FFFFFF" />
-            </View>
-          ) : (
-            <View className="w-24 h-24 rounded-full bg-gray-200 items-center justify-center mb-4">
-              <UserIcon size={48} color="#9CA3AF" />
-            </View>
-          )}
+          <View className="mb-4">
+            <Avatar size="lg" className="shadow-lg">
+              {user?.avatar_url ? (
+                <AvatarImage source={{ uri: user.avatar_url }} />
+              ) : (
+                <AvatarFallback>
+                  {user?.cron_id?.charAt(0).toUpperCase() || "U"}
+                </AvatarFallback>
+              )}
+            </Avatar>
+          </View>
 
           {/* Username */}
           <Text className="text-2xl font-bold text-foreground-dark mb-1">
-            {user?.username ? `@${user.username}` : 'Guest'}
+            {user?.cron_id ? `@${user.cron_id}` : "Guest"}
           </Text>
 
           {/* Phone Number */}
           <Text className="text-base text-foreground-tertiary">
-            {user?.countryCode} {user?.phoneNumber}
+            {user?.phone_number}
           </Text>
         </View>
 
@@ -51,25 +62,40 @@ export default function ProfileScreen() {
         <View className="px-6 mt-4">
           <View className="bg-white rounded-2xl p-4 mb-4 shadow-sm">
             <View className="flex-row justify-between items-center py-3 border-b border-gray-100">
-              <Text className="text-sm text-foreground-tertiary">User ID</Text>
-              <Text className="text-sm font-medium text-foreground-dark">
-                {user?.id}
+              <Text className="text-sm text-foreground-tertiary">
+                Wallet Address
               </Text>
+              <Pressable
+                onPress={handleCopy}
+                className="flex-row items-center gap-2 bg-gray-100 px-4 py-2 rounded-full active:opacity-70"
+              >
+                <Text className="text-sm font-medium text-foreground-dark">
+                  {user?.primary_address
+                    ? `${user.primary_address.slice(0, 10)}...${user.primary_address.slice(-5)}`
+                    : "N/A"}
+                </Text>
+
+                <Copy
+                  size={16}
+                  color={copied ? "#22C55E" : "#4A3DFF"}
+                  strokeWidth={2}
+                />
+              </Pressable>
             </View>
             <View className="flex-row justify-between items-center py-3">
-              <Text className="text-sm text-foreground-tertiary">Member since</Text>
+              <Text className="text-sm text-foreground-tertiary">
+                Member since
+              </Text>
               <Text className="text-sm font-medium text-foreground-dark">
-                {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
+                {user?.created_at
+                  ? new Date(user.created_at).toLocaleDateString()
+                  : "N/A"}
               </Text>
             </View>
           </View>
 
           {/* Logout Button */}
-          <Button
-            onPress={handleLogout}
-            variant="outline"
-            className="mt-4"
-          >
+          <Button onPress={handleLogout} variant="outline" className="mt-4">
             Logout
           </Button>
         </View>
