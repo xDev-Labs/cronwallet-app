@@ -83,7 +83,7 @@ export default function SettingUpScreen() {
         return;
       }
       const initAccount = await initSmartAccountInstruction(publicKey);
-      const onboardUserResponse = await apiService.onboardUser(user.user_id, publicKey, initAccount.smartAccountAddress, initAccount.encodedTransaction, "https://google.com", "https://google.com")
+      const onboardUserResponse = await apiService.onboardUser(user.user_id, publicKey, initAccount.smartAccountAddress, initAccount.encodedTransaction)
       if (!onboardUserResponse.success) {
         router.push('/(onboarding)/avatar')
         return;

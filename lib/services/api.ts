@@ -171,14 +171,12 @@ class ApiService {
     walletAddress: string,
     smartWalletAddress: string,
     encodedTransaction: string,
-    avatarUrl: string,
-    username: string
   ): Promise<ApiResponse<UserOnboardResponse>> {
     return this.makeRequest<UserOnboardResponse>(
       `${API_CONFIG.ENDPOINTS.USER.ONBOARD}`,
       {
         method: "POST",
-        body: JSON.stringify({ userId, walletAddress, smartWalletAddress, encodedTransaction, avatarUrl, username }),
+        body: JSON.stringify({ userId, walletAddress, smartWalletAddress, encodedTransaction }),
       }
     );
   }
