@@ -8,6 +8,7 @@ export const STORAGE_KEYS = {
   USER_PROFILE: "cron_user_profile",
   HAS_COMPLETED_ONBOARDING: "cron_onboarding_complete",
   LATEST_TRANSACTIONS: "cron_latest_transactions",
+  PUBLIC_KEY: "cron_public_key",
   PASSCODE: "cron_passcode", // Secure
   BIOMETRIC_ENABLED: "cron_biometric_enabled", // Secure
 } as const;
@@ -127,6 +128,34 @@ export const storage = {
       await AsyncStorage.removeItem(STORAGE_KEYS.LATEST_TRANSACTIONS);
     } catch (error) {
       console.error("Error clearing transactions:", error);
+      throw error;
+    }
+  },
+
+  // Public Key
+  async savePublicKey(publicKey: string): Promise<void> {
+    try {
+      await AsyncStorage.setItem(STORAGE_KEYS.PUBLIC_KEY, publicKey);
+    } catch (error) {
+      console.error("Error saving public key:", error);
+      throw error;
+    }
+  },
+
+  async getPublicKey(): Promise<string | null> {
+    try {
+      return await AsyncStorage.getItem(STORAGE_KEYS.PUBLIC_KEY);
+    } catch (error) {
+      console.error("Error getting public key:", error);
+      return null;
+    }
+  },
+
+  async removePublicKey(): Promise<void> {
+    try {
+      await AsyncStorage.removeItem(STORAGE_KEYS.PUBLIC_KEY);
+    } catch (error) {
+      console.error("Error removing public key:", error);
       throw error;
     }
   },

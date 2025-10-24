@@ -143,7 +143,7 @@ export default function HomeScreen() {
             <ActionCard
               icon={Smartphone}
               title="Balance"
-              onPress={() => console.log("Check balance")}
+              onPress={() => router.push('/(tabs)/balance')}
             />
           </View>
         </View>

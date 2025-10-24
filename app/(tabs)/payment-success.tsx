@@ -1,15 +1,26 @@
+import { Text } from '@/components/ui/text';
 import { router, useLocalSearchParams } from 'expo-router';
 import { CircleCheck as CheckCircle, Share2, ShieldCheck } from 'lucide-react-native';
 import { Image, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Text } from '@/components/ui/text';
-import { mockContacts } from '../../data/mockData';
 
 export default function PaymentSuccessScreen() {
-    const { contactId, amount } = useLocalSearchParams();
-    const contact = mockContacts.find(c => c.id === contactId);
+    const {
+        contactId,
+        amount,
+        contactName,
+        contactAvatarUrl,
+        contactCronId
+    } = useLocalSearchParams();
 
-    if (!contact) {
+    // Use the passed contact data directly instead of looking up from mockContacts
+    const contact = {
+        name: contactName as string || 'Unknown',
+        bankingName: contactCronId as string || 'N/A',
+        avatarUrl: contactAvatarUrl as string,
+    };
+
+    if (!contactName || !amount) {
         return null;
     }
 

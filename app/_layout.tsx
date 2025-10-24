@@ -16,6 +16,8 @@ import './global.css';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { AuthProvider } from '@/lib/contexts/AuthContext';
 import '@react-native-firebase/app';
+import 'expo-crypto';
+import 'react-native-get-random-values';
 
 // Keep splash screen visible while fonts load
 SplashScreen.preventAutoHideAsync();

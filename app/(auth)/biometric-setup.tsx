@@ -17,6 +17,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+global.Buffer = global.Buffer || require('buffer').Buffer
+
 const CronLogo = () => (
   <View className="flex-1 w-full items-center justify-center">
     <Image

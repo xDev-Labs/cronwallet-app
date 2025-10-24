@@ -66,7 +66,13 @@ export default function RecipientScreen() {
   const handlePayPress = () => {
     router.push({
       pathname: "/(tabs)/payment-initiate" as any,
-      params: { contactId },
+      params: {
+        contactId,
+        contactName,
+        contactPhone,
+        contactAvatarUrl,
+        contactCronId,
+      },
     });
   };
 
