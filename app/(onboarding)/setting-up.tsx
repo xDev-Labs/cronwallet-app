@@ -9,6 +9,7 @@ import { Text } from "@/components/ui/text";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { apiService } from '@/lib/services/api';
 import { storage } from "@/lib/storage/storage";
+import { mapBackendUserToUser } from '@/lib/utils/userMapping';
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Image, StatusBar, View } from "react-native";
@@ -24,7 +25,7 @@ const CronLogo = () => (
 );
 
 export default function SettingUpScreen() {
-  const { completeOnboarding, user } = useAuth();
+  const { completeOnboarding, updateUserProfile, user } = useAuth();
   const [status, setStatus] = useState("Setting up account...");
 
   useEffect(() => {
@@ -89,12 +90,18 @@ export default function SettingUpScreen() {
         router.push('/(onboarding)/avatar')
         return;
       }
+
+      const userData =  response.data!;
+
+      const updatedUserData = mapBackendUserToUser(userData);
+
+      await updateUserProfile(updatedUserData);
+
       try{
         await storage.savePublicKey(publicKey);
       }catch(err){
         console.log(err)
       }
-      
 
       // Complete onboarding locally
       await completeOnboarding();
