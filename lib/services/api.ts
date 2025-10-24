@@ -1,5 +1,6 @@
 import {
   API_CONFIG,
+  UserByPhoneNumberResponse,
   type ApiResponse,
   type CronIdCheckResponse,
   type CronIdRegisterResponse,
@@ -105,6 +106,18 @@ class ApiService {
   ): Promise<ApiResponse<UserCreateResponse["user"]>> {
     return this.makeRequest<UserCreateResponse["user"]>(
       `${API_CONFIG.ENDPOINTS.USER.GET_BY_ID}/${userId}`,
+      {
+        method: "GET",
+      }
+    );
+  }
+
+  // Get user by Phone Number
+  async getUserByPhoneNumber(
+    phoneNumber: string
+  ): Promise<ApiResponse<UserByPhoneNumberResponse["user"]>> {
+    return this.makeRequest<UserByPhoneNumberResponse["user"]>(
+      `${API_CONFIG.ENDPOINTS.USER.GET_BY_PHONE_NUMBER}/${phoneNumber}`,
       {
         method: "GET",
       }

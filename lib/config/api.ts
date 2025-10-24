@@ -63,3 +63,13 @@ export interface UserUpdateResponse {
     updated_at?: string;
   };
 }
+
+export interface UserByPhoneNumberResponse {
+  user: {
+    user_id: string;
+    phone_number: string;
+    cron_id: string;
+    primary_address: string;
+    avatar_url?: string;
+  };
+}
