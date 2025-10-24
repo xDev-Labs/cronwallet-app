@@ -86,7 +86,10 @@ export default function HomeScreen() {
 
             {/* Right Side: QR + Copy */}
             <View className="flex-row items-center">
-              <Pressable className="mr-3">
+              <Pressable
+                className="mr-3"
+                onPress={() => router.push("/qr-code")}
+              >
                 <QrCode size={20} color="#FFFFFF" strokeWidth={2} />
               </Pressable>
             </View>
@@ -105,9 +108,7 @@ export default function HomeScreen() {
                   console.log("No wallet address found for user");
                   return;
                 }
-                await Linking.openURL(
-                  `solana:${userWalletAddress}`
-                );
+                await Linking.openURL(`solana:${userWalletAddress}`);
               } catch (error) {
                 console.log(error);
               }
@@ -139,7 +140,7 @@ export default function HomeScreen() {
             <ActionCard
               icon={Smartphone}
               title="Balance"
-              onPress={() => router.push('/(tabs)/balance')}
+              onPress={() => router.push("/(tabs)/balance")}
             />
           </View>
         </View>

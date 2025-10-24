@@ -8,27 +8,28 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#4A3DFF',
-        tabBarInactiveTintColor: '#9CA3AF',
+        tabBarActiveTintColor: "#4A3DFF",
+        tabBarInactiveTintColor: "#9CA3AF",
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarStyle: {
-          backgroundColor: '#FFFFFF',
+          backgroundColor: "#FFFFFF",
           borderTopWidth: 1,
-          borderTopColor: '#E5E7EB',
+          borderTopColor: "#E5E7EB",
           height: 80,
           paddingBottom: 8,
           paddingTop: 8,
         },
         tabBarLabelStyle: {
           fontSize: 12,
-          fontWeight: '500',
+          fontWeight: "500",
         },
-      }}>
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
+          title: "Home",
           tabBarIcon: ({ color, size }) => (
             <Home size={size} color={color} strokeWidth={2} />
           ),
@@ -37,7 +38,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="history"
         options={{
-          title: 'History',
+          title: "History",
           tabBarIcon: ({ color, size }) => (
             <History size={size} color={color} strokeWidth={2} />
           ),
@@ -46,7 +47,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profile',
+          title: "Profile",
           tabBarIcon: ({ color, size }) => (
             <User size={size} color={color} strokeWidth={2} />
           ),
@@ -57,21 +58,21 @@ export default function TabLayout() {
         name="balance"
         options={{
           href: null,
-          tabBarStyle: { display: 'none' },
+          tabBarStyle: { display: "none" },
         }}
       />
       <Tabs.Screen
         name="payment-confirm"
         options={{
           href: null,
-          tabBarStyle: { display: 'none' },
+          tabBarStyle: { display: "none" },
         }}
       />
       <Tabs.Screen
         name="payment-initiate"
         options={{
           href: null,
-          tabBarStyle: { display: 'none' },
+          tabBarStyle: { display: "none" },
         }}
       />
       <Tabs.Screen
@@ -84,11 +85,17 @@ export default function TabLayout() {
         name="recipient"
         options={{
           href: null,
-          tabBarStyle: { display: 'none' },
+          tabBarStyle: { display: "none" },
         }}
       />
       <Tabs.Screen
         name="pay-anyone"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="qr-code"
         options={{
           href: null,
         }}
