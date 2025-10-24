@@ -56,10 +56,15 @@ export default function ScanQRScreen() {
     setIsProcessing(true);
 
     try {
-      // The data should be a wallet address
-      const address = data.trim();
+      // Parse the address from QR code data
+      let address = data.trim();
 
-      if (!address) {
+      // Handle solana: prefix if present
+      if (address.startsWith("solana:")) {
+        address = address.replace("solana:", "");
+        console.log("Address : ", address);
+      }
+      if (!address || !data.trim().startsWith("solana:")) {
         if (!isMountedRef.current) return;
         setIsProcessing(false);
         Alert.alert("Invalid QR Code", "No address found in QR code", [
@@ -75,7 +80,7 @@ export default function ScanQRScreen() {
         ]);
         return;
       }
-
+      console.log(address);
       // Check if scanning own address
       if (address === user?.primary_address) {
         if (!isMountedRef.current) return;
