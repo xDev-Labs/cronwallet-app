@@ -182,17 +182,16 @@ export default function UsernameScreen() {
 
               {/* Username Input Field */}
               <View
-                className={`flex-row items-center h-14 rounded-xl border-2 px-4 ${
-                  isFocused
+                className={`flex-row items-center h-14 rounded-xl border-2 px-4 ${isFocused
                     ? "border-border-focus bg-background-light"
                     : "border-border-light bg-gray-100"
-                }`}
+                  }`}
               >
                 <Text className="text-base font-semibold text-foreground-tertiary mr-1">
                   @
                 </Text>
                 <Input
-                  className="flex-1 h-full border-0 bg-transparent px-2 text-foreground-dark"
+                  className="flex-1 font-sans h-full border-0 bg-transparent px-2 text-foreground-dark"
                   placeholder="username"
                   placeholderTextColor="#A0A0A0"
                   value={username}
@@ -214,9 +213,8 @@ export default function UsernameScreen() {
                     </Text>
                   ) : availabilityMessage ? (
                     <Text
-                      className={`text-sm font-sans ${
-                        isAvailable ? "text-green-600" : "text-error"
-                      }`}
+                      className={`text-sm font-sans ${isAvailable ? "text-green-600" : "text-error"
+                        }`}
                     >
                       {availabilityMessage}
                     </Text>

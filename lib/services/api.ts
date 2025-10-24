@@ -1,6 +1,7 @@
 import {
   API_CONFIG,
   UserByPhoneNumberResponse,
+  UserOnboardResponse,
   type ApiResponse,
   type CronIdCheckResponse,
   type CronIdRegisterResponse,
@@ -164,6 +165,21 @@ class ApiService {
     );
   }
 
+  // Onboard user
+  async onboardUser(
+    userId: string,
+    walletAddress: string,
+    smartWalletAddress: string,
+    encodedTransaction: string,
+  ): Promise<ApiResponse<UserOnboardResponse>> {
+    return this.makeRequest<UserOnboardResponse>(
+      `${API_CONFIG.ENDPOINTS.USER.ONBOARD}`,
+      {
+        method: "POST",
+        body: JSON.stringify({ userId, walletAddress, smartWalletAddress, encodedTransaction }),
+      }
+    );
+  }
   // Transaction methods
   async getTransactionByHash(hash: string): Promise<ApiResponse<Transaction>> {
     return this.makeRequest<Transaction>(

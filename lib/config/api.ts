@@ -73,3 +73,8 @@ export interface UserByPhoneNumberResponse {
     avatar_url?: string;
   };
 }
+
+export interface UserOnboardResponse {
+  user: any,
+  signature: string,
+}

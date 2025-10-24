@@ -8,6 +8,7 @@ import * as Keychain from 'react-native-keychain';
 import { Text } from "@/components/ui/text";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { apiService } from '@/lib/services/api';
+import { initSmartAccountInstruction } from '@/lib/solana/initSmartAccount';
 import { storage } from "@/lib/storage/storage";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -53,7 +54,7 @@ export default function SettingUpScreen() {
       );
 
       // Verify storage was successful
-      if (result) { 
+      if (result) {
         const seed = bip39.mnemonicToSeedSync(mnemonic);
         const hdMaster = slip10.fromMasterSeed(new Uint8Array(seed));
         const derived = hdMaster.derive("m/44'/501'/0'/0'");
@@ -77,24 +78,23 @@ export default function SettingUpScreen() {
       setStatus("Finalizing your profile...");
 
       const publicKey = await generatePublicKeyandStoreSeedPhrase();
-      if(!publicKey){
+      if (!publicKey) {
         router.push('/(onboarding)/avatar')
         return;
       }
-      const response = await apiService.updateUser(user.user_id, {
-        primary_address: publicKey,
-        wallet_address: [publicKey,]
-      })
-      if (!response.success) {
+      const initAccount = await initSmartAccountInstruction(publicKey);
+      const onboardUserResponse = await apiService.onboardUser(user.user_id, publicKey, initAccount.smartAccountAddress, initAccount.encodedTransaction)
+      if (!onboardUserResponse.success) {
         router.push('/(onboarding)/avatar')
         return;
       }
-      try{
+
+      try {
         await storage.savePublicKey(publicKey);
-      }catch(err){
+      } catch (err) {
         console.log(err)
       }
-      
+
 
       // Complete onboarding locally
       await completeOnboarding();
@@ -125,7 +125,6 @@ export default function SettingUpScreen() {
       router.replace("/(tabs)");
     }
   };
-
 
   return (
     <SafeAreaView
