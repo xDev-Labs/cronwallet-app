@@ -105,7 +105,7 @@ export default function PaymentSuccessScreen() {
           <View className="flex-row items-center gap-1.5 mb-2">
             <ShieldCheck size={16} color="#4CAF50" fill="#4CAF50" />
             <Text className="text-foreground-secondary text-sm">
-              Banking Name: {contact.bankingName}
+              Cron ID: {contactCronId}
             </Text>
           </View>
 
