@@ -14,6 +14,7 @@ export const API_CONFIG = {
       CREATE: "/user/create",
       GET_BY_ID: "/user",
       GET_BY_PHONE_NUMBER: "/user/phone",
+      GET_BY_ADDRESS: "/user/address",
       ONBOARD: "/user/onboard",
       UPDATE: "/user",
       UPLOAD_AVATAR: "/user",

@@ -150,7 +150,7 @@ export default function QRCodeScreen() {
           <View className="mb-6">
             {primaryAddress ? (
               <QRCode
-                value={primaryAddress}
+                value={`solana:${primaryAddress}`}
                 size={280}
                 color="#000000"
                 backgroundColor="#FFFFFF"

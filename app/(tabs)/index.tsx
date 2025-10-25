@@ -135,7 +135,8 @@ export default function HomeScreen() {
             <ActionCard
               icon={QrCode}
               title="Scan QR"
-              onPress={() => console.log("Scan QR")}
+              
+              onPress={() => router.push("/(tabs)/scan-qr")}
             />
             <ActionCard
               icon={Smartphone}
