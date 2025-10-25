@@ -1,6 +1,7 @@
-import { getAssociatedTokenAddressSync, TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { ASSOCIATED_TOKEN_PROGRAM_ID, createAssociatedTokenAccountInstruction, getAssociatedTokenAddressSync, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { Connection, PublicKey, Transaction, TransactionInstruction } from "@solana/web3.js";
 import { signSolanaTransaction } from "../wallet/wallet";
+import { checkAccountExists } from "./helpers";
 import { PROGRAM_ID, SERVER_PUBLIC_KEY } from "./initSmartAccount";
 
 export const transferSpl = async (amount: number, smartAccountAddress: string, to: string, splTokenAddress: string, ownerPublicKey: PublicKey) => {
@@ -25,6 +26,19 @@ export const transferSpl = async (amount: number, smartAccountAddress: string, t
         TOKEN_PROGRAM_ID,
     );
     console.log('📥 Destination Token Account:', dstTokenAccount.toBase58());
+    let transaction = new Transaction();
+
+    if (!await checkAccountExists(connection, dstTokenAccount)) {
+        const tokenAccountCreationIx = createAssociatedTokenAccountInstruction(
+            SERVER_PUBLIC_KEY,
+            dstTokenAccount,
+            recipientPublicKey,
+            mintAddress,
+            TOKEN_PROGRAM_ID,
+            ASSOCIATED_TOKEN_PROGRAM_ID
+        );
+        transaction.add(tokenAccountCreationIx);
+    }
 
     // Get the source token account (smart account's ATA)
     const srcTokenAccount = getAssociatedTokenAddressSync(
@@ -34,15 +48,6 @@ export const transferSpl = async (amount: number, smartAccountAddress: string, t
         TOKEN_PROGRAM_ID,
     );
     console.log('📤 Source Token Account:', srcTokenAccount.toBase58());
-
-    let ata = await connection.getAccountInfo(dstTokenAccount);
-    let transaction = new Transaction();
-
-    if (!ata) {
-        console.error('❌ Associated token account not found for recipient');
-        throw new Error("Associated token account not found");
-    }
-    console.log('✅ Recipient token account verified');
 
     // Discriminator for pay_with_spl instruction
     const discriminator = new Uint8Array([181, 68, 253, 39, 76, 203, 111, 69]);
