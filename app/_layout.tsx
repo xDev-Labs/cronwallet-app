@@ -19,12 +19,23 @@ import '@react-native-firebase/app';
 import 'expo-crypto';
 import 'react-native-get-random-values';
 
+import * as Notifications from 'expo-notifications';
+
 // Keep splash screen visible while fonts load
 SplashScreen.preventAutoHideAsync();
 
 export const unstable_settings = {
   anchor: '(tabs)',
 };
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
+});
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
