@@ -10,6 +10,7 @@ import { useAuth } from "@/lib/contexts/AuthContext";
 import { apiService } from '@/lib/services/api';
 import { initSmartAccountInstruction } from '@/lib/solana/initSmartAccount';
 import { storage } from "@/lib/storage/storage";
+import { mapBackendUserToUser } from '@/lib/utils/userMapping';
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Image, StatusBar, View } from "react-native";
@@ -25,7 +26,7 @@ const CronLogo = () => (
 );
 
 export default function SettingUpScreen() {
-  const { completeOnboarding, user } = useAuth();
+  const { completeOnboarding, updateUserProfile, user } = useAuth();
   const [status, setStatus] = useState("Setting up account...");
 
   useEffect(() => {
@@ -88,6 +89,11 @@ export default function SettingUpScreen() {
         router.push('/(onboarding)/avatar')
         return;
       }
+
+      const backendUserData = onboardUserResponse.data!.user;
+      const userData = mapBackendUserToUser(backendUserData);
+      await updateUserProfile(userData);
+
 
       try {
         await storage.savePublicKey(publicKey);
