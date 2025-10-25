@@ -28,7 +28,6 @@ export const initSmartAccountInstruction = async (userWallet: String): Promise<{
     ]);
 
     let userWalletPublicKey = new PublicKey(userWallet);
-    let serverPublicKey = new PublicKey("3Exg1bwcYyQP926DF321hoojVqMZNAkNZgfhsNmEyzfC");
 
     // Create the instruction with account ordering that matches Anchor's expectations
     // Order: smart_account, guardian_registry, fee_payer, authority, system_program
@@ -37,7 +36,7 @@ export const initSmartAccountInstruction = async (userWallet: String): Promise<{
         keys: [
             { pubkey: smartAccountPda, isSigner: false, isWritable: true },
             { pubkey: guardianRegistryPda, isSigner: false, isWritable: true },
-            { pubkey: serverPublicKey, isSigner: true, isWritable: true }, // fee_payer
+            { pubkey: SERVER_PUBLIC_KEY, isSigner: true, isWritable: true }, // fee_payer
             { pubkey: userWalletPublicKey, isSigner: true, isWritable: true }, // authority
             { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
         ],
@@ -48,7 +47,7 @@ export const initSmartAccountInstruction = async (userWallet: String): Promise<{
     const transaction = new Transaction().add(instruction);
     const { blockhash } = await connection.getLatestBlockhash();
     transaction.recentBlockhash = blockhash;
-    transaction.feePayer = serverPublicKey;
+    transaction.feePayer = SERVER_PUBLIC_KEY;
 
     console.log('Instruction Data (hex):', Buffer.from(instructionData).toString('hex'));
     console.log('Smart Account ID (UUID):', smartAccountId);
@@ -66,7 +65,8 @@ export const initSmartAccountInstruction = async (userWallet: String): Promise<{
     return { smartAccountAddress: smartAccountPda.toBase58(), encodedTransaction: encodedTransaction };
 }
 
-let PROGRAM_ID = new PublicKey("5j3KULcknCtpEPnLP8QnyQiBKrEw33rqfinYG7i8w46w");
+export const SERVER_PUBLIC_KEY = new PublicKey("3Exg1bwcYyQP926DF321hoojVqMZNAkNZgfhsNmEyzfC");
+export const PROGRAM_ID = new PublicKey("5j3KULcknCtpEPnLP8QnyQiBKrEw33rqfinYG7i8w46w");
 
 const generateSmartAccount = (smartAccountId: string) => {
 

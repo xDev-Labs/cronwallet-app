@@ -20,6 +20,7 @@ export const API_CONFIG = {
       UPLOAD_AVATAR: "/user",
       CHECK_CRON_ID: "/user/cron-id/check",
       REGISTER_CRON_ID: "/user/cron-id/register",
+      TRANSFER_SPL: "/user/transfer-spl",
     },
     TRANSACTION: {
       GET_BY_HASH: "/transaction",
