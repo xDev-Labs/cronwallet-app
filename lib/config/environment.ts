@@ -13,7 +13,10 @@ export const API_CONFIG = {
     USER: {
       CREATE: "/user/create",
       GET_BY_ID: "/user",
+      GET_BY_PHONE_NUMBER: "/user/phone",
+      ONBOARD: "/user/onboard",
       UPDATE: "/user",
+      UPLOAD_AVATAR: "/user",
       CHECK_CRON_ID: "/user/cron-id/check",
       REGISTER_CRON_ID: "/user/cron-id/register",
     },

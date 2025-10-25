@@ -176,7 +176,7 @@ export default function PayAnyoneScreen() {
                                         value={searchQuery}
                                         onChangeText={setSearchQuery}
                                         placeholder="Enter phone number"
-                                        className="h-14 rounded-xl border-2 border-gray-200 bg-gray-50 px-4 pr-12 text-base text-black"
+                                        className="h-14 font-sans rounded-xl border-2 border-gray-200 bg-gray-50 px-4 pr-12 text-base text-black"
                                         placeholderTextColor="#8E8E93"
                                     />
                                     <View className="absolute right-4 top-1/2 -translate-y-1/2">

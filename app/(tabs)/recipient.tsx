@@ -3,6 +3,7 @@ import { DotsVertical } from "@/components/icons/DotsVertical";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { useAuth } from "@/lib/contexts/AuthContext";
+import { apiService } from "@/lib/services/api";
 import type { Transaction } from "@/lib/types/transaction.types";
 import { getTransactionsBetweenUsers } from "@/lib/utils/transactionService";
 import { router, useLocalSearchParams } from "expo-router";
@@ -11,6 +12,8 @@ import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Image,
+  Modal,
+  Pressable,
   ScrollView,
   TouchableOpacity,
   View,
@@ -29,6 +32,9 @@ export default function RecipientScreen() {
   } = useLocalSearchParams();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isCheckingRecipient, setIsCheckingRecipient] = useState(true);
+  const [recipientExists, setRecipientExists] = useState(false);
+  const [showNotCronUserModal, setShowNotCronUserModal] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
 
   const loadTransactions = async () => {
@@ -59,8 +65,42 @@ export default function RecipientScreen() {
     }
   };
 
+  const checkRecipientExists = async () => {
+    try {
+      const normalizedPhone = (contactPhone as string).replace(/[^0-9+]/g, "");
+      console.log("Normalized phone:", normalizedPhone);
+      const response = await apiService.getUserByPhoneNumber(normalizedPhone);
+      return response.success;
+    } catch (error) {
+      console.error("Error checking recipient:", error);
+      return false;
+    }
+  };
+
   useEffect(() => {
-    loadTransactions();
+    const initializeRecipient = async () => {
+      if (!contactPhone) {
+        setIsCheckingRecipient(false);
+        return;
+      }
+
+      setIsCheckingRecipient(true);
+      const exists = await checkRecipientExists();
+
+      if (exists) {
+        setRecipientExists(true);
+        await loadTransactions();
+      } else {
+        setRecipientExists(false);
+        setShowNotCronUserModal(true);
+        // Still load page but with no transactions
+        setIsLoading(false);
+      }
+
+      setIsCheckingRecipient(false);
+    };
+
+    initializeRecipient();
   }, [user?.user_id, contactPhone]);
 
   const handlePayPress = () => {
@@ -137,6 +177,29 @@ export default function RecipientScreen() {
       </View>
     );
   };
+
+  // Show loading while checking recipient
+  if (isCheckingRecipient) {
+    return (
+      <SafeAreaView edges={["top"]} className="flex-1 bg-white font-sans">
+        <View className="flex-row items-center px-4 py-3">
+          <TouchableOpacity
+            className="p-2"
+            onPress={() => router.push("/(tabs)/pay-anyone")}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <ChevronLeft size={28} color="#000" pointerEvents="none" />
+          </TouchableOpacity>
+        </View>
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator size="large" color="#4A3DFF" />
+          <Text className="text-base text-foreground-tertiary mt-4">
+            Checking recipient...
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView edges={["top"]} className="flex-1 bg-white font-sans">
@@ -222,7 +285,7 @@ export default function RecipientScreen() {
               const isNewDate =
                 index === 0 ||
                 formatDate(transaction.created_at) !==
-                  formatDate(transactions[index - 1].created_at);
+                formatDate(transactions[index - 1].created_at);
 
               return (
                 <View key={transaction.transaction_hash} className="mb-3">
@@ -240,11 +303,10 @@ export default function RecipientScreen() {
                     className={`flex-row ${transactionType === "sent" ? "justify-end" : "justify-start"}`}
                   >
                     <TouchableOpacity
-                      className={`rounded-2xl w-3/5 overflow-hidden ${
-                        transactionType === "sent"
-                          ? "bg-[#4A3DFF0F]"
-                          : "bg-white border border-gray-200"
-                      }`}
+                      className={`rounded-2xl w-3/5 overflow-hidden ${transactionType === "sent"
+                        ? "bg-[#4A3DFF0F]"
+                        : "bg-white border border-gray-200"
+                        }`}
                     >
                       <View className="border-b-[3px] border-[#12062B]">
                         <View className="border-b-[3px] border-[#4A3DFF] p-5">
@@ -292,10 +354,54 @@ export default function RecipientScreen() {
           elevation: 8,
         }}
       >
-        <Button className="w-full" onPress={handlePayPress}>
+        <Button 
+          className="w-full" 
+          onPress={handlePayPress}
+          disabled={!recipientExists}
+        >
           Pay
         </Button>
       </View>
+
+      {/* Modal for Non-Cron Users */}
+      <Modal
+        visible={showNotCronUserModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowNotCronUserModal(false)}
+      >
+        <View className="flex-1 bg-black/50">
+          <Pressable 
+            className="flex-1" 
+            onPress={() => setShowNotCronUserModal(false)} 
+          />
+          <View className="bg-white rounded-t-3xl pb-8">
+            {/* Header */}
+            <View className="p-6">
+              <View className="w-12 h-1 bg-gray-300 rounded-full self-center mb-6" />
+              <Text variant="h3" className="text-foreground-dark text-center mb-2">
+                User Not Found
+              </Text>
+              <Text variant="body" className="text-foreground-secondary text-center">
+                User does not use Cron
+              </Text>
+            </View>
+
+            {/* OK Button */}
+            <View className="px-6">
+              <Button 
+                className="w-full" 
+                onPress={() => {
+                  setShowNotCronUserModal(false);
+                  router.push('/(tabs)/pay-anyone');
+                }}
+              >
+                OK
+              </Button>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }

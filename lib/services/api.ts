@@ -1,5 +1,7 @@
 import {
   API_CONFIG,
+  UserByPhoneNumberResponse,
+  UserOnboardResponse,
   type ApiResponse,
   type CronIdCheckResponse,
   type CronIdRegisterResponse,
@@ -111,6 +113,18 @@ class ApiService {
     );
   }
 
+  // Get user by Phone Number
+  async getUserByPhoneNumber(
+    phoneNumber: string
+  ): Promise<ApiResponse<UserByPhoneNumberResponse["user"]>> {
+    return this.makeRequest<UserByPhoneNumberResponse["user"]>(
+      `${API_CONFIG.ENDPOINTS.USER.GET_BY_PHONE_NUMBER}/${phoneNumber}`,
+      {
+        method: "GET",
+      }
+    );
+  }
+
   // Check if cron ID is available
   async checkCronIdAvailability(
     cronId: string
@@ -151,6 +165,79 @@ class ApiService {
     );
   }
 
+  // Upload avatar
+  async uploadAvatar(
+    userId: string,
+    imageUri: string,
+    fileName: string
+  ): Promise<ApiResponse<{ user: any; avatarUrl: string }>> {
+    const formData = new FormData();
+    
+    // For React Native, create proper file object with URI
+    const fileObject = {
+      uri: imageUri,
+      type: 'image/jpeg',
+      name: fileName,
+    };
+    
+    formData.append('avatar', fileObject as any);
+    
+    const url = `${this.baseURL}${API_CONFIG.ENDPOINTS.USER.UPLOAD_AVATAR}/${userId}/avatar`;
+
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+
+      const response = await fetch(url, {
+        method: 'PUT',
+        body: formData,
+        signal: controller.signal,
+        // Don't set Content-Type header - let browser handle it for FormData
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new ApiError(
+          errorData.message || `HTTP error! status: ${response.status}`,
+          response.status,
+          errorData
+        );
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw error;
+      }
+
+      if (error instanceof Error && error.name === "AbortError") {
+        throw new ApiError("Request timeout");
+      }
+
+      throw new ApiError(
+        error instanceof Error ? error.message : "Network error occurred"
+      );
+    }
+  }
+
+  // Onboard user
+  async onboardUser(
+    userId: string,
+    walletAddress: string,
+    smartWalletAddress: string,
+    encodedTransaction: string,
+  ): Promise<ApiResponse<UserOnboardResponse>> {
+    return this.makeRequest<UserOnboardResponse>(
+      `${API_CONFIG.ENDPOINTS.USER.ONBOARD}`,
+      {
+        method: "POST",
+        body: JSON.stringify({ userId, walletAddress, smartWalletAddress, encodedTransaction }),
+      }
+    );
+  }
   // Transaction methods
   async getTransactionByHash(hash: string): Promise<ApiResponse<Transaction>> {
     return this.makeRequest<Transaction>(
