@@ -20,6 +20,14 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+interface RecipientData {
+  user_id: string;
+  phone_number: string;
+  cron_id: string;
+  primary_address: string;
+  avatar_url?: string;
+}
+
 export default function RecipientScreen() {
   const { user } = useAuth();
   const {
@@ -34,6 +42,9 @@ export default function RecipientScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [isCheckingRecipient, setIsCheckingRecipient] = useState(true);
   const [recipientExists, setRecipientExists] = useState(false);
+  const [recipientData, setRecipientData] = useState<RecipientData | null>(
+    null
+  );
   const [showNotCronUserModal, setShowNotCronUserModal] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
 
@@ -70,6 +81,13 @@ export default function RecipientScreen() {
       const normalizedPhone = (contactPhone as string).replace(/[^0-9+]/g, "");
       console.log("Normalized phone:", normalizedPhone);
       const response = await apiService.getUserByPhoneNumber(normalizedPhone);
+
+      if (response.success && response.data) {
+        // Store recipient data in state
+        setRecipientData(response.data);
+        console.log("Recipient data loaded:", response.data);
+      }
+
       return response.success;
     } catch (error) {
       console.error("Error checking recipient:", error);
@@ -110,8 +128,9 @@ export default function RecipientScreen() {
         contactId,
         contactName,
         contactPhone,
-        contactAvatarUrl,
-        contactCronId,
+        // Use recipient data from state if available, otherwise fallback to params
+        contactAvatarUrl: recipientData?.avatar_url || contactAvatarUrl,
+        contactCronId: recipientData?.cron_id || contactCronId,
       },
     });
   };
@@ -150,16 +169,12 @@ export default function RecipientScreen() {
   };
 
   const renderAvatar = () => {
-    if (
-      contactAvatarUrl &&
-      typeof contactAvatarUrl === "string" &&
-      contactAvatarUrl.trim()
-    ) {
+    // Use recipient data avatar if available, otherwise fallback to params
+    const avatarUrl = recipientData?.avatar_url || contactAvatarUrl;
+
+    if (avatarUrl && typeof avatarUrl === "string" && avatarUrl.trim()) {
       return (
-        <Image
-          source={{ uri: contactAvatarUrl }}
-          className="w-12 h-12 rounded-full"
-        />
+        <Image source={{ uri: avatarUrl }} className="w-12 h-12 rounded-full" />
       );
     }
 
@@ -243,10 +258,10 @@ export default function RecipientScreen() {
             {contactName || "Unknown"}
           </Text>
 
-          {contactCronId && (
+          {(recipientData?.cron_id || contactCronId) && (
             <View className="flex-row items-center mt-2">
               <Text className="text-black text-base font-sans">
-                CRON ID : {contactCronId}
+                Cron ID : {recipientData?.cron_id || contactCronId}
               </Text>
             </View>
           )}
@@ -285,7 +300,7 @@ export default function RecipientScreen() {
               const isNewDate =
                 index === 0 ||
                 formatDate(transaction.created_at) !==
-                formatDate(transactions[index - 1].created_at);
+                  formatDate(transactions[index - 1].created_at);
 
               return (
                 <View key={transaction.transaction_hash} className="mb-3">
@@ -303,10 +318,11 @@ export default function RecipientScreen() {
                     className={`flex-row ${transactionType === "sent" ? "justify-end" : "justify-start"}`}
                   >
                     <TouchableOpacity
-                      className={`rounded-2xl w-3/5 overflow-hidden ${transactionType === "sent"
-                        ? "bg-[#4A3DFF0F]"
-                        : "bg-white border border-gray-200"
-                        }`}
+                      className={`rounded-2xl w-3/5 overflow-hidden ${
+                        transactionType === "sent"
+                          ? "bg-[#4A3DFF0F]"
+                          : "bg-white border border-gray-200"
+                      }`}
                     >
                       <View className="border-b-[3px] border-[#12062B]">
                         <View className="border-b-[3px] border-[#4A3DFF] p-5">
@@ -354,8 +370,8 @@ export default function RecipientScreen() {
           elevation: 8,
         }}
       >
-        <Button 
-          className="w-full" 
+        <Button
+          className="w-full"
           onPress={handlePayPress}
           disabled={!recipientExists}
         >
@@ -371,29 +387,35 @@ export default function RecipientScreen() {
         onRequestClose={() => setShowNotCronUserModal(false)}
       >
         <View className="flex-1 bg-black/50">
-          <Pressable 
-            className="flex-1" 
-            onPress={() => setShowNotCronUserModal(false)} 
+          <Pressable
+            className="flex-1"
+            onPress={() => setShowNotCronUserModal(false)}
           />
           <View className="bg-white rounded-t-3xl pb-8">
             {/* Header */}
             <View className="p-6">
               <View className="w-12 h-1 bg-gray-300 rounded-full self-center mb-6" />
-              <Text variant="h3" className="text-foreground-dark text-center mb-2">
+              <Text
+                variant="h3"
+                className="text-foreground-dark text-center mb-2"
+              >
                 User Not Found
               </Text>
-              <Text variant="body" className="text-foreground-secondary text-center">
+              <Text
+                variant="body"
+                className="text-foreground-secondary text-center"
+              >
                 User does not use Cron
               </Text>
             </View>
 
             {/* OK Button */}
             <View className="px-6">
-              <Button 
-                className="w-full" 
+              <Button
+                className="w-full"
                 onPress={() => {
                   setShowNotCronUserModal(false);
-                  router.push('/(tabs)/pay-anyone');
+                  router.push("/(tabs)/pay-anyone");
                 }}
               >
                 OK

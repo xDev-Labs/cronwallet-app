@@ -79,6 +79,7 @@ export default function TabLayout() {
         name="payment-success"
         options={{
           href: null,
+          tabBarStyle: { display: "none" },
         }}
       />
       <Tabs.Screen
