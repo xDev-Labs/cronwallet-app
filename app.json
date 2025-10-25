@@ -11,7 +11,10 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.shiyasmohd.cronwalletapp",
-      "googleServicesFile": "./GoogleService-Info.plist"
+      "googleServicesFile": "./GoogleService-Info.plist",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -29,7 +32,11 @@
           "phantom",
           "backpack"
         ]
-      }
+      },
+      "permissions": [
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT"
+      ]
     },
     "web": {
       "output": "static",
@@ -39,6 +46,7 @@
       "expo-router",
       "@react-native-firebase/app",
       "@react-native-firebase/auth",
+      "expo-notifications",
       [
         "expo-build-properties",
         {
@@ -73,6 +81,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "73b1ceda-35c0-4f11-b100-6d6cea55ba96"
+      }
+    },
+    "owner": "aanand_s"
   }
 }
