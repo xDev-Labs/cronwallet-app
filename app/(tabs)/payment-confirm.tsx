@@ -47,7 +47,7 @@ export default function PaymentConfirmScreen() {
 
 
 
-        let response = await apiService.transferSpl(encodedTransaction);
+        let response = await apiService.transferSpl(encodedTransaction, user?.user_id as string, recipientData.data?.user_id as string, Number(coinAmount), [{ amount: coinAmount as string, token_address: tokenAddress }]);
 
         console.log({ response });
 

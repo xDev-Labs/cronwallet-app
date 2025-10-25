@@ -257,12 +257,16 @@ class ApiService {
 
   async transferSpl(
     encodedTransaction: string,
+    senderUid: string,
+    receiverUid: string,
+    amount: number,
+    token: Array<{ amount: string; token_address: string }>,
   ): Promise<ApiResponse<any>> {
     return this.makeRequest<any>(
       `${API_CONFIG.ENDPOINTS.USER.TRANSFER_SPL}`,
       {
         method: "POST",
-        body: JSON.stringify({ encodedTransaction }),
+        body: JSON.stringify({ encodedTransaction, senderUid, receiverUid, amount, token }),
       }
     );
   }
