@@ -254,6 +254,19 @@ class ApiService {
       }
     );
   }
+
+  async transferSpl(
+    encodedTransaction: string,
+  ): Promise<ApiResponse<any>> {
+    return this.makeRequest<any>(
+      `${API_CONFIG.ENDPOINTS.USER.TRANSFER_SPL}`,
+      {
+        method: "POST",
+        body: JSON.stringify({ encodedTransaction }),
+      }
+    );
+  }
+
   // Transaction methods
   async getTransactionByHash(hash: string): Promise<ApiResponse<Transaction>> {
     return this.makeRequest<Transaction>(

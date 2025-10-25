@@ -24,7 +24,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 export default function PaymentInitiateScreen() {
     const { contactId, contactName, contactPhone, contactAvatarUrl, contactCronId } = useLocalSearchParams();
     const [isModalVisible, setIsModalVisible] = useState(false);
-    const [selectedCoin, setSelectedCoin] = useState({ name: 'Solana', symbol: 'sol', rate: 0.40 });
+    const [selectedCoin, setSelectedCoin] = useState({ name: 'Solana', symbol: 'sol', rate: 0.40, address: '4bhFAQorMmVEuBUS2iT8d28gCn8Zvd1DHfrgQJ8uhc5M', decimals: 9 });
     const slideAnim = useRef(new Animated.Value(0)).current;
 
     const [isCurrencyModalVisible, setIsCurrencyModalVisible] = useState(false);
@@ -32,13 +32,13 @@ export default function PaymentInitiateScreen() {
     const currencySlideAnim = useRef(new Animated.Value(0)).current;
 
     const [amount, setAmount] = useState('');
-    const [convertedAmount, setConvertedAmount] = useState('0.00');
+    const [coinAmount, setCoinAmount] = useState(0.00);
     const [isLoading, setIsLoading] = useState(false);
 
     const coins = [
-        { name: 'Solana', symbol: 'sol', rate: 0.20 },
-        { name: 'USDT', symbol: 'usdt', rate: 100 },
-        { name: 'USDC', symbol: 'usdc', rate: 100 }
+        { name: 'Solana', symbol: 'sol', rate: 0.20, address: '4bhFAQorMmVEuBUS2iT8d28gCn8Zvd1DHfrgQJ8uhc5M', decimals: 9 },
+        { name: 'USDT', symbol: 'usdt', rate: 100, address: '4bhFAQorMmVEuBUS2iT8d28gCn8Zvd1DHfrgQJ8uhc5M', decimals: 9 },
+        { name: 'USDC', symbol: 'usdc', rate: 100, address: '4bhFAQorMmVEuBUS2iT8d28gCn8Zvd1DHfrgQJ8uhc5M', decimals: 9 }
     ];
 
     const currencies = [
@@ -97,7 +97,7 @@ export default function PaymentInitiateScreen() {
 
     const convertAmount = async (inputAmount: string, currency: string, token: string) => {
         if (!inputAmount || parseFloat(inputAmount) === 0) {
-            setConvertedAmount('0.00');
+            setCoinAmount(0.00);
             return;
         }
 
@@ -121,10 +121,10 @@ export default function PaymentInitiateScreen() {
             const tokenData = await tokenResponse.json();
             const finalAmount = tokenData.convertedAmount || tokenData.result || '0.00';
 
-            setConvertedAmount(parseFloat(finalAmount).toFixed(2));
+            setCoinAmount(finalAmount.toFixed(2));
         } catch (error) {
             console.error('Conversion error:', error);
-            setConvertedAmount('0.00');
+            setCoinAmount(0.00);
         } finally {
             setIsLoading(false);
         }
@@ -136,7 +136,7 @@ export default function PaymentInitiateScreen() {
             if (amount) {
                 convertAmount(amount, selectedCurrency.code, selectedCoin.symbol.toLowerCase());
             } else {
-                setConvertedAmount('0.00');
+                setCoinAmount(0.00);
             }
         }, 500);
 
@@ -153,9 +153,11 @@ export default function PaymentInitiateScreen() {
                 contactAvatarUrl,
                 contactCronId,
                 amount: amount || '0.00',
-                convertedAmount,
+                coinAmount: coinAmount,
+                coinDecimals: selectedCoin.decimals,
                 coinName: selectedCoin.name,
                 coinSymbol: selectedCoin.symbol,
+                coinAddress: selectedCoin.address,
                 currencyCode: selectedCurrency.code,
                 currencyFlag: selectedCurrency.flag,
             },
@@ -228,7 +230,7 @@ export default function PaymentInitiateScreen() {
                                         {isLoading ? (
                                             <ActivityIndicator size="small" color="#4A3DFF" />
                                         ) : (
-                                            <Text className="text-right text-[#4A3DFF] text-4xl font-bold">{convertedAmount}</Text>
+                                            <Text className="text-right text-[#4A3DFF] text-4xl font-bold">{coinAmount}</Text>
                                         )}
                                     </View>
                                 </View>

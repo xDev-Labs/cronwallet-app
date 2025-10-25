@@ -1,6 +1,10 @@
 import { CryptoIcon } from '@/components/CryptoIcon';
 import { SlideToConfirm } from '@/components/SlideToConfirm';
 import { Text as UIText } from '@/components/ui/text';
+import { apiService } from '@/lib/services/api';
+import { transferSpl } from '@/lib/solana/transferSpl';
+import { storage } from '@/lib/storage/storage';
+import { PublicKey } from '@solana/web3.js';
 import { router, useLocalSearchParams } from 'expo-router';
 import { ChevronLeft, Lock } from 'lucide-react-native';
 import { Image, Pressable, View } from 'react-native';
@@ -14,14 +18,40 @@ export default function PaymentConfirmScreen() {
         contactAvatarUrl,
         contactCronId,
         amount,
-        convertedAmount,
+        coinAmount,
         coinName,
+        coinAddress,
+        coinDecimals,
         coinSymbol,
         currencyCode,
         currencyFlag,
     } = useLocalSearchParams();
 
-    const handleSlideToConfirm = () => {
+    const handleSlideToConfirm = async () => {
+        let user = await storage.getUser();
+        // let smartAccountAddress = "HYyxPRR5tR8PjHDXaQqDRxB8bQ4ScK2dynTeSqQLsCs1";
+        let smartAccountAddress = user?.primary_address as string;
+
+        console.log({ contactPhone });
+        const normalizedPhone = (contactPhone as string).replace(/[^0-9+]/g, "");
+        let recipientData = await apiService.getUserByPhoneNumber(normalizedPhone);
+        let toAddress = "";
+        if (recipientData.success) {
+            toAddress = recipientData.data?.primary_address as string;
+        } else {
+            return;
+        }
+        let tokenAddress = coinAddress as string;
+        let ownerPublicKey = await storage.getPublicKey() as string;
+        let encodedTransaction = await transferSpl(Number(coinAmount) * (10 ** Number(coinDecimals)), smartAccountAddress, toAddress, tokenAddress, new PublicKey(ownerPublicKey));
+
+
+
+        let response = await apiService.transferSpl(encodedTransaction);
+
+        console.log({ response });
+
+
         // Navigate to payment success screen
         router.push({
             pathname: './payment-success' as any,
@@ -32,7 +62,7 @@ export default function PaymentConfirmScreen() {
                 contactAvatarUrl,
                 contactCronId,
                 amount,
-                convertedAmount,
+                coinAmount,
                 coinName,
                 coinSymbol,
                 currencyCode,
@@ -86,9 +116,13 @@ export default function PaymentConfirmScreen() {
                 >
                     <ChevronLeft size={24} color="#000" />
                 </Pressable>
-                <UIText className="text-xl font-sans font-bold text-foreground-dark ml-4">
-                    Transfer Summary
-                </UIText>
+
+                <Pressable onPress={handleSlideToConfirm}>
+
+                    <UIText className="text-xl font-sans font-bold text-foreground-dark ml-4">
+                        Transfer Summary
+                    </UIText>
+                </Pressable>
             </View>
 
             <View className="flex-1 px-4">
@@ -104,7 +138,7 @@ export default function PaymentConfirmScreen() {
                                 <View className="flex-row items-center mb-1">
                                     <View className="w-4 h-4 bg-[#4A3DFF] rounded mr-2" />
                                     <UIText className="text-black font-sans text-base font-semibold">
-                                        {contactCronId || `${contactName}@1341`}
+                                        {contactCronId || `${contactName}`}
                                     </UIText>
                                 </View>
                                 <UIText className="text-foreground-secondary text-sm font-sans">
@@ -142,7 +176,7 @@ export default function PaymentConfirmScreen() {
                                 <UIText className="text-black font-sans ml-2">{(coinSymbol as string)?.toUpperCase() || 'SOL'}</UIText>
                             </View>
                             <UIText className="text-[#4A3DFF] text-3xl font-bold">
-                                {convertedAmount || '0.00'}
+                                {coinAmount || '0.00'}
                             </UIText>
                         </View>
 

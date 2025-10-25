@@ -31,7 +31,7 @@ export default function SettingUpScreen() {
 
   useEffect(() => {
     setupAccount();
-  }, [user?.user_id, completeOnboarding]);
+  }, []);
 
 
   const generatePublicKeyandStoreSeedPhrase = async () => {
