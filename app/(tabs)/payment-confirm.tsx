@@ -7,7 +7,7 @@ import { storage } from '@/lib/storage/storage';
 import { PublicKey } from '@solana/web3.js';
 import { router, useLocalSearchParams } from 'expo-router';
 import { ChevronLeft, Lock } from 'lucide-react-native';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { Image, Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -29,7 +29,6 @@ export default function PaymentConfirmScreen() {
     } = useLocalSearchParams();
     const sliderRef = useRef<SlideToConfirmHandle>(null);
     const [status, setStatus] = useState<'idle' | 'processing' | 'failed'>('idle');
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const sliderText = status === 'processing' ? 'PROCESSING...' : 'SLIDE TO CONFIRM';
 
     const handleSlideToConfirm = async () => {
@@ -38,8 +37,6 @@ export default function PaymentConfirmScreen() {
         }
 
         let didFail = false;
-        setStatus('processing');
-        setErrorMessage(null);
         try {
             let user = await storage.getUser();
             // let smartAccountAddress = "HYyxPRR5tR8PjHDXaQqDRxB8bQ4ScK2dynTeSqQLsCs1";
@@ -54,7 +51,6 @@ export default function PaymentConfirmScreen() {
             } else {
                 didFail = true;
                 setStatus('failed');
-                setErrorMessage('Payment failed. Please try again.');
                 return;
             }
             let tokenAddress = coinAddress as string;
@@ -89,7 +85,6 @@ export default function PaymentConfirmScreen() {
             console.log(e);
             didFail = true;
             setStatus('failed');
-            setErrorMessage('Payment failed. Please try again.');
         } finally {
             sliderRef.current?.reset();
             if (!didFail) {
@@ -123,11 +118,6 @@ export default function PaymentConfirmScreen() {
             </View>
         );
     };
-
-    useEffect(() => {
-        setErrorMessage(null);
-    }, [])
-
     return (
         <SafeAreaView className="flex-1 bg-white">
             {/* Header */}
