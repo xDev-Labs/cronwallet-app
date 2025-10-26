@@ -177,6 +177,7 @@ export default function OTPVerificationScreen() {
             mappedUserData.cron_id !== ""
           ) {
             await storage.setOnboardingComplete(true);
+            await storage.savePublicKey(mappedUserData.primary_address);
 
             // Fetch and store user's last 10 transactions
             try {
