@@ -34,6 +34,7 @@ export default function UsernameScreen() {
   const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
   const [availabilityMessage, setAvailabilityMessage] = useState("");
   const [isAvailable, setIsAvailable] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { updateUserProfile, user } = useAuth();
 
   const validateUsername = (text: string): string | null => {
@@ -118,6 +119,8 @@ export default function UsernameScreen() {
       return;
     }
 
+    setIsLoading(true);
+
     try {
       // Register the cron ID with the backend
       const response = await apiService.registerCronId(user.user_id, username);
@@ -137,9 +140,11 @@ export default function UsernameScreen() {
         router.push("/(onboarding)/avatar");
       } else {
         setError("Failed to register username. Please try again.");
+        setIsLoading(false);
       }
     } catch (err) {
       console.error("Error registering username:", err);
+      setIsLoading(false);
       if (err instanceof ApiError) {
         setError(err.message);
       } else {
@@ -149,7 +154,10 @@ export default function UsernameScreen() {
   };
 
   const isButtonEnabled =
-    username.length >= 3 && isAvailable && !isCheckingAvailability;
+    username.length >= 3 &&
+    isAvailable &&
+    !isCheckingAvailability &&
+    !isLoading;
 
   return (
     <SafeAreaView
@@ -182,10 +190,11 @@ export default function UsernameScreen() {
 
               {/* Username Input Field */}
               <View
-                className={`flex-row items-center h-14 rounded-xl border-2 px-4 ${isFocused
+                className={`flex-row items-center h-14 rounded-xl border-2 px-4 ${
+                  isFocused
                     ? "border-border-focus bg-background-light"
                     : "border-border-light bg-gray-100"
-                  }`}
+                }`}
               >
                 <Text className="text-base font-semibold text-foreground-tertiary mr-1">
                   @
@@ -213,8 +222,9 @@ export default function UsernameScreen() {
                     </Text>
                   ) : availabilityMessage ? (
                     <Text
-                      className={`text-sm font-sans ${isAvailable ? "text-green-600" : "text-error"
-                        }`}
+                      className={`text-sm font-sans ${
+                        isAvailable ? "text-green-600" : "text-error"
+                      }`}
                     >
                       {availabilityMessage}
                     </Text>
@@ -236,9 +246,10 @@ export default function UsernameScreen() {
               <Button
                 onPress={handleContinue}
                 disabled={!isButtonEnabled}
+                loading={isLoading}
                 className="shadow-lg shadow-primary/20 font-medium mb-4"
               >
-                Continue
+                Claim Username
               </Button>
             </View>
           </View>

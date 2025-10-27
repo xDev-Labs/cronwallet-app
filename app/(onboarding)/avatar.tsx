@@ -195,23 +195,23 @@ export default function AvatarScreen() {
             </View>
 
             {/* Upload Status */}
-            {isUploading && (
+            {/* {isUploading && (
               <View className="items-center mb-4">
                 <ActivityIndicator size="small" color="#4A3DFF" />
                 <Text className="text-foreground-tertiary text-sm mt-2 font-sans">
                   Uploading avatar...
                 </Text>
               </View>
-            )}
+            )} */}
 
-            {/* File Info */}
+            {/* File Info
             {selectedFile && !isUploading && (
               <View className="items-center mb-4">
                 <Text className="text-foreground-secondary text-sm font-sans">
                   Image selected
                 </Text>
               </View>
-            )}
+            )} */}
 
             {/* Error Message */}
             {error ? (
@@ -228,9 +228,10 @@ export default function AvatarScreen() {
             <Button
               onPress={handleGetStarted}
               disabled={!isButtonEnabled}
+              loading={isUpdating || isUploading}
               className="shadow-lg shadow-primary/20 font-medium"
             >
-              {isUpdating ? "Saving..." : isUploading ? "Uploading..." : "Get Started"}
+              Upload Avatar
             </Button>
           </View>
         </View>
