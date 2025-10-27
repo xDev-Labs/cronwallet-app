@@ -1,6 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import { ChevronRight } from 'lucide-react-native';
-import { useEffect } from 'react';
+import { forwardRef, useEffect, useImperativeHandle } from 'react';
 import { View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
@@ -11,16 +11,22 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Text } from './ui/text';
 
+export interface SlideToConfirmHandle {
+  reset: () => void;
+}
+
 interface SlideToConfirmProps {
   onConfirm: () => void;
   text?: string;
+  disabled?: boolean;
 }
 
 const SLIDER_HEIGHT = 56;
 const SLIDER_BUTTON_SIZE = 56;
 const SLIDER_PADDING = 0;
 
-export const SlideToConfirm = ({ onConfirm, text = 'SLIDE TO CONFIRM' }: SlideToConfirmProps) => {
+export const SlideToConfirm = forwardRef<SlideToConfirmHandle, SlideToConfirmProps>(
+  ({ onConfirm, text = 'SLIDE TO CONFIRM', disabled = false }, ref) => {
   const offset = useSharedValue(0);
   const maxTranslate = useSharedValue(0);
   const hasTriggered = useSharedValue(false);
@@ -32,57 +38,77 @@ export const SlideToConfirm = ({ onConfirm, text = 'SLIDE TO CONFIRM' }: SlideTo
   }, []);
 
   const handleConfirm = () => {
+    if (disabled) {
+      return;
+    }
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     onConfirm();
   };
 
-  const pan = Gesture.Pan().onChange((event) => {
-    // Don't allow manual updates once triggered
-    if (hasTriggered.value) {
-      return;
-    }
-
-    // Calculate new offset with boundaries
-    const newOffset =
-      Math.abs(offset.value) <= maxTranslate.value
-        ? offset.value + event.changeX <= 0
-          ? 0
-          : offset.value + event.changeX >= maxTranslate.value
-            ? maxTranslate.value
-            : offset.value + event.changeX
-        : offset.value;
-
-    offset.value = newOffset;
-
-    // Check if slider has reached the end (75% threshold)
-    const threshold = maxTranslate.value * 0.5;
-    if (newOffset >= threshold && !hasTriggered.value) {
-      hasTriggered.value = true;
-      offset.value = withSpring(
-        maxTranslate.value,
-        {
+  useImperativeHandle(
+    ref,
+    () => ({
+      reset: () => {
+        hasTriggered.value = false;
+        offset.value = withSpring(0, {
           damping: 15,
           stiffness: 100,
           mass: 0.5,
-        },
-        (finished) => {
-          'worklet';
-          if (finished) {
-            runOnJS(handleConfirm)();
+        });
+      },
+    }),
+    []
+  );
+
+  const pan = Gesture.Pan()
+    .enabled(!disabled)
+    .onChange((event) => {
+      // Don't allow manual updates once triggered
+      if (hasTriggered.value) {
+        return;
+      }
+
+      // Calculate new offset with boundaries
+      const newOffset =
+        Math.abs(offset.value) <= maxTranslate.value
+          ? offset.value + event.changeX <= 0
+            ? 0
+            : offset.value + event.changeX >= maxTranslate.value
+              ? maxTranslate.value
+              : offset.value + event.changeX
+          : offset.value;
+
+      offset.value = newOffset;
+
+      // Check if slider has reached the end (75% threshold)
+      const threshold = maxTranslate.value * 0.5;
+      if (newOffset >= threshold && !hasTriggered.value) {
+        hasTriggered.value = true;
+        offset.value = withSpring(
+          maxTranslate.value,
+          {
+            damping: 15,
+            stiffness: 100,
+            mass: 0.5,
+          },
+          (finished) => {
+            'worklet';
+            if (finished) {
+              runOnJS(handleConfirm)();
+            }
           }
-        }
-      );
-    }
-  }).onEnd(() => {
-    // Snap back if not triggered
-    if (!hasTriggered.value) {
-      offset.value = withSpring(0, {
-        damping: 15,
-        stiffness: 100,
-        mass: 0.5,
-      });
-    }
-  });
+        );
+      }
+    }).onEnd(() => {
+      // Snap back if not triggered
+      if (!hasTriggered.value) {
+        offset.value = withSpring(0, {
+          damping: 15,
+          stiffness: 100,
+          mass: 0.5,
+        });
+      }
+    });
 
   const animatedSliderStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: offset.value }],
@@ -155,4 +181,6 @@ export const SlideToConfirm = ({ onConfirm, text = 'SLIDE TO CONFIRM' }: SlideTo
       </GestureDetector>
     </View>
   );
-};
+});
+
+SlideToConfirm.displayName = 'SlideToConfirm';

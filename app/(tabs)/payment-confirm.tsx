@@ -1,5 +1,5 @@
 import { CryptoIcon } from '@/components/CryptoIcon';
-import { SlideToConfirm } from '@/components/SlideToConfirm';
+import { SlideToConfirm, SlideToConfirmHandle } from '@/components/SlideToConfirm';
 import { Text as UIText } from '@/components/ui/text';
 import { apiService } from '@/lib/services/api';
 import { transferSpl } from '@/lib/solana/transferSpl';
@@ -7,6 +7,7 @@ import { storage } from '@/lib/storage/storage';
 import { PublicKey } from '@solana/web3.js';
 import { router, useLocalSearchParams } from 'expo-router';
 import { ChevronLeft, Lock } from 'lucide-react-native';
+import { useRef, useState } from 'react';
 import { Image, Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -26,49 +27,71 @@ export default function PaymentConfirmScreen() {
         currencyCode,
         currencyFlag,
     } = useLocalSearchParams();
+    const sliderRef = useRef<SlideToConfirmHandle>(null);
+    const [status, setStatus] = useState<'idle' | 'processing' | 'failed'>('idle');
+    const sliderText = status === 'processing' ? 'PROCESSING...' : 'SLIDE TO CONFIRM';
 
     const handleSlideToConfirm = async () => {
-        let user = await storage.getUser();
-        // let smartAccountAddress = "HYyxPRR5tR8PjHDXaQqDRxB8bQ4ScK2dynTeSqQLsCs1";
-        let smartAccountAddress = user?.primary_address as string;
-
-        console.log({ contactPhone });
-        const normalizedPhone = (contactPhone as string).replace(/[^0-9+]/g, "");
-        let recipientData = await apiService.getUserByPhoneNumber(normalizedPhone);
-        let toAddress = "";
-        if (recipientData.success) {
-            toAddress = recipientData.data?.primary_address as string;
-        } else {
+        if (status === 'processing') {
             return;
         }
-        let tokenAddress = coinAddress as string;
-        let ownerPublicKey = await storage.getPublicKey() as string;
-        let encodedTransaction = await transferSpl(Number(coinAmount) * (10 ** Number(coinDecimals)), smartAccountAddress, toAddress, tokenAddress, new PublicKey(ownerPublicKey));
+
+        let didFail = false;
+        try {
+            let user = await storage.getUser();
+            // let smartAccountAddress = "HYyxPRR5tR8PjHDXaQqDRxB8bQ4ScK2dynTeSqQLsCs1";
+            let smartAccountAddress = user?.primary_address as string;
+
+            console.log({ contactPhone });
+            const normalizedPhone = (contactPhone as string).replace(/[^0-9+]/g, "");
+            let recipientData = await apiService.getUserByPhoneNumber(normalizedPhone);
+            let toAddress = "";
+            if (recipientData.success) {
+                toAddress = recipientData.data?.primary_address as string;
+            } else {
+                didFail = true;
+                setStatus('failed');
+                return;
+            }
+            let tokenAddress = coinAddress as string;
+            let ownerPublicKey = await storage.getPublicKey() as string;
+            let encodedTransaction = await transferSpl(Number(coinAmount) * (10 ** Number(coinDecimals)), smartAccountAddress, toAddress, tokenAddress, new PublicKey(ownerPublicKey));
 
 
 
-        let response = await apiService.transferSpl(encodedTransaction, user?.user_id as string, recipientData.data?.user_id as string, Number(coinAmount), [{ amount: coinAmount as string, token_address: tokenAddress }]);
+            let response = await apiService.transferSpl(encodedTransaction, user?.user_id as string, recipientData.data?.user_id as string, Number(coinAmount), [{ amount: coinAmount as string, token_address: tokenAddress }]);
 
-        console.log({ response });
+            console.log({ response });
 
 
-        // Navigate to payment success screen
-        router.push({
-            pathname: './payment-success' as any,
-            params: {
-                contactId,
-                contactName,
-                contactPhone,
-                contactAvatarUrl,
-                contactCronId,
-                amount,
-                coinAmount,
-                coinName,
-                coinSymbol,
-                currencyCode,
-                currencyFlag,
-            },
-        });
+            // Navigate to payment success screen
+            router.push({
+                pathname: './payment-success' as any,
+                params: {
+                    contactId,
+                    contactName,
+                    contactPhone,
+                    contactAvatarUrl,
+                    contactCronId,
+                    amount,
+                    coinAmount,
+                    coinName,
+                    coinSymbol,
+                    currencyCode,
+                    currencyFlag,
+                },
+            });
+        } catch (e) {
+            console.log(e);
+            didFail = true;
+            setStatus('failed');
+        } finally {
+            sliderRef.current?.reset();
+            if (!didFail) {
+                setStatus('idle');
+            }
+        }
+       
     };
 
     const renderAvatar = () => {
@@ -95,7 +118,6 @@ export default function PaymentConfirmScreen() {
             </View>
         );
     };
-
     return (
         <SafeAreaView className="flex-1 bg-white">
             {/* Header */}
@@ -207,6 +229,9 @@ export default function PaymentConfirmScreen() {
             <View className="px-4 pb-4">
                 <SlideToConfirm
                     key={`${contactId}-${amount}`}
+                    ref={sliderRef}
+                    text={sliderText}
+                    disabled={status === 'processing'}
                     onConfirm={handleSlideToConfirm}
                 />
             </View>

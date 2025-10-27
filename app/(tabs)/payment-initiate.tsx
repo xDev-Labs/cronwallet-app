@@ -22,7 +22,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function PaymentInitiateScreen() {
-    const { contactId, contactName, contactPhone, contactAvatarUrl, contactCronId } = useLocalSearchParams();
+    const { contactId, contactName, contactPhone,  contactAvatarUrl, contactCronId } = useLocalSearchParams();
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [selectedCoin, setSelectedCoin] = useState({ name: 'Solana', symbol: 'sol', rate: 0.40, address: '4bhFAQorMmVEuBUS2iT8d28gCn8Zvd1DHfrgQJ8uhc5M', decimals: 9 });
     const slideAnim = useRef(new Animated.Value(0)).current;
@@ -31,7 +31,7 @@ export default function PaymentInitiateScreen() {
     const [selectedCurrency, setSelectedCurrency] = useState({ name: 'USD', code: 'USD', flag: 'us' });
     const currencySlideAnim = useRef(new Animated.Value(0)).current;
 
-    const [amount, setAmount] = useState('');
+    const [amount, setAmount] = useState('0.00');
     const [coinAmount, setCoinAmount] = useState(0.00);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -143,7 +143,14 @@ export default function PaymentInitiateScreen() {
         return () => clearTimeout(timer);
     }, [amount, selectedCurrency.code, selectedCoin.name]);
 
+    const numericAmount = parseFloat(amount);
+    const isTransferDisabled = !amount || Number.isNaN(numericAmount) || numericAmount <= 0 || isLoading;
+
     const handlePayPress = () => {
+        if (isTransferDisabled) {
+            return;
+        }
+
         router.push({
             pathname: './payment-confirm' as any,
             params: {
@@ -162,6 +169,8 @@ export default function PaymentInitiateScreen() {
                 currencyFlag: selectedCurrency.flag,
             },
         });
+        setAmount('');
+        setCoinAmount(0.00);
     };
 
     return (
@@ -264,7 +273,13 @@ export default function PaymentInitiateScreen() {
                                 elevation: 8
                             }}
                         >
-                            <Button className='w-full' onPress={handlePayPress}>Make Transfer</Button>
+                            <Button
+                                className='w-full'
+                                onPress={handlePayPress}
+                                disabled={isTransferDisabled}
+                            >
+                                Make Transfer
+                            </Button>
                         </View>
                     </View>
                 </TouchableWithoutFeedback>
