@@ -2,6 +2,8 @@ import { CryptoIcon } from '@/components/CryptoIcon';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { useAuth } from '@/lib/contexts/AuthContext';
+import { apiService } from '@/lib/services/api';
+import { Token } from '@/lib/types/user.types';
 import { cn } from '@/lib/utils';
 import * as LocalAuthentication from 'expo-local-authentication';
 import { router, useFocusEffect } from 'expo-router';
@@ -10,27 +12,14 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Animated, Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-interface TokenBalance {
-  symbol: string;
-  name: string;
-  balance: number;
-  valueInUSD: number;
-  icon?: string;
-}
-
 export default function BalanceScreen() {
   const { user } = useAuth();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [balancesHidden, setBalancesHidden] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const balances: TokenBalance[] = [
-    { symbol: 'SOL', name: 'Solana', balance: 12.5, valueInUSD: 1875.50 },
-    { symbol: 'USDC', name: 'USDC', balance: 500.00, valueInUSD: 500.00 },
-    { symbol: 'USDT', name: 'USDT', balance: 250.00, valueInUSD: 250.00 },
-  ];
-
-  const totalValueUSD = balances.reduce((sum, token) => sum + token.valueInUSD, 0);
+  const [balances, setBalances] = useState<Token[]>([]);
+  const totalValueUSD = 0;
 
   // Re-authenticate every time screen comes into focus
   useFocusEffect(
@@ -84,8 +73,7 @@ export default function BalanceScreen() {
 
   const onRefresh = async () => {
     setRefreshing(true);
-    // TODO: Implement actual balance refresh from blockchain
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await loadTokens();
     setRefreshing(false);
   };
 
@@ -99,6 +87,19 @@ export default function BalanceScreen() {
 
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
+
+  const loadTokens = async () => {
+    let tokens = await apiService.getTokensByUserId(user?.user_id as string);
+    if (tokens.success && tokens.data) {
+      setBalances(tokens.data);
+    }
+  }
+
+  useEffect(() => {
+    if (user?.user_id && isAuthenticated) {
+      loadTokens();
+    }
+  }, [user?.user_id, isAuthenticated]);
 
   useEffect(() => {
     if (isAuthenticating) {
@@ -231,10 +232,10 @@ export default function BalanceScreen() {
                 </View>
                 <View className="items-end">
                   <Text className="font-semibold text-foreground-dark">
-                    {formatValue(token.balance)} {token.symbol}
+                    {token.balance} {token.symbol}
                   </Text>
                   <Text className="text-gray-500 text-sm">
-                    ${formatValue(token.valueInUSD)}
+                    ${token.valueInUsd}
                   </Text>
                 </View>
               </View>

@@ -45,3 +45,11 @@ export interface AuthState {
   isLoading: boolean;
   isBiometricAuthenticated: boolean;
 }
+
+export interface Token {
+  mintAddr: string;
+  balance: string;
+  name: string;
+  symbol: string;
+  valueInUsd: number;
+}

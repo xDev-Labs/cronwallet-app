@@ -10,9 +10,9 @@ import {
   type UserUpdateResponse,
 } from "@/lib/config/api";
 import type {
-  CreateTransactionDto,
-  Transaction,
+  Transaction
 } from "@/lib/types/transaction.types";
+import { Token } from "../types/user.types";
 
 class ApiError extends Error {
   constructor(
@@ -309,14 +309,13 @@ class ApiService {
     });
   }
 
-  async createTransaction(
-    transactionData: CreateTransactionDto
-  ): Promise<ApiResponse<Transaction>> {
-    return this.makeRequest<Transaction>(
-      API_CONFIG.ENDPOINTS.TRANSACTION.CREATE,
+  async getTokensByUserId(
+    userId: string
+  ): Promise<ApiResponse<Token[]>> {
+    return this.makeRequest<Token[]>(
+      `${API_CONFIG.ENDPOINTS.USER.GET_TOKENS}/${userId}/tokens`,
       {
-        method: "POST",
-        body: JSON.stringify(transactionData),
+        method: "GET",
       }
     );
   }
