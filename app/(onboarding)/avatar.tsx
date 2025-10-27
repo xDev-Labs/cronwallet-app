@@ -3,13 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { ApiError, apiService } from "@/lib/services/api";
-import { generateFileName, validateImageFile } from "@/lib/utils/fileValidation";
+import { validateImageFile } from "@/lib/utils/fileValidation";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import { Camera } from "lucide-react-native";
 import React, { useState } from "react";
 import {
-  ActivityIndicator,
   Alert,
   Image,
   KeyboardAvoidingView,
@@ -30,7 +29,6 @@ const CronLogo = () => (
   </View>
 );
 
-
 export default function AvatarScreen() {
   const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<any>(null);
@@ -41,19 +39,23 @@ export default function AvatarScreen() {
 
   const pickImage = async () => {
     try {
-      setError('');
+      setError("");
 
       // Request permission
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-      if (status !== 'granted') {
-        Alert.alert('Permission needed', 'Please grant permission to access your photos');
+      if (status !== "granted") {
+        Alert.alert(
+          "Permission needed",
+          "Please grant permission to access your photos"
+        );
         return;
       }
 
       // Launch image picker
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: 'images' as any,
+        mediaTypes: "images" as any,
         allowsEditing: true,
         aspect: [1, 1],
         quality: 1.0, // Use max quality to avoid compression issues
@@ -68,7 +70,7 @@ export default function AvatarScreen() {
         // Validate the selected file
         const validation = validateImageFile(imageUri);
         if (!validation.isValid) {
-          setError(validation.error || 'Invalid file selected');
+          setError(validation.error || "Invalid file selected");
           return;
         }
 
@@ -76,17 +78,12 @@ export default function AvatarScreen() {
         setSelectedFile(asset);
       }
     } catch (err) {
-      console.error('Error picking image:', err);
-      setError('Failed to pick image. Please try again.');
+      console.error("Error picking image:", err);
+      setError("Failed to pick image. Please try again.");
     }
   };
 
   const handleGetStarted = async () => {
-    if (!selectedAvatar || !selectedFile) {
-      setError("Please select an avatar image.");
-      return;
-    }
-
     if (!user?.user_id) {
       setError("User not found. Please try logging in again.");
       return;
@@ -97,27 +94,40 @@ export default function AvatarScreen() {
     setError("");
 
     try {
-      // Use the original file name from the asset or generate one
-      let fileName = selectedFile.fileName || `avatar_${user.user_id}_${Date.now()}.jpg`;
+      let avatarUrl: string;
 
-      // Upload to backend API
-      const uploadResponse = await apiService.uploadAvatar(
-        user.user_id,
-        selectedAvatar,
-        fileName
-      );
+      if (selectedAvatar && selectedFile) {
+        // User has selected a custom avatar - upload it
+        const fileName =
+          selectedFile.fileName || `avatar_${user.user_id}_${Date.now()}.jpg`;
 
-      if (!uploadResponse.success || !uploadResponse.data?.avatarUrl) {
-        throw new Error(uploadResponse.message || 'Failed to upload avatar');
+        const uploadResponse = await apiService.uploadAvatar(
+          user.user_id,
+          selectedAvatar,
+          fileName
+        );
+
+        if (!uploadResponse.success || !uploadResponse.data?.avatarUrl) {
+          throw new Error(uploadResponse.message || "Failed to upload avatar");
+        }
+
+        avatarUrl = uploadResponse.data.avatarUrl;
+      } else {
+        // No avatar selected - use default avatar URL
+        // This is a placeholder avatar that can be generated based on user's initials
+        avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.cron_id.charAt(0) || user.phone_number || "User")}&size=200&background=4A3DFF&color=fff&bold=true`;
+        // Update avatar URL in database
+        await apiService.updateUser(user.user_id, {
+          avatar_url: avatarUrl,
+        });
       }
 
-      const avatarUrl = uploadResponse.data.avatarUrl;
       setIsUploading(false);
 
-      // Update user profile with new avatar URL
+      // Update user profile with avatar URL
       const updatedUserData = {
         ...user,
-        avatar_url: avatarUrl
+        avatar_url: avatarUrl,
       };
 
       // Update local user profile
@@ -125,7 +135,6 @@ export default function AvatarScreen() {
 
       // Navigate to next screen
       router.push("/(onboarding)/setting-up");
-
     } catch (err) {
       console.error("Error uploading avatar:", err);
       setIsUploading(false);
@@ -141,8 +150,6 @@ export default function AvatarScreen() {
       setIsUpdating(false);
     }
   };
-
-  const isButtonEnabled = selectedAvatar !== null && !isUpdating && !isUploading;
 
   return (
     <SafeAreaView
@@ -168,7 +175,10 @@ export default function AvatarScreen() {
             >
               Choose your avatar
             </Text>
-            <Text variant="caption" className="text-foreground-tertiary mb-8 font-sans text-center">
+            <Text
+              variant="caption"
+              className="text-foreground-tertiary mb-8 font-sans text-center"
+            >
               Upload a photo to personalize your profile
             </Text>
 
@@ -179,7 +189,9 @@ export default function AvatarScreen() {
                   {selectedAvatar ? (
                     <AvatarImage source={{ uri: selectedAvatar }} />
                   ) : (
-                    <AvatarFallback>{user?.cron_id?.charAt(0).toUpperCase() || 'U'}</AvatarFallback>
+                    <AvatarFallback>
+                      {user?.cron_id?.charAt(0).toUpperCase() || "U"}
+                    </AvatarFallback>
                   )}
                 </Avatar>
 
@@ -227,11 +239,10 @@ export default function AvatarScreen() {
           >
             <Button
               onPress={handleGetStarted}
-              disabled={!isButtonEnabled}
               loading={isUpdating || isUploading}
               className="shadow-lg shadow-primary/20 font-medium"
             >
-              Upload Avatar
+             {selectedFile?  "Upload Avatar" : "Get Started"}
             </Button>
           </View>
         </View>
