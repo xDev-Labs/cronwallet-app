@@ -1,7 +1,8 @@
 import { Text } from "@/components/ui/text";
+import { Audio } from "expo-av";
 import { router, useLocalSearchParams } from "expo-router";
-import { CheckCircle, CircleCheckBig, Share2, ShieldCheck } from "lucide-react-native";
-import { useRef } from "react";
+import { CircleCheckBig, Share2, ShieldCheck } from "lucide-react-native";
+import { useEffect, useRef } from "react";
 import {
   Alert,
   Image,
@@ -31,6 +32,36 @@ export default function PaymentSuccessScreen() {
     bankingName: (contactCronId as string) || "N/A",
     avatarUrl: contactAvatarUrl as string,
   };
+
+  useEffect(() => {
+    // Play success sound when component mounts
+    async function playSuccessSound() {
+      try {
+        // Set audio mode for playback
+        await Audio.setAudioModeAsync({
+          playsInSilentModeIOS: true,
+          staysActiveInBackground: false,
+        });
+
+        // Load and play the sound
+        const { sound } = await Audio.Sound.createAsync(
+          require("@/assets/audio/payment-success.wav"),
+          { shouldPlay: true }
+        );
+
+        // Unload sound from memory after it finishes playing
+        sound.setOnPlaybackStatusUpdate((status) => {
+          if (status.isLoaded && status.didJustFinish) {
+            sound.unloadAsync();
+          }
+        });
+      } catch (error) {
+        console.error("Error playing success sound:", error);
+      }
+    }
+
+    playSuccessSound();
+  }, []);
 
   if (!contactName || !amount) {
     return null;
