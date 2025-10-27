@@ -7,9 +7,9 @@ import { storage } from "@/lib/storage/storage";
 import { fetchAndStoreUserTransactions } from "@/lib/utils/transactionService";
 import { mapBackendUserToUser } from "@/lib/utils/userMapping";
 import auth from "@react-native-firebase/auth";
-import Constants from 'expo-constants';
-import * as Device from 'expo-device';
-import * as Notifications from 'expo-notifications';
+import Constants from "expo-constants";
+import * as Device from "expo-device";
+import * as Notifications from "expo-notifications";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -77,29 +77,32 @@ export default function OTPVerificationScreen() {
   }
 
   async function registerForPushNotificationsAsync() {
-    if (Platform.OS === 'android') {
-      await Notifications.setNotificationChannelAsync('default', {
-        name: 'default',
+    if (Platform.OS === "android") {
+      await Notifications.setNotificationChannelAsync("default", {
+        name: "default",
         importance: Notifications.AndroidImportance.MAX,
         vibrationPattern: [0, 250, 250, 250],
-        lightColor: '#FF231F7C',
+        lightColor: "#FF231F7C",
       });
     }
 
     if (Device.isDevice) {
-      const { status: existingStatus } = await Notifications.getPermissionsAsync();
+      const { status: existingStatus } =
+        await Notifications.getPermissionsAsync();
       let finalStatus = existingStatus;
-      if (existingStatus !== 'granted') {
+      if (existingStatus !== "granted") {
         const { status } = await Notifications.requestPermissionsAsync();
         finalStatus = status;
       }
-      if (finalStatus !== 'granted') {
-        handleRegistrationError('Permission not granted to get push token for push notification!');
+      if (finalStatus !== "granted") {
+        handleRegistrationError(
+          "Permission not granted to get push token for push notification!"
+        );
         return;
       }
       const projectId = Constants?.expoConfig?.extra?.eas?.projectId;
       if (!projectId) {
-        handleRegistrationError('Project ID not found');
+        handleRegistrationError("Project ID not found");
       }
       try {
         const pushTokenString = (
@@ -113,7 +116,9 @@ export default function OTPVerificationScreen() {
         handleRegistrationError(`${e}`);
       }
     } else {
-      handleRegistrationError('Must use physical device for push notifications');
+      handleRegistrationError(
+        "Must use physical device for push notifications"
+      );
     }
   }
 
@@ -139,22 +144,25 @@ export default function OTPVerificationScreen() {
         const response = await apiService.createUser(fullPhoneNumber);
 
         if (response.success && response.data) {
-          console.log("Backend response:", response.data);          
+          console.log("Backend response:", response.data);
 
           // Handle different response structures
           const userData = response.data.user || response.data;
           console.log("User data to map:", userData);
 
           let token = null;
-          try{
+          try {
             token = await registerForPushNotificationsAsync();
-          } catch(e){
+          } catch (e) {
             console.log("Registering notification failed");
           }
 
-          const updatedUserData = await apiService.updateUser(userData.user_id,{
-            expo_push_token: token
-          });
+          const updatedUserData = await apiService.updateUser(
+            userData.user_id,
+            {
+              expo_push_token: token,
+            }
+          );
           console.log("Updated user data:", updatedUserData);
 
           // Map backend response to our user model
@@ -368,9 +376,10 @@ export default function OTPVerificationScreen() {
                 <Button
                   onPress={handleVerify}
                   disabled={!isVerifyEnabled}
+                  loading={isVerifying}
                   className="shadow-lg shadow-primary/20 font-medium mb-4"
                 >
-                  {isVerifying ? "Verifying..." : "Verify"}
+                  Verify OTP
                 </Button>
               </View>
             </View>

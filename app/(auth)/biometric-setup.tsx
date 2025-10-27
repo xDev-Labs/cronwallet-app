@@ -17,7 +17,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-global.Buffer = global.Buffer || require('buffer').Buffer
+global.Buffer = global.Buffer || require("buffer").Buffer;
 
 const CronLogo = () => (
   <View className="flex-1 w-full items-center justify-center">
@@ -253,9 +253,10 @@ export default function BiometricSetupScreen() {
               <Button
                 onPress={handleEnableBiometric}
                 disabled={!isAvailable || !isEnrolled || isLoading}
+                loading={isLoading}
                 className="shadow-lg shadow-primary/20"
               >
-                {isLoading ? "Setting up..." : getBiometricTitle()}
+                {getBiometricTitle()}
               </Button>
 
               <Button
