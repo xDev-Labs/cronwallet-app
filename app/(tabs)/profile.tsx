@@ -95,9 +95,9 @@ export default function ProfileScreen() {
           </View>
 
           {/* Logout Button */}
-          <Button onPress={handleLogout} variant="outline" className="mt-4">
+          {/* <Button onPress={handleLogout} variant="outline" className="mt-4">
             Logout
-          </Button>
+          </Button> */}
         </View>
       </ScrollView>
     </SafeAreaView>

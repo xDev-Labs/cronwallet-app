@@ -231,14 +231,14 @@ export default function BiometricLockScreen() {
                                 Try Again
                             </Button>
                         )}
-
+{/* 
                         <Button
                             onPress={handleUsePhoneNumber}
                             variant="outline"
                             className="border-gray-300"
                         >
                             Use Phone Number
-                        </Button>
+                        </Button> */}
                     </View>
                 </View>
             </View>
