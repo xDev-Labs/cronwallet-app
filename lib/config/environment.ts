@@ -21,6 +21,7 @@ export const API_CONFIG = {
       CHECK_CRON_ID: "/user/cron-id/check",
       REGISTER_CRON_ID: "/user/cron-id/register",
       TRANSFER_SPL: "/user/transfer-spl",
+      GET_AIRDROP: "/user/airdrop",
     },
     TRANSACTION: {
       GET_BY_HASH: "/transaction",
