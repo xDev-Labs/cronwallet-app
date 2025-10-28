@@ -1,7 +1,9 @@
 import { Text } from "@/components/ui/text";
+import { useFocusEffect } from "@react-navigation/native";
+import { Audio } from "expo-av";
 import { router, useLocalSearchParams } from "expo-router";
-import { CheckCircle, CircleCheckBig, Share2, ShieldCheck } from "lucide-react-native";
-import { useRef } from "react";
+import { CircleCheckBig, Share2, ShieldCheck } from "lucide-react-native";
+import { useCallback, useRef } from "react";
 import {
   Alert,
   Image,
@@ -31,6 +33,51 @@ export default function PaymentSuccessScreen() {
     bankingName: (contactCronId as string) || "N/A",
     avatarUrl: contactAvatarUrl as string,
   };
+
+  // Play success sound every time the screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      let soundObject: Audio.Sound | null = null;
+
+      async function playSuccessSound() {
+        try {
+          // Set audio mode for playback
+          await Audio.setAudioModeAsync({
+            playsInSilentModeIOS: true,
+            staysActiveInBackground: false,
+          });
+
+          // Load and play the sound
+          const { sound } = await Audio.Sound.createAsync(
+            require("@/assets/audio/payment-success.wav"),
+            { shouldPlay: true }
+          );
+
+          soundObject = sound;
+
+          // Unload sound from memory after it finishes playing
+          sound.setOnPlaybackStatusUpdate((status) => {
+            if (status.isLoaded && status.didJustFinish) {
+              sound.unloadAsync();
+            }
+          });
+        } catch (error) {
+          console.error("Error playing success sound:", error);
+        }
+      }
+
+      playSuccessSound();
+
+      // Cleanup function to unload sound when screen loses focus or unmounts
+      return () => {
+        if (soundObject) {
+          soundObject.unloadAsync().catch((error) => {
+            console.error("Error unloading sound:", error);
+          });
+        }
+      };
+    }, [])
+  );
 
   if (!contactName || !amount) {
     return null;
@@ -64,7 +111,9 @@ export default function PaymentSuccessScreen() {
   };
 
   const handleDone = () => {
-    router.push({
+    // Use replace to ensure this screen is removed from the stack
+    // This helps ensure proper cleanup and re-initialization on next visit
+    router.replace({
       pathname: "./recipient" as any,
       params: {
         contactId,
