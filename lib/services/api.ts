@@ -1,6 +1,7 @@
 import {
   API_CONFIG,
   UserByAddressResponse,
+  UserByCronIDResponse,
   UserByPhoneNumberResponse,
   UserOnboardResponse,
   type ApiResponse,
@@ -9,9 +10,7 @@ import {
   type UserCreateResponse,
   type UserUpdateResponse,
 } from "@/lib/config/api";
-import type {
-  Transaction
-} from "@/lib/types/transaction.types";
+import type { Transaction } from "@/lib/types/transaction.types";
 import { Token } from "../types/user.types";
 
 class ApiError extends Error {
@@ -39,7 +38,6 @@ class ApiService {
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
     const url = `${this.baseURL}${endpoint}`;
-
     const defaultHeaders = {
       "Content-Type": "application/json",
     };
@@ -120,6 +118,17 @@ class ApiService {
   ): Promise<ApiResponse<UserByPhoneNumberResponse["user"]>> {
     return this.makeRequest<UserByPhoneNumberResponse["user"]>(
       `${API_CONFIG.ENDPOINTS.USER.GET_BY_PHONE_NUMBER}/${phoneNumber}`,
+      {
+        method: "GET",
+      }
+    );
+  }
+  // Get user by Phone Number
+  async getUserByCronID(
+    cronId: string
+  ): Promise<ApiResponse<UserByCronIDResponse["user"]>> {
+    return this.makeRequest<UserByCronIDResponse["user"]>(
+      `${API_CONFIG.ENDPOINTS.USER.GET_BY_CRON_ID}/${cronId}`,
       {
         method: "GET",
       }
@@ -260,15 +269,18 @@ class ApiService {
     senderUid: string,
     receiverUid: string,
     amount: number,
-    token: Array<{ amount: string; token_address: string }>,
+    token: Array<{ amount: string; token_address: string }>
   ): Promise<ApiResponse<any>> {
-    return this.makeRequest<any>(
-      `${API_CONFIG.ENDPOINTS.USER.TRANSFER_SPL}`,
-      {
-        method: "POST",
-        body: JSON.stringify({ encodedTransaction, senderUid, receiverUid, amount, token }),
-      }
-    );
+    return this.makeRequest<any>(`${API_CONFIG.ENDPOINTS.USER.TRANSFER_SPL}`, {
+      method: "POST",
+      body: JSON.stringify({
+        encodedTransaction,
+        senderUid,
+        receiverUid,
+        amount,
+        token,
+      }),
+    });
   }
 
   // Transaction methods
@@ -309,9 +321,7 @@ class ApiService {
     });
   }
 
-  async getTokensByUserId(
-    userId: string
-  ): Promise<ApiResponse<Token[]>> {
+  async getTokensByUserId(userId: string): Promise<ApiResponse<Token[]>> {
     return this.makeRequest<Token[]>(
       `${API_CONFIG.ENDPOINTS.USER.GET_TOKENS}/${userId}/tokens`,
       {
@@ -320,17 +330,11 @@ class ApiService {
     );
   }
 
-  async getAirdrop(
-    userId: string,
-    amount: number,
-  ): Promise<ApiResponse<any>> {
-    return this.makeRequest<any>(
-      `${API_CONFIG.ENDPOINTS.USER.GET_AIRDROP}`,
-      {
-        method: "POST",
-        body: JSON.stringify({ userId, amount }),
-      }
-    );
+  async getAirdrop(userId: string, amount: number): Promise<ApiResponse<any>> {
+    return this.makeRequest<any>(`${API_CONFIG.ENDPOINTS.USER.GET_AIRDROP}`, {
+      method: "POST",
+      body: JSON.stringify({ userId, amount }),
+    });
   }
 }
 

@@ -83,6 +83,16 @@ export interface UserByAddressResponse {
     avatar_url?: string;
   };
 }
+export interface UserByCronIDResponse {
+  user: {
+    user_id: string;
+    phone_number: string;
+    cron_id: string;
+    primary_address: string;
+    avatar_url?: string;
+  };
+}
+
 export interface UserOnboardResponse {
   user: any,
   signature: string,
