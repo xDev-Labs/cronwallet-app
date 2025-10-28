@@ -38,6 +38,7 @@ export default function RecipientScreen() {
     contactAvatarUrl,
     contactCronId,
     contactJoinedDate,
+    type,
   } = useLocalSearchParams();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -48,6 +49,47 @@ export default function RecipientScreen() {
   );
   const [showNotCronUserModal, setShowNotCronUserModal] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
+
+  // Mask sensitive data based on payment type
+  const maskPhoneNumber = (phone: string | string[] | undefined): string => {
+    if (!phone) return "No phone";
+    const phoneStr = Array.isArray(phone) ? phone[0] : phone;
+
+    // Mask wallet address
+    if (type === "walletAddress" && phoneStr && phoneStr.length > 20) {
+      // Show first 8 and last 8 characters for wallet addresses
+      const firstPart = phoneStr.slice(0, 8);
+      const lastPart = phoneStr.slice(-8);
+      return `${firstPart}...${lastPart}`;
+    }
+
+    // Mask phone number
+    if (type === "cronId" && phoneStr && phoneStr.length > 6) {
+      // Show first 3 and last 4 digits, mask the rest
+      const firstPart = phoneStr.slice(0, 3);
+      const lastPart = phoneStr.slice(-4);
+      const maskedLength = phoneStr.length - 7;
+      const masked = "*".repeat(Math.max(maskedLength, 4));
+      return `${firstPart}${masked}${lastPart}`;
+    }
+
+    return phoneStr || "No phone";
+  };
+
+  // Mask display name when it's a wallet address
+  const maskDisplayName = (name: string | string[] | undefined): string => {
+    if (!name) return "Unknown";
+    const nameStr = Array.isArray(name) ? name[0] : name;
+
+    // Mask wallet address in name
+    if (type === "walletAddress" && nameStr && nameStr.length > 20) {
+      const firstPart = nameStr.slice(0, 8);
+      const lastPart = nameStr.slice(-8);
+      return `${firstPart}...${lastPart}`;
+    }
+
+    return nameStr || "Unknown";
+  };
 
   const loadTransactions = async () => {
     if (!user?.user_id || !contactPhone) {
@@ -232,11 +274,13 @@ export default function RecipientScreen() {
           {renderAvatar()}
           <View className="ml-3 flex-1">
             <Text className="text-black text-lg font-semibold">
-              {contactName || "Unknown"}
+              {maskDisplayName(contactName)}
             </Text>
-            <Text className="text-foreground-secondary text-sm mt-0.5">
-              {contactPhone || "No phone"}
-            </Text>
+            {type !== "walletAddress" && (
+              <Text className="text-foreground-secondary text-sm mt-0.5">
+                {maskPhoneNumber(contactPhone)}
+              </Text>
+            )}
           </View>
         </View>
 
@@ -254,9 +298,11 @@ export default function RecipientScreen() {
       >
         {/* Centered Profile Section */}
         <View className="items-center px-4 py-6">
-          {renderAvatar()}
-          <Text className="text-black text-2xl font-semibold mt-4">
-            {contactName || "Unknown"}
+          {type !== "walletAddress" && renderAvatar()}
+          <Text
+            className={`text-black text-2xl font-semibold ${type !== "walletAddress" ? "mt-4" : ""}`}
+          >
+            {type !== "walletAddress" && maskDisplayName(contactName)}
           </Text>
 
           {(recipientData?.cron_id || contactCronId) && (
@@ -267,9 +313,11 @@ export default function RecipientScreen() {
             </View>
           )}
 
-          <Text className="text-black text-base mt-2 font-sans">
-            {contactPhone || "No phone"}
-          </Text>
+          {type !== "walletAddress" && (
+            <Text className="text-black text-base mt-2 font-sans">
+              {maskPhoneNumber(contactPhone)}
+            </Text>
+          )}
 
           {contactJoinedDate && (
             <Text className="text-foreground-secondary text-sm mt-1 font-sans">
