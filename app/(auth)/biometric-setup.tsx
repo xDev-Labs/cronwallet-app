@@ -258,14 +258,6 @@ export default function BiometricSetupScreen() {
               >
                 {getBiometricTitle()}
               </Button>
-
-              <Button
-                onPress={handleSkip}
-                variant="outline"
-                className="border-primary"
-              >
-                Skip for now
-              </Button>
             </View>
           </View>
         </View>
