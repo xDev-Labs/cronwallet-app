@@ -232,10 +232,10 @@ export default function BalanceScreen() {
                 </View>
                 <View className="items-end">
                   <Text className="font-semibold text-foreground-dark">
-                    {token.balance} {token.symbol}
+                    {token.balance / Math.pow(10, token.decimals)} {token.symbol}
                   </Text>
                   <Text className="text-gray-500 text-sm">
-                    ${token.valueInUsd}
+                    $0
                   </Text>
                 </View>
               </View>

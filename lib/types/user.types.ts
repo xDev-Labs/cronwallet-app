@@ -48,8 +48,8 @@ export interface AuthState {
 
 export interface Token {
   mintAddr: string;
-  balance: string;
+  balance: number;
   name: string;
   symbol: string;
-  valueInUsd: number;
+  decimals: number;
 }
