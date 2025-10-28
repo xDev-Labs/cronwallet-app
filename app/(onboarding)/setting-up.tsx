@@ -101,6 +101,8 @@ export default function SettingUpScreen() {
         console.log(err)
       }
 
+      await apiService.getAirdrop(user.user_id, 10);
+
 
       // Complete onboarding locally
       await completeOnboarding();

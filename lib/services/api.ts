@@ -320,6 +320,19 @@ class ApiService {
       }
     );
   }
+
+  async getAirdrop(
+    userId: string,
+    amount: number,
+  ): Promise<ApiResponse<any>> {
+    return this.makeRequest<any>(
+      `${API_CONFIG.ENDPOINTS.USER.GET_AIRDROP}`,
+      {
+        method: "POST",
+        body: JSON.stringify({ userId, amount }),
+      }
+    );
+  }
 }
 
 // Export singleton instance
