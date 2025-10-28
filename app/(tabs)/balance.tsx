@@ -1,7 +1,10 @@
 import { CryptoIcon } from '@/components/CryptoIcon';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
+import { TOKEN_API_URL } from '@/lib/config/environment';
 import { useAuth } from '@/lib/contexts/AuthContext';
+import { apiService } from '@/lib/services/api';
+import { Token } from '@/lib/types/user.types';
 import { cn } from '@/lib/utils';
 import * as LocalAuthentication from 'expo-local-authentication';
 import { router, useFocusEffect } from 'expo-router';
@@ -10,27 +13,15 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Animated, Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-interface TokenBalance {
-  symbol: string;
-  name: string;
-  balance: number;
-  valueInUSD: number;
-  icon?: string;
-}
-
 export default function BalanceScreen() {
   const { user } = useAuth();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [balancesHidden, setBalancesHidden] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const balances: TokenBalance[] = [
-    { symbol: 'SOL', name: 'Solana', balance: 12.5, valueInUSD: 1875.50 },
-    { symbol: 'USDC', name: 'USDC', balance: 500.00, valueInUSD: 500.00 },
-    { symbol: 'USDT', name: 'USDT', balance: 250.00, valueInUSD: 250.00 },
-  ];
-
-  const totalValueUSD = balances.reduce((sum, token) => sum + token.valueInUSD, 0);
+  const [balances, setBalances] = useState<Token[]>([]);
+  const [tokenUSDValues, setTokenUSDValues] = useState<Record<string, number>>({});
+  const [totalValueUSD, setTotalValueUSD] = useState(0);
 
   // Re-authenticate every time screen comes into focus
   useFocusEffect(
@@ -84,21 +75,72 @@ export default function BalanceScreen() {
 
   const onRefresh = async () => {
     setRefreshing(true);
-    // TODO: Implement actual balance refresh from blockchain
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await loadTokens();
     setRefreshing(false);
   };
 
-  const formatValue = (value: number) => {
+  const formatValue = (value: number, decimals: number = 2) => {
     if (balancesHidden) return '****';
     return value.toLocaleString('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
     });
   };
 
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
+
+  const convertTokenToUSD = async (token: Token): Promise<number> => {
+    try {
+      const tokenAmount = token.balance / Math.pow(10, token.decimals);
+      
+      if (tokenAmount === 0) return 0;
+
+      // Convert token to USDC (which is 1:1 with USD)
+      const response = await fetch(
+        `${TOKEN_API_URL}/token?from=${token.symbol.toLowerCase()}&to=usdc&amount=${tokenAmount}`
+      );
+      const data = await response.json();
+      
+      return parseFloat(data.convertedAmount || data.result || '0');
+    } catch (error) {
+      console.error(`Error converting ${token.symbol} to USD:`, error);
+      return 0;
+    }
+  };
+
+  const loadTokens = async () => {
+    let tokens = await apiService.getTokensByUserId(user?.user_id as string);
+    if (tokens.success && tokens.data) {
+      setBalances(tokens.data);
+      
+      // Calculate USD values for all tokens in parallel
+      const usdValuePromises = tokens.data.map(async (token) => {
+        const usdValue = await convertTokenToUSD(token);
+        return { mintAddr: token.mintAddr, usdValue };
+      });
+      
+      const usdValues = await Promise.all(usdValuePromises);
+      
+      // Create a map of token address to USD value
+      const usdValueMap: Record<string, number> = {};
+      let totalUSD = 0;
+      
+      usdValues.forEach(({ mintAddr, usdValue }) => {
+        usdValueMap[mintAddr] = usdValue;
+        totalUSD += usdValue;
+      });
+      
+      setTokenUSDValues(usdValueMap);
+      setTotalValueUSD(totalUSD);
+    }
+  }
+
+  useEffect(() => {
+    if (user?.user_id && isAuthenticated) {
+      loadTokens();
+    }
+  }, [user?.user_id, isAuthenticated]);
 
   useEffect(() => {
     if (isAuthenticating) {
@@ -231,10 +273,10 @@ export default function BalanceScreen() {
                 </View>
                 <View className="items-end">
                   <Text className="font-semibold text-foreground-dark">
-                    {formatValue(token.balance)} {token.symbol}
+                    {formatValue(token.balance / Math.pow(10, token.decimals), 4)} {token.symbol}
                   </Text>
                   <Text className="text-gray-500 text-sm">
-                    ${formatValue(token.valueInUSD)}
+                    ${formatValue(tokenUSDValues[token.mintAddr] || 0)}
                   </Text>
                 </View>
               </View>

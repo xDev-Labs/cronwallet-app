@@ -1,16 +1,11 @@
 import { CryptoIcon } from '@/components/CryptoIcon';
 import { TOKEN_API_URL } from '@/lib/config/environment';
+import { Token } from '@/lib/types/user.types';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
 
-interface Coin {
-    name: string;
-    symbol: string;
-    rate: number;
-}
-
 interface CoinSelectionItemProps {
-    coin: Coin;
+    coin: Token;
     amount: string;
     currency: string;
     onPress: () => void;
@@ -22,7 +17,6 @@ export function CoinSelectionItem({
     amount,
     currency,
     onPress,
-    isSelected,
 }: CoinSelectionItemProps) {
     const [rate, setRate] = useState<string>('0.00');
     const [isLoading, setIsLoading] = useState(false);
@@ -76,9 +70,14 @@ export function CoinSelectionItem({
             className="flex-row items-center justify-between py-4 border-b border-gray-100"
             onPress={onPress}
         >
-            <View className="flex-row items-center">
+            <View className="flex-row items-center flex-1">
                 <CryptoIcon symbol={coin.name.toLowerCase()} size={32} variant="branded" />
-                <Text className="text-black text-base font-medium ml-3">{coin.name}</Text>
+                <View className="ml-3 flex-1">
+                    <Text className="text-black text-base font-medium">{coin.name}</Text>
+                    <Text className="text-gray-500 text-sm">
+                        Balance: {coin.balance.toFixed(4)} {coin.symbol.toUpperCase()}
+                    </Text>
+                </View>
             </View>
             {isLoading ? (
                 <ActivityIndicator size="small" color="#4A3DFF" />
