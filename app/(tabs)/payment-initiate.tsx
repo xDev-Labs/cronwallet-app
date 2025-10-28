@@ -3,6 +3,9 @@ import { CryptoIcon } from '@/components/CryptoIcon';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { TOKEN_API_URL } from '@/lib/config/environment';
+import { useAuth } from '@/lib/contexts/AuthContext';
+import { apiService } from '@/lib/services/api';
+import { Token } from '@/lib/types/user.types';
 import { router, useLocalSearchParams } from 'expo-router';
 import { ChevronDown, ChevronLeft } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
@@ -22,9 +25,10 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function PaymentInitiateScreen() {
-    const { contactId, contactName, contactPhone,  contactAvatarUrl, contactCronId } = useLocalSearchParams();
+    const { contactId, contactName, contactPhone, contactAvatarUrl, contactCronId } = useLocalSearchParams();
+    const { user } = useAuth();
     const [isModalVisible, setIsModalVisible] = useState(false);
-    const [selectedCoin, setSelectedCoin] = useState({ name: 'Solana', symbol: 'sol', rate: 0.40, address: '4bhFAQorMmVEuBUS2iT8d28gCn8Zvd1DHfrgQJ8uhc5M', decimals: 9 });
+    const [selectedCoin, setSelectedCoin] = useState<Token | null>(null);
     const slideAnim = useRef(new Animated.Value(0)).current;
 
     const [isCurrencyModalVisible, setIsCurrencyModalVisible] = useState(false);
@@ -34,18 +38,45 @@ export default function PaymentInitiateScreen() {
     const [amount, setAmount] = useState('0.00');
     const [coinAmount, setCoinAmount] = useState(0.00);
     const [isLoading, setIsLoading] = useState(false);
-
-    const coins = [
-        { name: 'Solana', symbol: 'sol', rate: 0.20, address: '4bhFAQorMmVEuBUS2iT8d28gCn8Zvd1DHfrgQJ8uhc5M', decimals: 9 },
-        { name: 'USDT', symbol: 'usdt', rate: 100, address: '4bhFAQorMmVEuBUS2iT8d28gCn8Zvd1DHfrgQJ8uhc5M', decimals: 9 },
-        { name: 'USDC', symbol: 'usdc', rate: 100, address: '4bhFAQorMmVEuBUS2iT8d28gCn8Zvd1DHfrgQJ8uhc5M', decimals: 9 }
-    ];
+    const [userTokens, setUserTokens] = useState<Token[]>([]);
+    const [isLoadingTokens, setIsLoadingTokens] = useState(true);
+    const [hasInsufficientBalance, setHasInsufficientBalance] = useState(false);
 
     const currencies = [
         { name: 'US Dollar', code: 'USD', flag: 'us' },
         { name: 'Indian Rupee', code: 'INR', flag: 'in' },
         { name: 'UAE Dirham', code: 'AED', flag: 'ae' }
     ];
+
+    // Fetch user tokens on mount
+    useEffect(() => {
+        const fetchUserTokens = async () => {
+            if (!user?.user_id) return;
+
+            try {
+                setIsLoadingTokens(true);
+                const response = await apiService.getTokensByUserId(user.user_id);
+
+                if (response.data) {
+                    let tokens = response.data.map((token: Token) => ({
+                        ...token,
+                        balance: token.balance / Math.pow(10, token.decimals)
+                    }));
+                    setUserTokens(tokens);
+                    // Set default selected coin to the first token if available
+                    if (tokens.length > 0 && !selectedCoin) {
+                        setSelectedCoin(tokens[0]);
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching tokens:', error);
+            } finally {
+                setIsLoadingTokens(false);
+            }
+        };
+
+        fetchUserTokens();
+    }, [user?.user_id]);
 
     const openModal = () => {
         setIsModalVisible(true);
@@ -66,7 +97,7 @@ export default function PaymentInitiateScreen() {
         });
     };
 
-    const selectCoin = (coin: any) => {
+    const selectCoin = (coin: Token) => {
         setSelectedCoin(coin);
         closeModal();
     };
@@ -95,9 +126,10 @@ export default function PaymentInitiateScreen() {
         closeCurrencyModal();
     };
 
-    const convertAmount = async (inputAmount: string, currency: string, token: string) => {
-        if (!inputAmount || parseFloat(inputAmount) === 0) {
+    const convertAmount = async (inputAmount: string, currency: string, token: Token | null) => {
+        if (!inputAmount || parseFloat(inputAmount) === 0 || !token) {
             setCoinAmount(0.00);
+            setHasInsufficientBalance(false);
             return;
         }
 
@@ -116,15 +148,23 @@ export default function PaymentInitiateScreen() {
 
             // Step 2: Convert USD to selected token using USDC
             const tokenResponse = await fetch(
-                `${TOKEN_API_URL}/token?from=usdc&to=${token.toLowerCase()}&amount=${usdAmount}`
+                `${TOKEN_API_URL}/token?from=usdc&to=${token.symbol.toLowerCase()}&amount=${usdAmount}`
             );
             const tokenData = await tokenResponse.json();
-            const finalAmount = tokenData.convertedAmount || tokenData.result || '0.00';
+            const finalAmount = parseFloat(tokenData.convertedAmount || tokenData.result || '0.00');
 
-            setCoinAmount(finalAmount.toFixed(2));
+            setCoinAmount(finalAmount);
+
+            // Check if user has sufficient balance
+            if (finalAmount > token.balance) {
+                setHasInsufficientBalance(true);
+            } else {
+                setHasInsufficientBalance(false);
+            }
         } catch (error) {
             console.error('Conversion error:', error);
             setCoinAmount(0.00);
+            setHasInsufficientBalance(false);
         } finally {
             setIsLoading(false);
         }
@@ -133,18 +173,19 @@ export default function PaymentInitiateScreen() {
     // Debounced conversion effect
     useEffect(() => {
         const timer = setTimeout(() => {
-            if (amount) {
-                convertAmount(amount, selectedCurrency.code, selectedCoin.symbol.toLowerCase());
+            if (amount && selectedCoin) {
+                convertAmount(amount, selectedCurrency.code, selectedCoin);
             } else {
                 setCoinAmount(0.00);
+                setHasInsufficientBalance(false);
             }
         }, 500);
 
         return () => clearTimeout(timer);
-    }, [amount, selectedCurrency.code, selectedCoin.name]);
+    }, [amount, selectedCurrency.code, selectedCoin]);
 
     const numericAmount = parseFloat(amount);
-    const isTransferDisabled = !amount || Number.isNaN(numericAmount) || numericAmount <= 0 || isLoading;
+    const isTransferDisabled = !amount || Number.isNaN(numericAmount) || numericAmount <= 0 || isLoading || hasInsufficientBalance || !selectedCoin;
 
     const handlePayPress = () => {
         if (isTransferDisabled) {
@@ -161,10 +202,10 @@ export default function PaymentInitiateScreen() {
                 contactCronId,
                 amount: amount || '0.00',
                 coinAmount: coinAmount,
-                coinDecimals: selectedCoin.decimals,
-                coinName: selectedCoin.name,
-                coinSymbol: selectedCoin.symbol,
-                coinAddress: selectedCoin.address,
+                coinDecimals: selectedCoin!.decimals,
+                coinName: selectedCoin!.name,
+                coinSymbol: selectedCoin!.symbol,
+                coinAddress: selectedCoin!.mintAddr,
                 currencyCode: selectedCurrency.code,
                 currencyFlag: selectedCurrency.flag,
             },
@@ -217,6 +258,11 @@ export default function PaymentInitiateScreen() {
                                         keyboardType="decimal-pad"
                                     />
                                 </View>
+                                {hasInsufficientBalance && selectedCoin && (
+                                    <Text className=" font-sans text-red-500 text-sm text-right mt-2">
+                                        Insufficient balance (Available: {(selectedCoin.balance)} {selectedCoin.symbol.toUpperCase()})
+                                    </Text>
+                                )}
                             </View>
 
                             {/* Recipient gets section */}
@@ -229,8 +275,12 @@ export default function PaymentInitiateScreen() {
                                             onPress={openModal}
                                         >
                                             <View className="flex-row items-center">
-                                                <CryptoIcon symbol={selectedCoin.name.toLowerCase()} size={24} variant="branded" />
-                                                <Text className="text-black font-medium ml-2">{selectedCoin.symbol.toUpperCase()}</Text>
+                                                {selectedCoin && (
+                                                    <>
+                                                        <CryptoIcon symbol={selectedCoin.name.toLowerCase()} size={24} variant="branded" />
+                                                        <Text className="text-black font-medium ml-2">{selectedCoin.symbol.toUpperCase()}</Text>
+                                                    </>
+                                                )}
                                             </View>
                                             <ChevronDown size={16} color="#000" />
                                         </TouchableOpacity>
@@ -239,7 +289,7 @@ export default function PaymentInitiateScreen() {
                                         {isLoading ? (
                                             <ActivityIndicator size="small" color="#4A3DFF" />
                                         ) : (
-                                            <Text className="text-right text-[#4A3DFF] text-4xl font-bold">{coinAmount}</Text>
+                                            <Text className="text-right text-[#4A3DFF] text-4xl font-bold">{coinAmount.toFixed(2)}</Text>
                                         )}
                                     </View>
                                 </View>
@@ -312,16 +362,25 @@ export default function PaymentInitiateScreen() {
                         <View className="p-6">
                             <Text className="text-black text-xl font-bold mb-6">Select Coin</Text>
 
-                            {coins.map((coin, index) => (
-                                <CoinSelectionItem
-                                    key={index}
-                                    coin={coin}
-                                    amount={amount}
-                                    currency={selectedCurrency.code}
-                                    onPress={() => selectCoin(coin)}
-                                    isSelected={selectedCoin.symbol === coin.symbol}
-                                />
-                            ))}
+                            {isLoadingTokens ? (
+                                <View className="py-8 items-center">
+                                    <ActivityIndicator size="large" color="#4A3DFF" />
+                                    <Text className="text-gray-500 mt-4">Loading tokens...</Text>
+                                </View>
+                            ) : userTokens.length === 0 ? (
+                                <Text className="text-gray-500 text-center py-8">No tokens available</Text>
+                            ) : (
+                                userTokens.map((token, index) => (
+                                    <CoinSelectionItem
+                                        key={token.mintAddr}
+                                        coin={token}
+                                        amount={amount}
+                                        currency={selectedCurrency.code}
+                                        onPress={() => selectCoin(token)}
+                                        isSelected={selectedCoin?.mintAddr === token.mintAddr}
+                                    />
+                                ))
+                            )}
                         </View>
                     </Animated.View>
                 </View>
