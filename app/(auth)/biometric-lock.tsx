@@ -1,20 +1,31 @@
+import { Logo } from '@/components/icons/Logo';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import * as LocalAuthentication from 'expo-local-authentication';
 import { router } from 'expo-router';
-import { ScanFace, Shield, Smartphone } from 'lucide-react-native';
-import { useEffect, useState } from 'react';
-import { AppState, Image, View } from 'react-native';
+import { Shield } from 'lucide-react-native';
+import { useEffect, useRef, useState } from 'react';
+import { Animated, AppState, Image, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const CronLogo = () => (
-    <View className="flex-1 w-full items-center justify-center">
-        <Image
-            source={require('@/assets/images/cron-black-logo.png')}
-            className="w-[100px] h-8"
-            resizeMode="contain"
-        />
+const AnimatedCronLogo = ({ scaleAnim, opacityAnim }: { scaleAnim: Animated.Value, opacityAnim: Animated.Value }) => (
+    <View className="justify-center items-center h-full">
+        <Animated.View
+            style={{
+                transform: [{ scale: scaleAnim }],
+                opacity: opacityAnim,
+                alignItems: "center",
+            }}
+        >
+            <View className="justify-center items-center shadow-lg">
+                <Image
+                    source={require('@/assets/images/cron-black-logo.png')}
+                    className="w-[150px]"
+                    resizeMode="contain"
+                />
+            </View>
+        </Animated.View>
     </View>
 );
 
@@ -25,9 +36,32 @@ export default function BiometricLockScreen() {
     const [biometricType, setBiometricType] = useState<'faceId' | 'fingerprint' | 'none'>('none');
     const [isEnrolled, setIsEnrolled] = useState(false);
     const [isAvailable, setIsAvailable] = useState(false);
+    const scaleAnim = useRef(new Animated.Value(0)).current;
+    const opacityAnim = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
         checkBiometricAvailability();
+    }, []);
+
+    // Logo animation effect
+    useEffect(() => {
+        Animated.sequence([
+            Animated.spring(scaleAnim, {
+                toValue: 1.2,
+                useNativeDriver: true,
+            }),
+            Animated.spring(scaleAnim, {
+                toValue: 1,
+                useNativeDriver: true,
+            }),
+        ]).start();
+
+        Animated.timing(opacityAnim, {
+            toValue: 1,
+            delay: 200,
+            duration: 600,
+            useNativeDriver: true,
+        }).start();
     }, []);
 
     useEffect(() => {
@@ -104,54 +138,14 @@ export default function BiometricLockScreen() {
         }
     };
 
-    const handleRetry = () => {
-        setError(null);
-        handleBiometricAuth();
-    };
-
-    const handleUsePhoneNumber = () => {
-        // Navigate back to phone auth
-        router.replace('/(auth)/phone-auth');
-    };
-
-    const getBiometricIcon = () => {
-        if (biometricType === 'faceId') {
-            return <ScanFace size={80} color="#4A3DFF" strokeWidth={1.5} />;
-        } else if (biometricType === 'fingerprint') {
-            return <Smartphone size={80} color="#4A3DFF" strokeWidth={1.5} />;
-        } else {
-            return <Shield size={80} color="#4A3DFF" strokeWidth={1.5} />;
-        }
-    };
-
-    const getBiometricTitle = () => {
-        if (biometricType === 'faceId') {
-            return 'Unlock with Face ID';
-        } else if (biometricType === 'fingerprint') {
-            return 'Unlock with Touch ID';
-        } else {
-            return 'Unlock Account';
-        }
-    };
-
-    const getBiometricDescription = () => {
-        if (biometricType === 'faceId') {
-            return 'Use Face ID to securely access your account';
-        } else if (biometricType === 'fingerprint') {
-            return 'Use Touch ID to securely access your account';
-        } else {
-            return 'Use biometric authentication to access your account';
-        }
-    };
-
     // If biometric is not available or not enrolled, show a message and allow direct access
     if (!isAvailable || !isEnrolled) {
         return (
-            <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-background-light">
-                <View className="flex-1 justify-between bg-background-light">
-                    {/* Header (Logo) */}
-                    <View className="items-start px-6 pt-15 pb-10">
-                        <CronLogo />
+            <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-white">
+                <View className="flex-1 bg-white">
+                    {/* Animated Logo Header */}
+                    <View className="h-1/3">
+                        <AnimatedCronLogo scaleAnim={scaleAnim} opacityAnim={opacityAnim} />
                     </View>
 
                     {/* Content Area */}
@@ -183,64 +177,9 @@ export default function BiometricLockScreen() {
     }
 
     return (
-        <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-background-light">
-            <View className="flex-1 justify-between bg-background-light">
-                {/* Header (Logo) */}
-                <View className="items-start px-6 pt-15 pb-10">
-                    <CronLogo />
-                </View>
-
-                {/* Content Area */}
-                <View className="flex-1 px-6 justify-center">
-                    <View className="items-center mb-12">
-                        <View className="w-32 h-32 rounded-full bg-primary/10 items-center justify-center mb-8">
-                            {getBiometricIcon()}
-                        </View>
-
-                        <Text variant="h3" className="text-foreground-dark mb-4 text-center">
-                            Welcome Back
-                        </Text>
-
-                        <Text variant="caption" className="text-foreground-tertiary text-center leading-6 mb-8">
-                            {getBiometricDescription()}
-                        </Text>
-
-                        {error && (
-                            <View className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6 w-full">
-                                <Text className="text-red-800 text-sm text-center">
-                                    {error}
-                                </Text>
-                            </View>
-                        )}
-
-                        {isAuthenticating && (
-                            <View className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 w-full">
-                                <Text className="text-blue-800 text-sm text-center">
-                                    Authenticating...
-                                </Text>
-                            </View>
-                        )}
-                    </View>
-
-                    <View className="space-y-4">
-                        {error && (
-                            <Button
-                                onPress={handleRetry}
-                                className="shadow-lg shadow-primary/20"
-                            >
-                                Try Again
-                            </Button>
-                        )}
-{/* 
-                        <Button
-                            onPress={handleUsePhoneNumber}
-                            variant="outline"
-                            className="border-gray-300"
-                        >
-                            Use Phone Number
-                        </Button> */}
-                    </View>
-                </View>
+        <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-primary">
+            <View className="flex-1 justify-center items-center">
+                <Logo size={60} color="white" />
             </View>
         </SafeAreaView>
     );
