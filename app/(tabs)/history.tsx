@@ -3,6 +3,7 @@ import { useAuth } from "@/lib/contexts/AuthContext";
 import { apiService } from "@/lib/services/api";
 import type { Transaction } from "@/lib/types/transaction.types";
 import { mapBackendTransactionToTransaction } from "@/lib/utils/transactionMapping";
+import { router } from "expo-router";
 import { Clock, RefreshCw } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import {
@@ -22,7 +23,6 @@ export default function HistoryScreen() {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMoreData, setHasMoreData] = useState(true);
-  const [totalPages, setTotalPages] = useState(1);
 
   const loadTransactions = async (
     page: number = 1,
@@ -57,7 +57,6 @@ export default function HistoryScreen() {
         }
 
         setCurrentPage(page);
-        setTotalPages(response.data.pagination.totalPages);
         setHasMoreData(page < response.data.pagination.totalPages);
       }
     } catch (error) {
@@ -117,47 +116,59 @@ export default function HistoryScreen() {
     return item.sender_uid === user?.user_id ? "sent" : "received";
   };
 
+  const handleTransactionPress = (item: Transaction) => {
+    router.push({
+      pathname: "/(tabs)/transaction-details",
+      params: {
+        transactionData: JSON.stringify(item),
+        userId: user?.user_id,
+      },
+    });
+  };
+
   const renderTransaction = ({ item }: { item: Transaction }) => {
     const direction = getTransactionDirection(item);
     const isSent = direction === "sent";
 
     return (
-      <View className="bg-white rounded-xl p-4 mb-3 shadow-sm border border-gray-100">
-        <View className="flex-row justify-between items-center">
-          <View className="flex-1">
-            <View className="flex-row items-center mb-1">
-              <Text
-                className={`text-lg font-bold ${isSent ? "text-red-600" : "text-green-600"}`}
-              >
-                {isSent ? "-" : "+"}
-              </Text>
-              <Text
-                className={`text-lg font-bold ml-1 ${isSent ? "text-red-600" : "text-green-600"}`}
-              >
-                {formatAmount(item.amount)}
-              </Text>
-            </View>
-            <Text className="text-sm text-foreground-tertiary">
-              {isSent ? "Sent to" : "Received from"}{" "}
-              {item.receiver?.phone_number || "Unknown"}
-            </Text>
-          </View>
-          <View className="items-end">
-            <View
-              className={`px-2 py-1 rounded-full ${getStatusColor(item.status)} bg-opacity-10`}
-            >
-              <Text
-                className={`text-xs font-medium ${getStatusColor(item.status)}`}
-              >
-                {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+      <Pressable onPress={() => handleTransactionPress(item)}>
+        <View className="bg-white rounded-xl p-4 mb-3 shadow-sm border border-gray-100">
+          <View className="flex-row justify-between items-center">
+            <View className="flex-1">
+              <View className="flex-row items-center mb-1">
+                <Text
+                  className={`text-lg font-bold ${isSent ? "text-red-600" : "text-green-600"}`}
+                >
+                  {isSent ? "-" : "+"}
+                </Text>
+                <Text
+                  className={`text-lg font-bold ml-1 ${isSent ? "text-red-600" : "text-green-600"}`}
+                >
+                  {formatAmount(item.amount)}
+                </Text>
+              </View>
+              <Text className="text-sm text-foreground-tertiary">
+                {isSent ? "Sent to" : "Received from"}{" "}
+                {item.receiver?.phone_number || "Unknown"}
               </Text>
             </View>
-            <Text className="text-xs text-foreground-tertiary mt-1">
-              {formatDate(item.created_at)}
-            </Text>
+            <View className="items-end">
+              <View
+                className={`px-2 py-1 rounded-full ${getStatusColor(item.status)} bg-opacity-10`}
+              >
+                <Text
+                  className={`text-xs font-medium ${getStatusColor(item.status)}`}
+                >
+                  {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+                </Text>
+              </View>
+              <Text className="text-xs text-foreground-tertiary mt-1">
+                {formatDate(item.created_at)}
+              </Text>
+            </View>
           </View>
         </View>
-      </View>
+      </Pressable>
     );
   };
 

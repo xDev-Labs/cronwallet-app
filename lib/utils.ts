@@ -16,10 +16,14 @@ export function cn(...inputs: ClassValue[]) {
 export function normalizePhoneNumber(phone: string): string {
   // First, check if the phone starts with +
   const hasPlus = phone.startsWith('+');
-  
+
   // Remove all non-digit characters
   const digitsOnly = phone.replace(/[^0-9]/g, '');
-  
+
   // Add back the + if it was there originally
   return hasPlus ? `+${digitsOnly}` : digitsOnly;
+}
+
+export const shortenTxnHash = (hash: string) => {
+  return `${hash.slice(0, 6)}...${hash.slice(-4)}`;
 }
