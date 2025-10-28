@@ -5,6 +5,7 @@ import { Text } from "@/components/ui/text";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { apiService } from "@/lib/services/api";
 import type { Transaction } from "@/lib/types/transaction.types";
+import { normalizePhoneNumber } from "@/lib/utils";
 import { getTransactionsBetweenUsers } from "@/lib/utils/transactionService";
 import { router, useLocalSearchParams } from "expo-router";
 import { ChevronLeft } from "lucide-react-native";
@@ -78,7 +79,7 @@ export default function RecipientScreen() {
 
   const checkRecipientExists = async () => {
     try {
-      const normalizedPhone = (contactPhone as string).replace(/[^0-9+]/g, "");
+      const normalizedPhone = normalizePhoneNumber(contactPhone as string);
       console.log("Normalized phone:", normalizedPhone);
       const response = await apiService.getUserByPhoneNumber(normalizedPhone);
 

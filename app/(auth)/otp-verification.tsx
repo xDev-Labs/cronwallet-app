@@ -4,6 +4,7 @@ import { Text } from "@/components/ui/text";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { ApiError, apiService } from "@/lib/services/api";
 import { storage } from "@/lib/storage/storage";
+import { normalizePhoneNumber } from "@/lib/utils";
 import { fetchAndStoreUserTransactions } from "@/lib/utils/transactionService";
 import { mapBackendUserToUser } from "@/lib/utils/userMapping";
 import auth from "@react-native-firebase/auth";
@@ -140,7 +141,7 @@ export default function OTPVerificationScreen() {
         console.log("OTP verification successful:", userCredential.user);
 
         // Create user in backend after successful OTP verification
-        const fullPhoneNumber = `${countryCode}${phoneNumber}`;
+        const fullPhoneNumber = normalizePhoneNumber(`${countryCode}${phoneNumber}`);
         const response = await apiService.createUser(fullPhoneNumber);
 
         if (response.success && response.data) {
@@ -217,7 +218,7 @@ export default function OTPVerificationScreen() {
         // Fallback to simulation for testing
         if (otp === "123456") {
           // Simulate backend call for testing
-          const fullPhoneNumber = `${countryCode}${phoneNumber}`;
+          const fullPhoneNumber = normalizePhoneNumber(`${countryCode}${phoneNumber}`);
           try {
             const response = await apiService.createUser(fullPhoneNumber);
 
