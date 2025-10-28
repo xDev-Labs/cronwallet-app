@@ -4,6 +4,7 @@ import { Text as UIText } from '@/components/ui/text';
 import { apiService } from '@/lib/services/api';
 import { transferSpl } from '@/lib/solana/transferSpl';
 import { storage } from '@/lib/storage/storage';
+import { normalizePhoneNumber } from '@/lib/utils';
 import { PublicKey } from '@solana/web3.js';
 import { router, useLocalSearchParams } from 'expo-router';
 import { ChevronLeft, Lock } from 'lucide-react-native';
@@ -43,7 +44,7 @@ export default function PaymentConfirmScreen() {
             let smartAccountAddress = user?.primary_address as string;
 
             console.log({ contactPhone });
-            const normalizedPhone = (contactPhone as string).replace(/[^0-9+]/g, "");
+            const normalizedPhone = normalizePhoneNumber(contactPhone as string);
             let recipientData = await apiService.getUserByPhoneNumber(normalizedPhone);
             let toAddress = "";
             if (recipientData.success) {
