@@ -192,6 +192,16 @@ export default function PaymentInitiateScreen() {
             return;
         }
 
+        console.log("contactId", contactId);
+        console.log("contactName", contactName);
+        console.log("contactPhone", contactPhone);
+        console.log("contactAvatarUrl", contactAvatarUrl);
+        console.log("contactCronId", contactCronId);
+        console.log("amount", amount);
+        console.log("coinAmount", coinAmount);
+        console.log("selectedCoin", selectedCoin);
+        console.log("selectedCurrency", selectedCurrency);
+
         router.push({
             pathname: './payment-confirm' as any,
             params: {

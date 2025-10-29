@@ -168,7 +168,7 @@ export default function RecipientScreen() {
     router.push({
       pathname: "/(tabs)/payment-initiate" as any,
       params: {
-        contactId,
+        contactId: recipientData?.user_id,
         contactName,
         contactPhone,
         // Use recipient data from state if available, otherwise fallback to params
@@ -349,7 +349,7 @@ export default function RecipientScreen() {
               const isNewDate =
                 index === 0 ||
                 formatDate(transaction.created_at) !==
-                  formatDate(transactions[index - 1].created_at);
+                formatDate(transactions[index - 1].created_at);
 
               return (
                 <View key={transaction.transaction_hash} className="mb-3">
@@ -367,11 +367,10 @@ export default function RecipientScreen() {
                     className={`flex-row ${transactionType === "sent" ? "justify-end" : "justify-start"}`}
                   >
                     <TouchableOpacity
-                      className={`rounded-2xl w-3/5 overflow-hidden ${
-                        transactionType === "sent"
-                          ? "bg-[#4A3DFF0F]"
-                          : "bg-white border border-gray-200"
-                      }`}
+                      className={`rounded-2xl w-3/5 overflow-hidden ${transactionType === "sent"
+                        ? "bg-[#4A3DFF0F]"
+                        : "bg-white border border-gray-200"
+                        }`}
                     >
                       <View className="border-b-[3px] border-[#12062B]">
                         <View className="border-b-[3px] border-[#4A3DFF] p-5">

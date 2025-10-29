@@ -80,13 +80,13 @@ export default function SettingUpScreen() {
 
       const publicKey = await generatePublicKeyandStoreSeedPhrase();
       if (!publicKey) {
-        router.push('/(onboarding)/avatar')
+        router.push('/(onboarding)/username')
         return;
       }
       const initAccount = await initSmartAccountInstruction(publicKey);
       const onboardUserResponse = await apiService.onboardUser(user.user_id, publicKey, initAccount.smartAccountAddress, initAccount.encodedTransaction)
       if (!onboardUserResponse.success) {
-        router.push('/(onboarding)/avatar')
+        router.push('/(onboarding)/username')
         return;
       }
 
