@@ -105,7 +105,7 @@ export default function HomeScreen() {
               </Pressable>
               <View>
                 <Text className="text-white text-lg font-semibold">
-                  {user?.cron_id}mohd
+                  {user?.cron_id}
                 </Text>
               </View>
             </View>
