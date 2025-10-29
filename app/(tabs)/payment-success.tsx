@@ -14,7 +14,7 @@ import {
   ActivityIndicator,
   Pressable,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -42,6 +42,7 @@ export default function PaymentSuccessScreen() {
   // Transaction processing state
   const [isProcessing, setIsProcessing] = useState(true);
   const [transactionError, setTransactionError] = useState<string | null>(null);
+  const [transactionData, setTransactionData] = useState<any>(null);
 
   // Use the passed contact data directly instead of looking up from mockContacts
   const contact = {
@@ -66,15 +67,22 @@ export default function PaymentSuccessScreen() {
       // Get user data and public key
       const user = await storage.getUser();
       const smartAccountAddress = user?.primary_address as string;
-      const ownerPublicKey = await storage.getPublicKey() as string;
+      const ownerPublicKey = (await storage.getPublicKey()) as string;
 
-      if (!smartAccountAddress || !ownerPublicKey || !toAddress || !coinAddress || !coinDecimals || !coinAmount) {
+      if (
+        !smartAccountAddress ||
+        !ownerPublicKey ||
+        !toAddress ||
+        !coinAddress ||
+        !coinDecimals ||
+        !coinAmount
+      ) {
         throw new Error("Missing required transaction parameters");
       }
 
       // Create encoded transaction
       const encodedTransaction = await transferSpl(
-        Number(coinAmount) * (10 ** Number(coinDecimals)),
+        Number(coinAmount) * 10 ** Number(coinDecimals),
         smartAccountAddress,
         toAddress as string,
         coinAddress as string,
@@ -93,16 +101,40 @@ export default function PaymentSuccessScreen() {
       console.log("Transaction response:", response);
 
       if (response.success) {
+        // Construct full transaction object for display
+        const newTransaction = {
+          transaction_hash: response.data.signature,
+          sender_uid: user?.user_id as string,
+          receiver_uid: contactId as string,
+          amount: Number(amount),
+          token: [
+            {
+              amount: coinAmount as string,
+              token_address: coinAddress as string,
+            },
+          ],
+          chain_id: 101, // Solana mainnet
+          status: "completed" as const,
+          created_at: new Date().toISOString(),
+          completed_at: new Date().toISOString(),
+          receiver: {
+            phone_number: contactPhone as string,
+          },
+        };
+
+        setTransactionData(newTransaction);
         setIsProcessing(false);
       } else {
         throw new Error(response.message || "Transaction failed");
       }
     } catch (error) {
       console.error("Transaction error:", error);
-      setTransactionError(error instanceof Error ? error.message : "Transaction failed");
+      setTransactionError(
+        error instanceof Error ? error.message : "Transaction failed"
+      );
       setIsProcessing(false);
     }
-  }, [toAddress, coinAmount, coinAddress, contactId]);
+  }, [toAddress, coinAmount, coinAddress, contactId, amount, contactPhone]);
 
   useFocusEffect(
     useCallback(() => {
@@ -209,6 +241,9 @@ export default function PaymentSuccessScreen() {
         contactPhone,
         contactAvatarUrl,
         contactCronId,
+        newTransaction: transactionData
+          ? JSON.stringify(transactionData)
+          : undefined,
       },
     });
   };
@@ -251,7 +286,9 @@ export default function PaymentSuccessScreen() {
             className="bg-[#4A3DFF] py-3.5 px-8 rounded-3xl"
             onPress={handleRetry}
           >
-            <Text className="text-white text-base font-semibold font-sans">Try Again</Text>
+            <Text className="text-white text-base font-semibold font-sans">
+              Try Again
+            </Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -300,8 +337,7 @@ export default function PaymentSuccessScreen() {
       </View>
 
       <View className="p-4 gap-3 bg-white mb-6">
-        <Pressable
-        >
+        <Pressable>
           <Button onPress={handleDone} className="w-full">
             Done
           </Button>

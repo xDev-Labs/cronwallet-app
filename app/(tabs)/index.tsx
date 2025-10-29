@@ -167,7 +167,7 @@ export default function HomeScreen() {
               <ActionCard
                 icon={Send}
                 title="Pay anyone"
-                description="Send money to anyone using Phone Number"
+                description="Send money to anyone"
                 onPress={() => router.push("/(tabs)/pay-anyone")}
               />
             </View>

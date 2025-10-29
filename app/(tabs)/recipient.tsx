@@ -32,13 +32,13 @@ interface RecipientData {
 export default function RecipientScreen() {
   const { user } = useAuth();
   const {
-    contactId,
     contactName,
     contactPhone,
     contactAvatarUrl,
     contactCronId,
     contactJoinedDate,
     type,
+    newTransaction,
   } = useLocalSearchParams();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -163,6 +163,26 @@ export default function RecipientScreen() {
 
     initializeRecipient();
   }, [user?.user_id, contactPhone]);
+
+  // Handle new transaction from payment success
+  useEffect(() => {
+    if (newTransaction) {
+      try {
+        const parsedTransaction = JSON.parse(newTransaction as string);
+        setTransactions((prevTransactions) => [
+          ...prevTransactions,
+          parsedTransaction,
+        ]);
+
+        // Scroll to bottom to show the new transaction
+        setTimeout(() => {
+          scrollViewRef.current?.scrollToEnd({ animated: true });
+        }, 100);
+      } catch (error) {
+        console.error("Error parsing new transaction:", error);
+      }
+    }
+  }, [newTransaction]);
 
   const handlePayPress = () => {
     router.push({
@@ -349,7 +369,7 @@ export default function RecipientScreen() {
               const isNewDate =
                 index === 0 ||
                 formatDate(transaction.created_at) !==
-                formatDate(transactions[index - 1].created_at);
+                  formatDate(transactions[index - 1].created_at);
 
               return (
                 <View key={transaction.transaction_hash} className="mb-3">
@@ -367,10 +387,26 @@ export default function RecipientScreen() {
                     className={`flex-row ${transactionType === "sent" ? "justify-end" : "justify-start"}`}
                   >
                     <TouchableOpacity
-                      className={`rounded-2xl w-3/5 overflow-hidden ${transactionType === "sent"
-                        ? "bg-[#4A3DFF0F]"
-                        : "bg-white border border-gray-200"
-                        }`}
+                      onPress={() => {
+                        router.push({
+                          pathname: "/(tabs)/transaction-details",
+                          params: {
+                            transactionData: JSON.stringify(transaction),
+                            fromRecipient: "true",
+                            contactName,
+                            contactPhone,
+                            contactAvatarUrl,
+                            contactCronId,
+                            contactJoinedDate,
+                            type,
+                          },
+                        });
+                      }}
+                      className={`rounded-2xl w-3/5 overflow-hidden ${
+                        transactionType === "sent"
+                          ? "bg-[#4A3DFF0F]"
+                          : "bg-white border border-gray-200"
+                      }`}
                     >
                       <View className="border-b-[3px] border-[#12062B]">
                         <View className="border-b-[3px] border-[#4A3DFF] p-5">
@@ -387,13 +423,13 @@ export default function RecipientScreen() {
                                 : "Paid"}
                             </Text>
                           </View>
-                          {transactionType === "sent" && (
+                          {/* {transactionType === "sent" && (
                             <View className="self-start bg-white border border-primary px-3 py-1 rounded-full mt-3">
                               <Text className="text-primary text-xs">
                                 Pay Again
                               </Text>
                             </View>
-                          )}
+                          )} */}
                           <Text className="text-sm text-right text-foreground-secondary">
                             {formatTime(transaction.created_at)}
                           </Text>
