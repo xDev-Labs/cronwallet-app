@@ -4,7 +4,7 @@ import { apiService } from "@/lib/services/api";
 import type { Transaction } from "@/lib/types/transaction.types";
 import { mapBackendTransactionToTransaction } from "@/lib/utils/transactionMapping";
 import { router } from "expo-router";
-import { Clock, RefreshCw } from "lucide-react-native";
+import { ChevronLeft, Clock, RefreshCw } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -213,9 +213,19 @@ export default function HistoryScreen() {
     <SafeAreaView edges={["top"]} className="flex-1 bg-background-light">
       <View className="flex-1 px-4 pt-4">
         <View className="flex-row justify-between items-center mb-4">
-          <Text className="text-2xl font-bold text-foreground-dark">
+          <Pressable
+            onPress={() => router.back()}
+            className="p-2 -ml-2 active:opacity-70"
+          >
+            <ChevronLeft size={24} color="#000" />
+          </Pressable>
+          <Text
+            variant="h3"
+            className="text-black text-center font-semibold"
+          >
             Transaction History
           </Text>
+
           <Pressable
             onPress={handleRefresh}
             disabled={isRefreshing}
