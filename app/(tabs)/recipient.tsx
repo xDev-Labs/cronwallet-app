@@ -371,6 +371,13 @@ export default function RecipientScreen() {
                           pathname: "/(tabs)/transaction-details",
                           params: {
                             transactionData: JSON.stringify(transaction),
+                            fromRecipient: "true",
+                            contactName,
+                            contactPhone,
+                            contactAvatarUrl,
+                            contactCronId,
+                            contactJoinedDate,
+                            type,
                           },
                         });
                       }}
