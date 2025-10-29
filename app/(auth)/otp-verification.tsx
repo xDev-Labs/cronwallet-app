@@ -1,4 +1,5 @@
 import CodeInput from "@/components/CodeInput";
+import { OnBoardingPages } from "@/components/OnBoardingPages";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { useAuth } from "@/lib/contexts/AuthContext";
@@ -283,7 +284,7 @@ export default function OTPVerificationScreen() {
         Alert.alert(
           "Verification Failed",
           error.message ||
-            "An error occurred during verification. Please try again.",
+          "An error occurred during verification. Please try again.",
           [{ text: "OK" }]
         );
       } else {
@@ -312,16 +313,14 @@ export default function OTPVerificationScreen() {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View className="flex-1 justify-between bg-background-light mt-20">
-            {/* Header (Logo) */}
-            <View className="items-start px-6 pt-15 pb-10">
-              <CronLogo />
-            </View>
+          <View className="flex-1 justify-between bg-background-light">
+
 
             {/* Content Area */}
-            <View className="flex-1 px-6 justify-between">
+            <View className="flex-1 px-6 justify-center">
               <View className="mt-5">
                 {/* Header */}
+                <OnBoardingPages selected="phone" />
                 <Text variant="h3" className="text-foreground-dark">
                   OTP Verification
                 </Text>
@@ -360,30 +359,29 @@ export default function OTPVerificationScreen() {
                   </Text>
                   <Pressable onPress={handleResend} disabled={!canResend}>
                     <Text
-                      className={`text-sm font-semibold font-sans ${
-                        canResend ? "text-primary" : "text-foreground-tertiary"
-                      }`}
+                      className={`text-sm font-semibold font-sans ${canResend ? "text-primary" : "text-foreground-tertiary"
+                        }`}
                     >
                       Resend OTP
                     </Text>
                   </Pressable>
                 </View>
               </View>
-
-              {/* Verify Button Container */}
-              <View
-                className={`pt-2.5 ${Platform.OS === "ios" ? "pb-7.5" : "pb-5"}`}
-              >
-                <Button
-                  onPress={handleVerify}
-                  disabled={!isVerifyEnabled}
-                  loading={isVerifying}
-                  className="shadow-lg shadow-primary/20 font-medium mb-4"
-                >
-                  Verify OTP
-                </Button>
-              </View>
             </View>
+
+            <View
+              className={`px-6 pt-2.5 ${Platform.OS === "ios" ? "pb-7.5" : "pb-5"}`}
+            >
+              <Button
+                onPress={handleVerify}
+                disabled={!isVerifyEnabled}
+                loading={isVerifying}
+                className="shadow-lg shadow-primary/20 font-medium mb-4"
+              >
+                Verify OTP
+              </Button>
+            </View>
+
           </View>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>

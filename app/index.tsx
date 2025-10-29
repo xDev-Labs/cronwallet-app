@@ -61,7 +61,7 @@ export default function SplashScreen() {
               router.replace("/(tabs)");
             }
           } else {
-            router.replace("/(onboarding)/username");
+            router.replace("/(auth)/biometric-setup");
           }
         } else {
           router.replace("/(auth)/phone-auth");

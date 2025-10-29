@@ -1,3 +1,4 @@
+import { OnBoardingPages } from "@/components/OnBoardingPages";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { useAuth } from "@/lib/contexts/AuthContext";
@@ -12,8 +13,9 @@ import {
   Alert,
   Image,
   Keyboard,
+  Platform,
   TouchableWithoutFeedback,
-  View,
+  View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -203,63 +205,35 @@ export default function BiometricSetupScreen() {
       className="flex-1 bg-background-light"
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View className="flex-1 justify-between bg-background-light mt-20">
-          {/* Header (Logo) */}
-          <View className="items-start px-6 pt-15 pb-10">
-            <CronLogo />
-          </View>
+        <View className="flex-1 justify-between bg-background-light">
 
           {/* Content Area */}
           <View className="flex-1 px-6 justify-center">
-            <View className="items-center mb-12">
-              <View className="w-32 h-32 rounded-full bg-primary/10 items-center justify-center mb-8">
-                {getBiometricIcon()}
-              </View>
-
-              <Text
-                variant="h3"
-                className="text-foreground-dark mb-4 text-center"
-              >
-                Secure Your Account
-              </Text>
-
-              <Text
-                variant="caption"
-                className="font-sans text-foreground-tertiary text-center leading-6 mb-8"
-              >
-                {getBiometricDescription()}
-              </Text>
-
-              {!isAvailable && (
-                <View className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6">
-                  <Text className="text-yellow-800 text-sm text-center">
-                    Biometric authentication is not available on this device
-                  </Text>
-                </View>
-              )}
-
-              {isAvailable && !isEnrolled && (
-                <View className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
-                  <Text className="text-blue-800 text-sm text-center">
-                    Please set up{" "}
-                    {biometricType === "faceId" ? "Face ID" : "Touch ID"} in
-                    your device settings first
-                  </Text>
-                </View>
-              )}
-            </View>
-
-            <View className="flex-col gap-4">
-              <Button
-                onPress={handleEnableBiometric}
-                disabled={!isAvailable || !isEnrolled || isLoading}
-                loading={isLoading}
-                className="shadow-lg shadow-primary/20"
-              >
-                {getBiometricTitle()}
-              </Button>
-            </View>
+            <OnBoardingPages selected="biometric" />
+            <Text variant="h4" className="text-foreground-dark">
+              Secure your wallet
+            </Text>
+            <Text
+              variant="muted"
+              className="text-[#C0C0C0] mb-8 font-sans text-sm"
+            >
+              Your Device Key is safely stored on your phone and protected by your biometrics.
+            </Text>
           </View>
+
+          <View
+            className={`px-6 pt-2.5 ${Platform.OS === "ios" ? "pb-7.5" : "pb-5"}`}
+          >
+            <Button
+              onPress={handleEnableBiometric}
+              loading={isLoading}
+              className="shadow-lg shadow-primary/20 font-medium mb-4"
+            >
+              Create Device Key
+            </Button>
+          </View>
+
+
         </View>
       </TouchableWithoutFeedback>
     </SafeAreaView>
