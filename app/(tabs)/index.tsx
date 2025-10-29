@@ -1,14 +1,12 @@
-import { ChevronRight } from "@/components/icons/ChevronRight";
-import { RosetteDiscount } from "@/components/icons/RosetteDiscount";
-import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { WalletSelectionModal } from "@/components/WalletSelectionModal";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { clearAllStorage } from "@/lib/storage/storage";
 import { router } from "expo-router";
-import { Bell, QrCode, Send, Smartphone } from "lucide-react-native";
+import { History, QrCode, Send, Wallet } from "lucide-react-native";
 import { useState } from "react";
-import { Image, Linking, Pressable, ScrollView, View } from "react-native";
+import { Image, Pressable, ScrollView, View } from "react-native";
+import LinearGradient from "react-native-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const CronLogo = () => (
@@ -23,63 +21,91 @@ const ActionCard = ({
   icon: Icon,
   title,
   onPress,
+  description,
 }: {
   icon: any;
   title: string;
   onPress?: () => void;
-}) => (
-  <Pressable
-    onPress={onPress}
-    className="flex-1 bg-white rounded-2xl p-5 items-center justify-center mx-2 shadow-md active:opacity-80"
-    style={{
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 8,
-      elevation: 3,
-    }}
-  >
-    <View className="w-14 h-14 rounded-full bg-primary/10 items-center justify-center mb-3">
-      <Icon size={28} color="#4A3DFF" strokeWidth={2} />
-    </View>
-    <Text className="text-sm font-medium text-foreground-dark text-center">
-      {title}
-    </Text>
-  </Pressable>
-);
+  description?: string;
+}) => {
+  // Convert CSS gradient angle (151.19deg) to React Native coordinates
+  // CSS: 0deg = to top, 90deg = to right, 151.19deg = southeast direction
+  const angle = 151.19;
+  const radians = (angle * Math.PI) / 180;
+  // Convert CSS angle to React Native coordinates (CSS uses clockwise from top, React Native uses unit circle)
+  const x = Math.sin(radians);
+  const y = -Math.cos(radians);
+  // Normalize to 0-1 range, centered at 0.5
+  const startX = Math.max(0, Math.min(1, 0.5 - x / 2));
+  const startY = Math.max(0, Math.min(1, 0.5 - y / 2));
+  const endX = Math.max(0, Math.min(1, 0.5 + x / 2));
+  const endY = Math.max(0, Math.min(1, 0.5 + y / 2));
+
+  return (
+    <Pressable
+      onPress={onPress}
+      className="w-full bg-[#F9F6FF] rounded-2xl p-5 justify-center shadow-md active:opacity-80"
+      style={{
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 3,
+      }}
+    >
+      <View className="w-12 h-12  rounded-full items-center justify-center mb-3">
+        <LinearGradient
+          colors={["#4A3DFF", "#ABA5FF"]}
+          locations={[0.0887, 0.929]}
+          start={{ x: startX, y: startY }}
+          end={{ x: endX, y: endY }}
+          style={{
+            width: "100%",
+            height: "100%",
+            borderRadius: 100,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Icon size={20} color="#ffffff" strokeWidth={2} />
+        </LinearGradient>
+      </View>
+      <Text className="text-lg font-semibold text-foreground-dark">
+        {title}
+      </Text>
+      <Text className="text-sm font-sans text-foreground-secondary">
+        {description}
+      </Text>
+    </Pressable>
+  );
+};
 
 export default function HomeScreen() {
-  const hasNotifications = true; // Change this based on actual notification state
   const [isWalletModalVisible, setIsWalletModalVisible] = useState(false);
   const { user } = useAuth();
 
   return (
-    <SafeAreaView edges={["top"]} className="flex-1 bg-background-light">
-      {/* Header */}
-      <View className="flex-row items-center justify-between px-6 py-4 bg-white">
-        <CronLogo />
-        <Pressable className="relative">
-          <Bell size={24} color="#000000" strokeWidth={2} />
-          {hasNotifications && (
-            <View className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white" />
-          )}
-        </Pressable>
-      </View>
+    <SafeAreaView edges={["top"]} className="flex-1 bg-white">
 
       <View className="px-4 py-6 ">
-        <View className="p-8 bg-[#12062B] rounded-xl">
+        <View className="p-8 bg-[#12062B] rounded-2xl">
           {/* Top Row: Avatar + User Info | QR + Copy */}
-          <View className="flex-row items-center justify-between mb-6">
+          <View className="flex-row items-center justify-between">
             {/* Left Side: Avatar + User Info */}
             <View className="flex-row items-center">
-              <Image
-                source={{ uri: "https://visual-lime-chickadee.myfilebase.com/ipfs/QmS4qaqwEuQnDyQAAZ5Ghm6KzAoW2m9YRnQ1ku4Q23JX98" }}
-                className="w-12 h-12 rounded-full items-center justify-center mr-4"
-                resizeMode="cover"
-              />
+              <Pressable
+                onPress={() => clearAllStorage()}
+              >
+                <Image
+                  source={{ uri: "https://visual-lime-chickadee.myfilebase.com/ipfs/QmS4qaqwEuQnDyQAAZ5Ghm6KzAoW2m9YRnQ1ku4Q23JX98" }}
+                  className="w-12 h-12 rounded-full items-center justify-center mr-4"
+                  resizeMode="cover"
+                />
+              </Pressable>
               <View>
                 <Text className="text-white text-lg font-semibold">
-                  @{user?.cron_id}
+                  {user?.cron_id}mohd
                 </Text>
               </View>
             </View>
@@ -95,27 +121,6 @@ export default function HomeScreen() {
             </View>
           </View>
 
-          {/* Add Funds Button */}
-          <Button
-            className="w-full align-center"
-            size="icon"
-            onPress={async () => {
-              try {
-                const userWalletAddress =
-                  user?.primary_address || user?.wallet_address?.[0];
-
-                if (!userWalletAddress) {
-                  console.log("No wallet address found for user");
-                  return;
-                }
-                await Linking.openURL(`solana:${userWalletAddress}`);
-              } catch (error) {
-                console.log(error);
-              }
-            }}
-          >
-            Add Funds
-          </Button>
         </View>
       </View>
 
@@ -125,44 +130,43 @@ export default function HomeScreen() {
         contentContainerStyle={{ flexGrow: 1 }}
       >
         {/* Action Cards */}
-        <View className="px-4 py-6">
-          <View className="flex-row">
-            <ActionCard
-              icon={Send}
-              title="Pay anyone"
-              onPress={() => router.push("/(tabs)/pay-anyone")}
-            />
-            <ActionCard
-              icon={QrCode}
-              title="Scan QR"
-
-              onPress={() => router.push("/(tabs)/scan-qr")}
-            />
-            <ActionCard
-              icon={Smartphone}
-              title="Balance"
-              onPress={() => router.push("/(tabs)/balance")}
-            />
+        <View className="px-4 py-4">
+          <View className="flex-row flex-wrap -mx-2">
+            <View className="w-1/2 px-2 mb-4">
+              <ActionCard
+                icon={Send}
+                title="Pay anyone"
+                description="Send money to anyone using Phone Number"
+                onPress={() => router.push("/(tabs)/pay-anyone")}
+              />
+            </View>
+            <View className="w-1/2 px-2 mb-4">
+              <ActionCard
+                icon={Wallet}
+                title="Balances"
+                description="Check your assets on Solana"
+                onPress={() => router.push("/(tabs)/balance")}
+              />
+            </View>
+            <View className="w-1/2 px-2 mb-4">
+              <ActionCard
+                icon={History}
+                title="Transfer History"
+                description="View your transfer history"
+                onPress={() => router.push("/(tabs)/history")}
+              />
+            </View>
+            <View className="w-1/2 px-2 mb-4">
+              <ActionCard
+                icon={QrCode}
+                title="Scan QR"
+                description="Scan QR to send money"
+                onPress={() => router.push("/(tabs)/scan-qr")}
+              />
+            </View>
           </View>
         </View>
 
-        {/* Offer */}
-        <View className="px-4 py-4">
-          <Pressable
-            className="bg-[#4A3DFF] flex-row items-center justify-between rounded-xl px-6 py-4"
-            onPress={() => clearAllStorage()}
-          >
-            <View className="flex-row items-center">
-              <Text className="text-white font-bold text-base mr-2">
-                FIRST TRANSFER FREE
-              </Text>
-              <ChevronRight size={16} color="#FFFFFF" strokeWidth={2} />
-            </View>
-            <View className="w-8 h-8 rounded-full  items-center justify-center">
-              <RosetteDiscount size={24} color="#fff" />
-            </View>
-          </Pressable>
-        </View>
       </ScrollView>
 
       {/* Wallet Selection Modal */}
