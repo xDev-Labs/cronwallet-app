@@ -38,6 +38,7 @@ export default function RecipientScreen() {
     contactCronId,
     contactJoinedDate,
     type,
+    newTransaction,
   } = useLocalSearchParams();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -162,6 +163,26 @@ export default function RecipientScreen() {
 
     initializeRecipient();
   }, [user?.user_id, contactPhone]);
+
+  // Handle new transaction from payment success
+  useEffect(() => {
+    if (newTransaction) {
+      try {
+        const parsedTransaction = JSON.parse(newTransaction as string);
+        setTransactions((prevTransactions) => [
+          ...prevTransactions,
+          parsedTransaction,
+        ]);
+
+        // Scroll to bottom to show the new transaction
+        setTimeout(() => {
+          scrollViewRef.current?.scrollToEnd({ animated: true });
+        }, 100);
+      } catch (error) {
+        console.error("Error parsing new transaction:", error);
+      }
+    }
+  }, [newTransaction]);
 
   const handlePayPress = () => {
     router.push({
