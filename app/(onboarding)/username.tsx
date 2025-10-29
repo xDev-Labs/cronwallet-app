@@ -1,3 +1,4 @@
+import { OnBoardingPages } from "@/components/OnBoardingPages";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
@@ -11,9 +12,8 @@ import {
   Keyboard,
   KeyboardAvoidingView,
   Platform,
-  StatusBar,
   TouchableWithoutFeedback,
-  View,
+  View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -164,53 +164,33 @@ export default function UsernameScreen() {
       edges={["top", "bottom"]}
       className="flex-1 bg-background-light"
     >
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
       <KeyboardAvoidingView
         className="flex-1"
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View className="flex-1 justify-between bg-background-light mt-20">
-            {/* Header (Logo) */}
-            <View className="items-start px-6 pt-15 pb-10">
-              <CronLogo />
-            </View>
-
+          <View className="flex-1 justify-between bg-background-light">
             {/* Content Area */}
-            <View className="flex-1 px-6 mt-5">
-              <Text variant="h3" className="text-foreground-dark">
+            <View className="flex-1 px-6 justify-center">
+              <OnBoardingPages selected="username" />
+              <Text variant="h4" className="text-foreground-dark">
                 Claim your username
               </Text>
               <Text
-                variant="caption"
-                className="text-foreground-tertiary mb-8 font-sans"
+                variant="muted"
+                className="text-[#C0C0C0] mb-8 font-sans text-sm"
               >
-                Create a unique username for your CRON account
+                This cannot be changed later.
               </Text>
 
-              {/* Username Input Field */}
-              <View
-                className={`flex-row items-center h-14 rounded-xl border-2 px-4 ${isFocused
-                    ? "border-border-focus bg-background-light"
-                    : "border-border-light bg-gray-100"
-                  }`}
-              >
-                <Text className="text-base font-semibold text-foreground-tertiary mr-1">
-                  @
-                </Text>
-                <Input
-                  className="flex-1 font-sans h-full border-0 bg-transparent px-2 text-foreground-dark"
-                  placeholder="username"
-                  placeholderTextColor="#A0A0A0"
-                  value={username}
-                  onChangeText={handleUsernameChange}
-                  onFocus={() => setIsFocused(true)}
-                  onBlur={() => setIsFocused(false)}
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  maxLength={20}
-                />
-              </View>
+              <Input
+                className="font-sans rounded-lg border-[#ECECEC] border bg-transparent text-foreground-dark"
+                placeholderTextColor="#A0A0A0"
+                value={username}
+                onChangeText={handleUsernameChange}
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => setIsFocused(false)}
+              />
 
               {/* Availability Status */}
               {username.length >= 3 && (
@@ -229,12 +209,6 @@ export default function UsernameScreen() {
                   ) : null}
                 </View>
               )}
-
-              {error ? (
-                <Text className="text-error text-sm mt-2 font-sans">
-                  {error}
-                </Text>
-              ) : null}
             </View>
 
             {/* Continue Button Container */}
@@ -253,6 +227,6 @@ export default function UsernameScreen() {
           </View>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </SafeAreaView >
   );
 }
