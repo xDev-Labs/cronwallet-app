@@ -1,4 +1,5 @@
 import { CountryPicker } from "@/components/CountryPicker";
+import { OnBoardingPages } from "@/components/OnBoardingPages";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
@@ -86,31 +87,27 @@ export default function PhoneAuthScreen() {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View className="flex-1 justify-between bg-background-light mt-20">
-            {/* Header (Logo) */}
-            <View className="items-start px-6 pt-15 pb-10">
-              <CronLogo />
-            </View>
+          <View className="flex-1 justify-between bg-background-light">
 
             {/* Content Area */}
-            <View className="flex-1 px-6 mt-5">
-              <Text variant="h3" className="text-foreground-dark">
-                Phone Number
+            <View className="flex-1 px-6 justify-center">
+              <OnBoardingPages selected="phone" />
+              <Text variant="h4" className="text-foreground-dark">
+                What is your phone number?
               </Text>
               <Text
-                variant="caption"
-                className="text-foreground-tertiary mb-8 font-sans"
+                variant="muted"
+                className="text-[#C0C0C0] mb-8 font-sans text-sm"
               >
-                Enter your phone number
+                Link your number and you’re ready to send & receive
               </Text>
 
               {/* Phone Input Field Container */}
               <View
-                className={`flex-row items-center h-14 rounded-xl border-2 px-2.5 ${
-                  isFocused
-                    ? "border-border-focus bg-background-light"
-                    : "border-border-light bg-gray-100"
-                }`}
+                className={`flex-row items-center h-14 rounded-lg border-2 px-2.5 ${isFocused
+                  ? "border-border-focus bg-background-light"
+                  : "border-border-light bg-gray-100"
+                  }`}
               >
                 {/* Country Code Selector */}
                 <CountryPicker
@@ -123,7 +120,7 @@ export default function PhoneAuthScreen() {
 
                 {/* Phone Number Input */}
                 <Input
-                  className="flex-1 h-full font-sans border-0 bg-transparent px-2 text-foreground-dark"
+                  className="font-sans border-0 -mt-2 bg-transparent px-2 text-foreground-dark"
                   placeholder="00000 00000"
                   placeholderTextColor="#A0A0A0"
                   keyboardType="phone-pad"
