@@ -1,5 +1,4 @@
 import { Tabs } from "expo-router";
-import { History, Home, User } from "lucide-react-native";
 import React from "react";
 
 import { HapticTab } from "@/components/haptic-tab";
@@ -30,27 +29,21 @@ export default function TabLayout() {
         name="index"
         options={{
           title: "Home",
-          tabBarIcon: ({ color, size }) => (
-            <Home size={size} color={color} strokeWidth={2} />
-          ),
+          tabBarStyle: { display: "none" },
         }}
       />
       <Tabs.Screen
         name="history"
         options={{
           title: "History",
-          tabBarIcon: ({ color, size }) => (
-            <History size={size} color={color} strokeWidth={2} />
-          ),
+          tabBarStyle: { display: "none" },
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: "Profile",
-          tabBarIcon: ({ color, size }) => (
-            <User size={size} color={color} strokeWidth={2} />
-          ),
+          tabBarStyle: { display: "none" },
         }}
       />
       {/* Hide other existing screens from tabs */}
