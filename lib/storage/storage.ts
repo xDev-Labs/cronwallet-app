@@ -11,6 +11,7 @@ export const STORAGE_KEYS = {
   PUBLIC_KEY: "cron_public_key",
   PASSCODE: "cron_passcode", // Secure
   BIOMETRIC_ENABLED: "cron_biometric_enabled", // Secure
+  WELCOME_REWARD_MODAL_SHOWN: "cron_welcome_reward_modal_shown",
 } as const;
 
 // AsyncStorage utilities for non-sensitive data
@@ -82,6 +83,31 @@ export const storage = {
     } catch (error) {
       console.error("Error checking onboarding status:", error);
       return false;
+    }
+  },
+
+  // Welcome Reward Modal
+  async hasSeenWelcomeModal(): Promise<boolean> {
+    try {
+      const value = await AsyncStorage.getItem(
+        STORAGE_KEYS.WELCOME_REWARD_MODAL_SHOWN
+      );
+      return value ? JSON.parse(value) : false;
+    } catch (error) {
+      console.error("Error checking welcome modal status:", error);
+      return false;
+    }
+  },
+
+  async setWelcomeModalShown(value: boolean): Promise<void> {
+    try {
+      await AsyncStorage.setItem(
+        STORAGE_KEYS.WELCOME_REWARD_MODAL_SHOWN,
+        JSON.stringify(value)
+      );
+    } catch (error) {
+      console.error("Error setting welcome modal status:", error);
+      throw error;
     }
   },
 
@@ -167,6 +193,7 @@ export const storage = {
         STORAGE_KEYS.USER_PROFILE,
         STORAGE_KEYS.HAS_COMPLETED_ONBOARDING,
         STORAGE_KEYS.LATEST_TRANSACTIONS,
+        STORAGE_KEYS.WELCOME_REWARD_MODAL_SHOWN,
       ]);
     } catch (error) {
       console.error("Error clearing storage:", error);

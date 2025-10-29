@@ -1,10 +1,11 @@
 import { Text } from "@/components/ui/text";
 import { WalletSelectionModal } from "@/components/WalletSelectionModal";
+import { WelcomeRewardModal } from "@/components/WelcomeRewardModal";
 import { useAuth } from "@/lib/contexts/AuthContext";
-import { clearAllStorage } from "@/lib/storage/storage";
+import { clearAllStorage, storage } from "@/lib/storage/storage";
 import { router } from "expo-router";
 import { History, QrCode, Send, Wallet } from "lucide-react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Image, Pressable, ScrollView, View } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -83,7 +84,37 @@ const ActionCard = ({
 
 export default function HomeScreen() {
   const [isWalletModalVisible, setIsWalletModalVisible] = useState(false);
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const { user } = useAuth();
+
+  // Check if welcome modal should be shown
+  useEffect(() => {
+    const checkWelcomeModal = async () => {
+      try {
+        const hasCompletedOnboarding = await storage.hasCompletedOnboarding();
+        const hasSeenModal = await storage.hasSeenWelcomeModal();
+
+        // Show modal only if onboarding is complete AND modal hasn't been shown
+        if (hasCompletedOnboarding && !hasSeenModal) {
+          setShowWelcomeModal(true);
+        }
+      } catch (error) {
+        console.error("Error checking welcome modal status:", error);
+      }
+    };
+
+    checkWelcomeModal();
+  }, []);
+
+  const handleCloseWelcomeModal = async () => {
+    try {
+      await storage.setWelcomeModalShown(true);
+      setShowWelcomeModal(false);
+    } catch (error) {
+      console.error("Error saving welcome modal status:", error);
+      setShowWelcomeModal(false);
+    }
+  };
 
   return (
     <SafeAreaView edges={["top"]} className="flex-1 bg-white">
@@ -173,6 +204,12 @@ export default function HomeScreen() {
       <WalletSelectionModal
         visible={isWalletModalVisible}
         onClose={() => setIsWalletModalVisible(false)}
+      />
+
+      {/* Welcome Reward Modal */}
+      <WelcomeRewardModal
+        visible={showWelcomeModal}
+        onClose={handleCloseWelcomeModal}
       />
     </SafeAreaView>
   );
