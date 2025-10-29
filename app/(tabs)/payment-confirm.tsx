@@ -1,14 +1,13 @@
 import { CryptoIcon } from '@/components/CryptoIcon';
+import { Logo } from '@/components/icons/Logo';
 import { SlideToConfirm, SlideToConfirmHandle } from '@/components/SlideToConfirm';
 import { Text as UIText } from '@/components/ui/text';
 import { apiService } from '@/lib/services/api';
-import { transferSpl } from '@/lib/solana/transferSpl';
-import { storage } from '@/lib/storage/storage';
 import { normalizePhoneNumber } from '@/lib/utils';
-import { PublicKey } from '@solana/web3.js';
+import { useFocusEffect } from '@react-navigation/native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { ChevronLeft, Lock } from 'lucide-react-native';
-import { useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Image, Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -37,35 +36,20 @@ export default function PaymentConfirmScreen() {
             return;
         }
 
-        let didFail = false;
-        try {
-            let user = await storage.getUser();
-            // let smartAccountAddress = "HYyxPRR5tR8PjHDXaQqDRxB8bQ4ScK2dynTeSqQLsCs1";
-            let smartAccountAddress = user?.primary_address as string;
+        setStatus('processing');
 
-            console.log({ contactPhone });
+        try {
+            // Validate recipient exists before proceeding
             const normalizedPhone = normalizePhoneNumber(contactPhone as string);
-            let recipientData = await apiService.getUserByPhoneNumber(normalizedPhone);
-            let toAddress = "";
-            if (recipientData.success) {
-                toAddress = recipientData.data?.primary_address as string;
-            } else {
-                didFail = true;
+            const recipientData = await apiService.getUserByPhoneNumber(normalizedPhone);
+
+            if (!recipientData.success || !recipientData.data?.primary_address) {
                 setStatus('failed');
+                sliderRef.current?.reset();
                 return;
             }
-            let tokenAddress = coinAddress as string;
-            let ownerPublicKey = await storage.getPublicKey() as string;
-            let encodedTransaction = await transferSpl(Number(coinAmount) * (10 ** Number(coinDecimals)), smartAccountAddress, toAddress, tokenAddress, new PublicKey(ownerPublicKey));
 
-
-
-            let response = await apiService.transferSpl(encodedTransaction, user?.user_id as string, recipientData.data?.user_id as string, Number(coinAmount), [{ amount: coinAmount as string, token_address: tokenAddress }]);
-
-            console.log({ response });
-
-
-            // Navigate to payment success screen
+            // Navigate to payment success screen with all necessary transaction details
             router.push({
                 pathname: './payment-success' as any,
                 params: {
@@ -77,22 +61,19 @@ export default function PaymentConfirmScreen() {
                     amount,
                     coinAmount,
                     coinName,
+                    coinAddress,
+                    coinDecimals,
                     coinSymbol,
                     currencyCode,
                     currencyFlag,
+                    toAddress: recipientData.data.primary_address,
                 },
             });
         } catch (e) {
-            console.log(e);
-            didFail = true;
+            console.log('Error validating recipient:', e);
             setStatus('failed');
-        } finally {
             sliderRef.current?.reset();
-            if (!didFail) {
-                setStatus('idle');
-            }
         }
-       
     };
 
     const renderAvatar = () => {
@@ -119,6 +100,18 @@ export default function PaymentConfirmScreen() {
             </View>
         );
     };
+
+    // Reset status and slider when screen gains focus
+    useFocusEffect(
+        useCallback(() => {
+            setStatus('idle');
+            sliderRef.current?.reset();
+        }, [])
+    );
+
+    useEffect(() => {
+        sliderRef.current?.reset();
+    }, [contactId, amount]);
     return (
         <SafeAreaView className="flex-1 bg-white">
             {/* Header */}
@@ -159,8 +152,8 @@ export default function PaymentConfirmScreen() {
                             {renderAvatar()}
                             <View className="ml-3 flex-1">
                                 <View className="flex-row items-center mb-1">
-                                    <View className="w-4 h-4 bg-[#4A3DFF] rounded mr-2" />
-                                    <UIText className="text-black font-sans text-base font-semibold">
+                                    <Logo size={12} color="#000000" fill="#000000" />
+                                    <UIText className="text-black font-sans text-base font-semibold ml-2">
                                         {contactCronId || `${contactName}`}
                                     </UIText>
                                 </View>
@@ -229,7 +222,7 @@ export default function PaymentConfirmScreen() {
             {/* Slide to Confirm Button */}
             <View className="px-4 pb-4">
                 <SlideToConfirm
-                    key={`${contactId}-${amount}`}
+                    key={`${contactId}-${amount}-${coinAmount}`}
                     ref={sliderRef}
                     text={sliderText}
                     disabled={status === 'processing'}

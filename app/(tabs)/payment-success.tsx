@@ -1,19 +1,22 @@
+import { CheckSquared } from "@/components/icons/CheckSquared";
+import { Logo } from "@/components/icons/Logo";
+import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
+import { apiService } from "@/lib/services/api";
+import { transferSpl } from "@/lib/solana/transferSpl";
+import { storage } from "@/lib/storage/storage";
 import { useFocusEffect } from "@react-navigation/native";
+import { PublicKey } from "@solana/web3.js";
 import { Audio } from "expo-av";
 import { router, useLocalSearchParams } from "expo-router";
-import { CircleCheckBig, Share2, ShieldCheck } from "lucide-react-native";
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  Alert,
-  Image,
-  Platform,
-  Share,
+  ActivityIndicator,
+  Pressable,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { captureRef } from "react-native-view-shot";
 
 export default function PaymentSuccessScreen() {
   const {
@@ -24,8 +27,21 @@ export default function PaymentSuccessScreen() {
     contactAvatarUrl,
     contactCronId,
     currencyCode,
+    currencyFlag,
+    coinAmount,
+    coinName,
+    coinAddress,
+    coinDecimals,
+    coinSymbol,
+    toAddress,
   } = useLocalSearchParams();
   const successScreenRef = useRef<View>(null);
+  const hasProcessedRef = useRef(false);
+  const hasPlayedAudioRef = useRef(false);
+
+  // Transaction processing state
+  const [isProcessing, setIsProcessing] = useState(true);
+  const [transactionError, setTransactionError] = useState<string | null>(null);
 
   // Use the passed contact data directly instead of looking up from mockContacts
   const contact = {
@@ -34,83 +50,155 @@ export default function PaymentSuccessScreen() {
     avatarUrl: contactAvatarUrl as string,
   };
 
-  // Play success sound every time the screen comes into focus
-  useFocusEffect(
-    useCallback(() => {
-      let soundObject: Audio.Sound | null = null;
+  // Process transaction when screen comes into focus
+  const processTransaction = useCallback(async () => {
+    // Prevent duplicate processing if already processing
+    if (hasProcessedRef.current) {
+      return;
+    }
 
-      async function playSuccessSound() {
-        try {
-          // Set audio mode for playback
-          await Audio.setAudioModeAsync({
-            playsInSilentModeIOS: true,
-            staysActiveInBackground: false,
-          });
+    try {
+      hasProcessedRef.current = true;
+      hasPlayedAudioRef.current = false; // Reset audio flag for new transaction
+      setIsProcessing(true);
+      setTransactionError(null);
 
-          // Load and play the sound
-          const { sound } = await Audio.Sound.createAsync(
-            require("@/assets/audio/payment-success.wav"),
-            { shouldPlay: true }
-          );
+      // Get user data and public key
+      const user = await storage.getUser();
+      const smartAccountAddress = user?.primary_address as string;
+      const ownerPublicKey = await storage.getPublicKey() as string;
 
-          soundObject = sound;
-
-          // Unload sound from memory after it finishes playing
-          sound.setOnPlaybackStatusUpdate((status) => {
-            if (status.isLoaded && status.didJustFinish) {
-              sound.unloadAsync();
-            }
-          });
-        } catch (error) {
-          console.error("Error playing success sound:", error);
-        }
+      if (!smartAccountAddress || !ownerPublicKey || !toAddress || !coinAddress || !coinDecimals || !coinAmount) {
+        throw new Error("Missing required transaction parameters");
       }
 
-      playSuccessSound();
+      // Create encoded transaction
+      const encodedTransaction = await transferSpl(
+        Number(coinAmount) * (10 ** Number(coinDecimals)),
+        smartAccountAddress,
+        toAddress as string,
+        coinAddress as string,
+        new PublicKey(ownerPublicKey)
+      );
 
-      // Cleanup function to unload sound when screen loses focus or unmounts
+      // Execute transaction
+      const response = await apiService.transferSpl(
+        encodedTransaction,
+        user?.user_id as string,
+        contactId as string, // Using contactId as recipient user ID
+        Number(coinAmount),
+        [{ amount: coinAmount as string, token_address: coinAddress as string }]
+      );
+
+      console.log("Transaction response:", response);
+
+      if (response.success) {
+        setIsProcessing(false);
+      } else {
+        throw new Error(response.message || "Transaction failed");
+      }
+    } catch (error) {
+      console.error("Transaction error:", error);
+      setTransactionError(error instanceof Error ? error.message : "Transaction failed");
+      setIsProcessing(false);
+    }
+  }, [toAddress, coinAmount, coinAddress, contactId]);
+
+  useFocusEffect(
+    useCallback(() => {
+      processTransaction();
+
+      // Reset the processing flag when screen loses focus
       return () => {
-        if (soundObject) {
-          soundObject.unloadAsync().catch((error) => {
-            console.error("Error unloading sound:", error);
-          });
-        }
+        hasProcessedRef.current = false;
       };
-    }, [])
+    }, [processTransaction])
   );
+
+  // Reset audio flag when starting a new transaction
+  useEffect(() => {
+    if (isProcessing) {
+      hasPlayedAudioRef.current = false;
+    }
+  }, [isProcessing]);
+
+  // Play success sound when transaction completes
+  useEffect(() => {
+    let soundObject: Audio.Sound | null = null;
+
+    async function playSuccessSound() {
+      // Only play sound if transaction is successful (not processing and no error) and hasn't been played yet
+      if (isProcessing || transactionError || hasPlayedAudioRef.current) {
+        return;
+      }
+
+      try {
+        // Set audio mode for playback
+        await Audio.setAudioModeAsync({
+          playsInSilentModeIOS: true,
+          staysActiveInBackground: false,
+        });
+
+        // Load and play the sound
+        const { sound } = await Audio.Sound.createAsync(
+          require("@/assets/audio/payment-success.wav"),
+          { shouldPlay: true }
+        );
+
+        soundObject = sound;
+        hasPlayedAudioRef.current = true; // Mark audio as played
+
+        // Unload sound from memory after it finishes playing
+        sound.setOnPlaybackStatusUpdate((status) => {
+          if (status.isLoaded && status.didJustFinish) {
+            sound.unloadAsync();
+          }
+        });
+      } catch (error) {
+        console.error("Error playing success sound:", error);
+      }
+    }
+
+    playSuccessSound();
+
+    // Cleanup function to unload sound when effect re-runs or component unmounts
+    return () => {
+      if (soundObject) {
+        soundObject.unloadAsync().catch((error) => {
+          console.error("Error unloading sound:", error);
+        });
+      }
+    };
+  }, [isProcessing, transactionError]);
 
   if (!contactName || !amount) {
     return null;
   }
 
-  const handleShare = async () => {
-    try {
-      if (!successScreenRef.current) {
-        Alert.alert("Error", "Unable to capture screen. Please try again.");
-        return;
-      }
-
-      // Capture the success screen view
-      const uri = await captureRef(successScreenRef, {
-        format: "png",
-        quality: 1,
-      });
-
-      // Share the image with message
-      await Share.share({
-        message: `Payment successful! Paid ${amount} ${currencyCode} to ${contact.name}`,
-        url: Platform.OS === "ios" ? uri : `file://${uri}`,
-      });
-    } catch (error) {
-      console.error("Error sharing screenshot:", error);
-      // Don't show alert if user cancelled the share
-      if ((error as any).message !== "User did not share") {
-        Alert.alert("Error", "Failed to share screenshot. Please try again.");
-      }
-    }
+  const handleRetry = () => {
+    // Navigate back to payment-confirm to retry
+    router.push({
+      pathname: "/(tabs)/payment-confirm" as any,
+      params: {
+        contactId,
+        contactName,
+        contactPhone,
+        contactAvatarUrl,
+        contactCronId,
+        amount,
+        coinAmount,
+        coinName,
+        coinAddress,
+        coinDecimals,
+        coinSymbol,
+        currencyCode,
+        currencyFlag,
+      },
+    });
   };
 
   const handleDone = () => {
+    console.log("handleDone");
     // Use replace to ensure this screen is removed from the stack
     // This helps ensure proper cleanup and re-initialization on next visit
     router.replace({
@@ -128,99 +216,96 @@ export default function PaymentSuccessScreen() {
   const currentDate = new Date();
   const formattedDate = `${currentDate.getDate()} ${currentDate.toLocaleString("en-US", { month: "long" })} ${currentDate.getFullYear()}, ${currentDate.toLocaleString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })}`;
 
+  // Render loading state
+  if (isProcessing) {
+    return (
+      <SafeAreaView edges={["top"]} className="flex-1 bg-white">
+        <View className="flex-1 items-center justify-center px-4">
+          <ActivityIndicator size="large" color="#4A3DFF" />
+          <Text className="text-black text-lg font-medium font-sans mt-6 text-center">
+            Processing transaction...
+          </Text>
+          <Text className="text-gray-500 text-sm font-sans mt-2 text-center">
+            Please wait while we complete your payment
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // Render error state
+  if (transactionError) {
+    return (
+      <SafeAreaView edges={["top"]} className="flex-1 bg-white">
+        <View className="flex-1 items-center justify-center px-4">
+          <View className="w-20 h-20 bg-red-100 rounded-full items-center justify-center mb-6">
+            <Text className="text-red-500 text-4xl">⚠️</Text>
+          </View>
+          <Text className="text-black text-xl font-semibold font-sans mb-2 text-center">
+            Transaction Failed
+          </Text>
+          <Text className="text-gray-500 text-base font-sans text-center mb-6">
+            {transactionError}
+          </Text>
+          <TouchableOpacity
+            className="bg-[#4A3DFF] py-3.5 px-8 rounded-3xl"
+            onPress={handleRetry}
+          >
+            <Text className="text-white text-base font-semibold font-sans">Try Again</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // Render success state
   return (
-    <SafeAreaView edges={["top"]} className="flex-1 bg-background">
+    <SafeAreaView edges={["top"]} className="flex-1 justify-center bg-white">
       <View
         ref={successScreenRef}
         collapsable={false}
-        className="flex-1 px-4 pt-[60px] bg-background"
+        className="flex-1 px-4 pt-[60px] bg-white justify-center"
       >
         <View className="items-center mb-10">
-          <View className="mb-8">
-            <CircleCheckBig size={80} color="#2196F3" strokeWidth={2.5} />
+          <View className="mb-4">
+            <CheckSquared size={40} color="#4CAF50" />
           </View>
 
-          <Text className="text-foreground text-5xl font-normal mb-6">
-            {amount} {currencyCode}
+          <Text className="text-black text-2xl font-semibold font-sans mb-6">
+            Payment Completed
           </Text>
 
-          <Text className="text-foreground-secondary text-base mb-2">
+          <Text className="text-black text-2xl font-normal font-sans mb-6">
+            {amount} {coinSymbol}
+          </Text>
+
+          <Text className="text-gray-500 text-base font-sans mb-2">
             Paid to
           </Text>
-          <Text className="text-foreground text-[28px] font-semibold mb-3">
+          <Text className="text-black text-xl font-semibold font-sans mb-3">
             {contact.name.split(" ")[0]}
           </Text>
 
           <View className="flex-row items-center gap-1.5 mb-2">
-            <ShieldCheck size={16} color="#4CAF50" fill="#4CAF50" />
-            <Text className="text-foreground-secondary text-sm">
+            <Logo size={12} color="#000000" fill="#000000" />
+            <Text className="text-gray-500 text-sm font-sans">
               Cron ID: {contactCronId}
             </Text>
           </View>
 
-          <Text className="text-foreground-secondary text-sm">
+          <Text className="text-gray-500 text-sm font-sans">
             {formattedDate}
           </Text>
         </View>
-
-        <View className="bg-[#1C1C1E] rounded-2xl p-6 flex-row justify-between items-center mb-6">
-          <View className="flex-1">
-            <Text className="text-foreground text-lg font-medium leading-6">
-              You have unopened
-            </Text>
-            <Text className="text-foreground text-lg font-medium leading-6">
-              rewards
-            </Text>
-            <TouchableOpacity className="bg-[rgba(255,255,255,0.1)] py-2 px-4 rounded-[20px] self-start mt-3">
-              <Text className="text-foreground text-sm font-medium">
-                Open now
-              </Text>
-            </TouchableOpacity>
-          </View>
-          <View className="relative w-[100px] h-[100px] justify-center items-center">
-            <View
-              className="w-[70px] h-[70px] bg-[#2196F3] rounded-xl justify-center items-center"
-              style={{ transform: [{ rotate: "-10deg" }] }}
-            >
-              <Text className="text-[36px]">🎁</Text>
-            </View>
-            <View className="absolute w-2 h-2 bg-[#FF5252] rounded-full top-2.5 right-5" />
-            <View className="absolute w-1.5 h-1.5 bg-[#2196F3] rounded-full bottom-5 left-2.5" />
-            <View className="absolute w-[7px] h-[7px] bg-[#4CAF50] rounded-full top-[15px] left-[15px]" />
-            <View className="absolute w-2 h-2 bg-[#FFC107] rounded-full bottom-[15px] right-[15px]" />
-          </View>
-        </View>
-
-        <View className="items-center gap-2">
-          <Text className="text-foreground-secondary text-[11px] tracking-wider">
-            POWERED BY
-          </Text>
-          <Image
-            source={{
-              uri: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/UPI-Logo-vector.svg/200px-UPI-Logo-vector.svg.png",
-            }}
-            className="w-[100px] h-[30px] tint-[#8E8E93]"
-            resizeMode="contain"
-          />
-        </View>
       </View>
 
-      <View className="flex-row p-4 gap-3 bg-background border-t border-[#1C1C1E] mb-10">
-        <TouchableOpacity
-          className="flex-row items-center justify-center bg-[#1C1C1E] py-3.5 px-6 rounded-3xl gap-2 flex-1"
-          onPress={handleShare}
+      <View className="p-4 gap-3 bg-white mb-6">
+        <Pressable
         >
-          <Share2 size={20} color="#fff" />
-          <Text className="text-foreground text-base font-medium">
-            Share screenshot
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          className="bg-[#A8D5FF] py-3.5 px-10 rounded-3xl justify-center items-center"
-          onPress={handleDone}
-        >
-          <Text className="text-background text-base font-semibold">Done</Text>
-        </TouchableOpacity>
+          <Button onPress={handleDone} className="w-full">
+            Done
+          </Button>
+        </Pressable>
       </View>
     </SafeAreaView>
   );
