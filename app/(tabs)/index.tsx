@@ -6,7 +6,7 @@ import { WalletSelectionModal } from "@/components/WalletSelectionModal";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { clearAllStorage } from "@/lib/storage/storage";
 import { router } from "expo-router";
-import { Bell, QrCode, Send, Smartphone } from "lucide-react-native";
+import { Bell, QrCode, Send, Smartphone, User } from "lucide-react-native";
 import { useState } from "react";
 import { Image, Linking, Pressable, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -72,11 +72,12 @@ export default function HomeScreen() {
           <View className="flex-row items-center justify-between mb-6">
             {/* Left Side: Avatar + User Info */}
             <View className="flex-row items-center">
-              <Image
+              {/* <Image
                 source={{ uri: user?.avatar_url }}
                 className="w-12 h-12 rounded-full items-center justify-center mr-4"
                 resizeMode="cover"
-              />
+              /> */}
+              <User size={24} color="#FFFFFF" strokeWidth={2} />
               <View>
                 <Text className="text-white text-lg font-semibold">
                   @{user?.cron_id}
@@ -135,7 +136,7 @@ export default function HomeScreen() {
             <ActionCard
               icon={QrCode}
               title="Scan QR"
-              
+
               onPress={() => router.push("/(tabs)/scan-qr")}
             />
             <ActionCard

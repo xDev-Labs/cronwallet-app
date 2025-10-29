@@ -137,7 +137,7 @@ export default function UsernameScreen() {
 
         // Update local user profile with the complete updated data
         await updateUserProfile(updatedUserData);
-        router.push("/(onboarding)/avatar");
+        router.push("/(onboarding)/setting-up");
       } else {
         setError("Failed to register username. Please try again.");
         setIsLoading(false);
@@ -190,11 +190,10 @@ export default function UsernameScreen() {
 
               {/* Username Input Field */}
               <View
-                className={`flex-row items-center h-14 rounded-xl border-2 px-4 ${
-                  isFocused
+                className={`flex-row items-center h-14 rounded-xl border-2 px-4 ${isFocused
                     ? "border-border-focus bg-background-light"
                     : "border-border-light bg-gray-100"
-                }`}
+                  }`}
               >
                 <Text className="text-base font-semibold text-foreground-tertiary mr-1">
                   @
@@ -222,9 +221,8 @@ export default function UsernameScreen() {
                     </Text>
                   ) : availabilityMessage ? (
                     <Text
-                      className={`text-sm font-sans ${
-                        isAvailable ? "text-green-600" : "text-error"
-                      }`}
+                      className={`text-sm font-sans ${isAvailable ? "text-green-600" : "text-error"
+                        }`}
                     >
                       {availabilityMessage}
                     </Text>
