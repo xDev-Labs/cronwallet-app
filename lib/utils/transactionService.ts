@@ -7,16 +7,22 @@ import { mapBackendTransactionToTransaction } from "@/lib/utils/transactionMappi
  * Normalizes phone number by removing special characters and adding +91 prefix if needed
  */
 function normalizePhoneNumber(phone: string): string {
-  // Remove all special characters: spaces, hyphens, parentheses, etc.
-  const cleaned = phone.replace(/[\s\-\(\)\+]/g, "");
+  // Check if phone starts with + before cleaning
+  const hasPlus = phone.startsWith("+");
+
+  // Remove all special characters: spaces, hyphens, parentheses, etc. (keep + for now)
+  let cleaned = phone.replace(/[\s\-\(\)]/g, "");
+
+  // Remove + from cleaned version
+  cleaned = cleaned.replace(/\+/g, "");
 
   // If phone doesn't start with +, add +91 prefix
-  if (!phone.startsWith("+")) {
+  if (!hasPlus) {
     return `+91${cleaned}`;
   }
 
-  // If it already has + prefix, return as is
-  return phone;
+  // If it already had + prefix, return with + and cleaned
+  return `+${cleaned}`;
 }
 
 /**
@@ -146,7 +152,7 @@ export async function getTransactionsBetweenUsers(
         (backendTx: any) => mapBackendTransactionToTransaction(backendTx)
       );
 
-    //   console.log("Mapped transactions between users:", transactions);
+      //   console.log("Mapped transactions between users:", transactions);
       return transactions;
     } else {
       console.warn("No transactions found between users");

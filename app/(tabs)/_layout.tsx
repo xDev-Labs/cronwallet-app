@@ -86,12 +86,14 @@ export default function TabLayout() {
         name="pay-anyone"
         options={{
           href: null,
+          tabBarStyle: { display: "none" },
         }}
       />
       <Tabs.Screen
         name="qr-code"
         options={{
           href: null,
+          tabBarStyle: { display: "none" },
         }}
       />
       <Tabs.Screen
