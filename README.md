@@ -1,50 +1,114 @@
-# Welcome to your Expo app 👋
+<div align="center">
+  <img src="./assets/images/icon.png" alt="Cron Logo" width="120" height="120">
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+  # CRON
 
-## Get started
+  **Where crypto finally feels like payments**
 
-1. Install dependencies
+  [![Platform](https://img.shields.io/badge/platform-iOS%20%7C%20Android-lightgrey.svg)](https://expo.dev)
+  [![Built with Expo](https://img.shields.io/badge/Built%20with-Expo-000020.svg?style=flat&logo=expo)](https://expo.dev)
+  [![Solana](https://img.shields.io/badge/Blockchain-Solana-9945FF.svg?style=flat&logo=solana)](https://solana.com)
+</div>
 
-   ```bash
-   npm install
-   ```
+---
 
-2. Start the app
+## Overview
 
-   ```bash
-   npx expo start
-   ```
+Cron is a payments-first smart wallet built on Solana. Send crypto using phone numbers or @CronID — no wallet addresses, no typos, no lost funds. Simple, secure peer-to-peer payments powered by account abstraction and social recovery.
 
-In the output, you'll find options to open the app in a
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Key Features
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+- **Pay with Phone Numbers/CronID** — No more copying wallet addresses
+- **Social Recovery** — Trusted guardians protect your wallet
+- **Multi-Token Support** — SOL, USDT, USDC with live fiat conversion (USD, INR, AED)
+- **Biometric Security** — Face ID/fingerprint for payment confirmations
+- **Account Abstraction** — No seed phrases to manage
+-  **Zero Transaction Fees** — We've eliminated fees and complexity for a gasless experience
 
-## Get a fresh project
+## Tech Stack
 
-When you're ready, run:
+- **Frontend:** React Native, Expo Router v6, NativeWind v4 (Tailwind CSS), TypeScript
+- **Backend:** Firebase Auth (OTP), NestJS Backend, Token Price API
+- **Security:** Biometrics (expo-local-authentication), Secure Storage (expo-secure-store)
 
-```bash
-npm run reset-project
+## Project Structure
+
+```
+app/
+├── (auth)/         # Phone → OTP → Passcode flow
+├── (onboarding)/   # Username → Avatar → Setup
+└── (tabs)/         # Home, Contacts, History, Profile, Payment flows
+
+components/
+├── ui/             # Button, Input, Text, Card (NativeWind styled)
+└── CodeInput.tsx   # OTP/Passcode input
+
+lib/
+├── contexts/       # AuthContext (global state)
+├── services/       # API services (backend, token conversion)
+├── types/          # TypeScript definitions
+└── utils.ts        # Helper functions (cn)
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+**Flows:**
+- Auth: `phone-auth → otp-verification → create-passcode → confirm-passcode`
+- Onboarding: `username → avatar → setting-up`
+- Payment: `index → recipient → payment-initiate → payment-confirm`
 
-## Learn more
+## Getting Started
 
-To learn more about developing your project with Expo, look at the following resources:
+### Installation
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```bash
+# Clone repository
+git clone https://github.com/xDev-Labs/cronwallet-app.git
+cd cronwallet-app
 
-## Join the community
+# Install dependencies (uses Bun, not npm)
+bun install
 
-Join our community of developers creating universal apps.
+# Copy the example environment variables and set your own values
+cp .env.example .env
+# Open the .env file and replace values as needed (Base URLs, RPC URL)
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
+# Prebuild the app
+bunx expo prebuild
+
+# Run on platform
+bunx expo run:ios       # iOS 
+bunx expo run:android   # Android 
+```
+
+## API Endpoints
+
+**Backend API** (`lib/services/api.ts`)
+- `POST /user` — Create user
+- `GET /user/:userId` — Get user
+- `GET /user/cron-id/check/:cronId` — Check username
+- `POST /user/cron-id/register` — Register CronID
+- `PATCH /user/:userId` — Update profile
+
+**Token Conversion API**
+- `GET /currency?from={currency}&to=usd&amount={amount}` — Fiat conversion
+- `GET /token?from=usdc&to={token}&amount={usdAmount}` — Token conversion
+
+## Related Repositories
+
+| Repository | Description | Link |
+|------------|-------------|------|
+| **Backend API** | NestJS Backend for user management, CronID registry, authentication | [xDev-Labs/cron-backend](https://github.com/xDev-Labs/cron-backend) |
+| **Smart Contracts** | Solana programs for smart wallet, social recovery, session keys | [xDev-Labs/cron-wallet-program](https://github.com/xDev-Labs/cron-wallet-program) |
+| **Token Price API** | Real-time crypto/fiat currency conversion service | [xDev-Labs/token-price-api](https://github.com/xDev-Labs/token-price-api) |
+
+
+---
+
+<div align="center">
+
+**Built with ❤️ by the Cron team**
+
+Making crypto payments as simple as they should be.
+
+</div>
