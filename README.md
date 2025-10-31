@@ -52,9 +52,9 @@ lib/
 ```
 
 **Flows:**
-- Auth: `phone-auth → otp-verification → create-passcode → confirm-passcode`
-- Onboarding: `username → avatar → setting-up`
-- Payment: `index → recipient → payment-initiate → payment-confirm`
+- Auth: `OTP Verification → Biometric Registration`
+- Onboarding: `Cron ID Setup → Wallet Generation`
+- Payment: `Pay Anyone → Phone/Cron ID/.sol/Address → Pay`
 
 ## Getting Started
 
