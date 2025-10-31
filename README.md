@@ -16,6 +16,11 @@
 
 Cron is a payments-first smart wallet built on Solana. Send crypto using phone numbers or @CronID — no wallet addresses, no typos, no lost funds. Simple, secure peer-to-peer payments powered by account abstraction and social recovery.
 
+## Download App
+
+📦 **[Download Android APK](https://drive.google.com/file/d/1ls7bN9NiLJAl3p0XovmHmtRVWRjLDsZm/view?usp=drivesdk)**
+
+Test Cron Wallet on your Android device by downloading APK from the above link.
 
 ## Key Features
 
