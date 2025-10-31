@@ -2,7 +2,7 @@ import { Text } from "@/components/ui/text";
 import { WalletSelectionModal } from "@/components/WalletSelectionModal";
 import { WelcomeRewardModal } from "@/components/WelcomeRewardModal";
 import { useAuth } from "@/lib/contexts/AuthContext";
-import { clearAllStorage, storage } from "@/lib/storage/storage";
+import { storage } from "@/lib/storage/storage";
 import { router } from "expo-router";
 import { History, QrCode, Send, Wallet } from "lucide-react-native";
 import { useEffect, useState } from "react";
@@ -125,15 +125,11 @@ export default function HomeScreen() {
           <View className="flex-row items-center justify-between">
             {/* Left Side: Avatar + User Info */}
             <View className="flex-row items-center">
-              <Pressable
-                onPress={() => clearAllStorage()}
-              >
-                <Image
-                  source={{ uri: "https://visual-lime-chickadee.myfilebase.com/ipfs/QmS4qaqwEuQnDyQAAZ5Ghm6KzAoW2m9YRnQ1ku4Q23JX98" }}
-                  className="w-12 h-12 rounded-full items-center justify-center mr-4"
-                  resizeMode="cover"
-                />
-              </Pressable>
+              <Image
+                source={{ uri: "https://visual-lime-chickadee.myfilebase.com/ipfs/QmS4qaqwEuQnDyQAAZ5Ghm6KzAoW2m9YRnQ1ku4Q23JX98" }}
+                className="w-12 h-12 rounded-full items-center justify-center mr-4"
+                resizeMode="cover"
+              />
               <View>
                 <Text className="text-white text-lg font-semibold">
                   {user?.cron_id}
