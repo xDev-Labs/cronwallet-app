@@ -65,7 +65,7 @@ lib/
 git clone https://github.com/xDev-Labs/cronwallet-app.git
 cd cronwallet-app
 
-# Install dependencies (uses Bun, not npm)
+# Install dependencies 
 bun install
 
 # Copy the example environment variables and set your own values
