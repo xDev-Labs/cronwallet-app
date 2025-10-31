@@ -98,7 +98,7 @@ bunx expo run:android   # Android
 
 | Repository | Description | Link |
 |------------|-------------|------|
-| **Backend API** | NestJS Backend for user management, CronID registry, authentication | [xDev-Labs/cron-backend](https://github.com/xDev-Labs/cron-backend) |
+| **Backend API** | NestJS Backend for user and transaction management, CronID registry, authentication | [xDev-Labs/cron-backend](https://github.com/xDev-Labs/cron-backend) |
 | **Smart Contracts** | Solana programs for smart wallet, social recovery, session keys | [xDev-Labs/cron-wallet-program](https://github.com/xDev-Labs/cron-wallet-program) |
 | **Token Price API** | Real-time crypto/fiat currency conversion service | [xDev-Labs/token-price-api](https://github.com/xDev-Labs/token-price-api) |
 
