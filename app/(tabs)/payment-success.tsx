@@ -3,6 +3,7 @@ import { Logo } from "@/components/icons/Logo";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { apiService } from "@/lib/services/api";
+import { transferSol } from "@/lib/solana/transferSol";
 import { transferSpl } from "@/lib/solana/transferSpl";
 import { storage } from "@/lib/storage/storage";
 import { useFocusEffect } from "@react-navigation/native";
@@ -79,15 +80,26 @@ export default function PaymentSuccessScreen() {
       ) {
         throw new Error("Missing required transaction parameters");
       }
+      let encodedTransaction = null;
 
-      // Create encoded transaction
-      const encodedTransaction = await transferSpl(
-        Number(coinAmount) * 10 ** Number(coinDecimals),
-        smartAccountAddress,
-        toAddress as string,
-        coinAddress as string,
-        new PublicKey(ownerPublicKey)
-      );
+      if (coinSymbol === "SOL") {
+        encodedTransaction = await transferSol(
+          Number(coinAmount) * 10 ** Number(coinDecimals),
+          smartAccountAddress,
+          toAddress as string,
+          new PublicKey(ownerPublicKey)
+        );
+      } else {
+
+        // Create encoded transaction
+        encodedTransaction = await transferSpl(
+          Number(coinAmount) * 10 ** Number(coinDecimals),
+          smartAccountAddress,
+          toAddress as string,
+          coinAddress as string,
+          new PublicKey(ownerPublicKey)
+        );
+      }
 
       // Execute transaction
       const response = await apiService.transferSpl(
