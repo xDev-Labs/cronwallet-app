@@ -321,6 +321,28 @@ class ApiService {
     });
   }
 
+  async getTransactionsByWalletAddress(
+    walletAddress: string,
+    page: number = 1,
+    limit: number = 10
+  ): Promise<
+    ApiResponse<{
+      walletAddress: string;
+      transactions: Transaction[];
+      pagination: {
+        page: number;
+        limit: number;
+        total: number;
+        totalPages: number;
+      };
+    }>
+  > {
+    const url = `${API_CONFIG.ENDPOINTS.TRANSACTION.GET_BY_WALLET}/${walletAddress}?page=${page}&limit=${limit}`;
+    return this.makeRequest(url, {
+      method: "GET",
+    });
+  }
+
   async getTokensByUserId(userId: string): Promise<ApiResponse<Token[]>> {
     return this.makeRequest<Token[]>(
       `${API_CONFIG.ENDPOINTS.USER.GET_TOKENS}/${userId}/tokens`,

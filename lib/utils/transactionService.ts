@@ -163,3 +163,39 @@ export async function getTransactionsBetweenUsers(
     throw error;
   }
 }
+
+/**
+ * Fetches transactions for a specific wallet address
+ */
+export async function getTransactionsByWalletAddress(
+  walletAddress: string
+): Promise<Transaction[]> {
+  try {
+    console.log("Fetching transactions for wallet address:", walletAddress);
+
+    // Fetch transactions from backend
+    const response = await apiService.getTransactionsByWalletAddress(
+      walletAddress,
+      1,
+      50
+    );
+
+    if (response.success && response.data) {
+      console.log("Backend wallet transactions response:", response.data);
+
+      // Map backend transactions to our Transaction model
+      const transactions: Transaction[] = response.data.transactions.map(
+        (backendTx: any) => mapBackendTransactionToTransaction(backendTx)
+      );
+
+      console.log("Mapped wallet transactions:", transactions);
+      return transactions;
+    } else {
+      console.warn("No transactions found for wallet address");
+      return [];
+    }
+  } catch (error) {
+    console.error("Error fetching transactions for wallet address:", error);
+    return [];
+  }
+}

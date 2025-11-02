@@ -102,14 +102,14 @@ export default function PayAnyoneScreen() {
         displayLabel: `Pay ${trimmedInput}`,
       };
     }
-
-    // Check if it's a Solana wallet address (32-44 characters, alphanumeric base58)
-    const solanaAddressRegex = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
+    console.log("Trimmed input:", trimmedInput);
+    // Check if it's a Solana wallet address (exactly 44 characters, alphanumeric base58)
+    const solanaAddressRegex = /^[1-9A-HJ-NP-Za-km-z]{43,44}$/;
     if (solanaAddressRegex.test(trimmedInput)) {
       return {
         type: "walletAddress",
         value: trimmedInput,
-        displayLabel: `Pay ${trimmedInput.slice(0, 8)}...${trimmedInput.slice(-8)}`,
+        displayLabel: `Pay ${trimmedInput.slice(0, 4)}...${trimmedInput.slice(-4)}`,
       };
     }
 
@@ -130,6 +130,8 @@ export default function PayAnyoneScreen() {
   const validatePaymentOption = async (
     option: PaymentOption
   ): Promise<PaymentOption> => {
+
+    console.log("Validating payment option:", option);
     try {
       switch (option.type) {
         case "phone": {
@@ -271,10 +273,22 @@ export default function PayAnyoneScreen() {
   }, [searchQuery, contacts]);
 
   const paymentOption = useMemo(() => {
-    // Only show payment option if no contacts match
-    if (filteredContacts.length === 0 && searchQuery.trim()) {
-      return detectInputType(searchQuery);
+    // Always try to detect input type if there's a search query
+    if (!searchQuery.trim()) return null;
+
+    const detectedOption = detectInputType(searchQuery);
+
+    // Show payment option for wallet addresses and .sol domains regardless of contact matches
+    // These are unambiguous and should always be available
+    if (detectedOption && (detectedOption.type === "walletAddress" || detectedOption.type === "solName")) {
+      return detectedOption;
     }
+
+    // For phone numbers and cron IDs, only show if no contacts match to avoid conflicts
+    if (detectedOption && filteredContacts.length === 0) {
+      return detectedOption;
+    }
+
     return null;
   }, [searchQuery, filteredContacts]);
 
@@ -343,23 +357,21 @@ export default function PayAnyoneScreen() {
     router.push({
       pathname: "/(tabs)/recipient",
       params: {
-        contactId: userData?.user_id || `${option.type}_${option.value}`,
+        contactId: userData?.user_id || option.value,
         contactName: userData?.cron_id || option.value,
-        contactPhone: userData?.phone_number || option.value,
+        contactPhone: userData?.phone_number || "",
         contactAvatarUrl: userData?.avatar_url || "",
         contactCronId: userData?.cron_id || "",
         contactJoinedDate: "",
         type: option.type,
         // Add custom fields for special types
         ...(option.type === "solName" && {
-          solName: option.value,
           walletAddress: userData?.primary_address, // Resolved .sol domain address
-          contactName: option.value,
+          contactName: option.value, // Full .sol name
         }),
         ...(option.type === "walletAddress" && {
           walletAddress: option.value,
-          // For wallet addresses, we might not have userData
-          contactName: option.value,
+          contactName: `${option.value.slice(0, 4)}...${option.value.slice(-4)}`, // Formatted address
         }),
       },
     });
@@ -463,7 +475,7 @@ export default function PayAnyoneScreen() {
             {/* Content Area */}
             <View className="flex-1 px-6">
               <Text variant="h3" className="text-foreground-dark">
-                Pay anyone
+                Pay anyone {paymentOption?.type}
               </Text>
               <Text
                 variant="caption"

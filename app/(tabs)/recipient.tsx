@@ -6,7 +6,7 @@ import { useAuth } from "@/lib/contexts/AuthContext";
 import { apiService } from "@/lib/services/api";
 import type { Transaction } from "@/lib/types/transaction.types";
 import { normalizePhoneNumber } from "@/lib/utils";
-import { getTransactionsBetweenUsers } from "@/lib/utils/transactionService";
+import { getTransactionsBetweenUsers, getTransactionsByWalletAddress } from "@/lib/utils/transactionService";
 import { router, useLocalSearchParams } from "expo-router";
 import { ChevronLeft } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
@@ -38,6 +38,7 @@ export default function RecipientScreen() {
     contactCronId,
     contactJoinedDate,
     type,
+    walletAddress,
     newTransaction,
   } = useLocalSearchParams();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -92,6 +93,35 @@ export default function RecipientScreen() {
   };
 
   const loadTransactions = async () => {
+    console.log("Loading transactions for user:", user?.user_id);
+    console.log("Contact phone:", contactPhone);
+    console.log("Type:", type);
+    console.log("Wallet address:", walletAddress);
+    
+    // For wallet/sol payments, load by wallet address
+    if ((type === "walletAddress" || type === "solName") && walletAddress) {
+      setTransactions([]);
+      setIsLoading(true);
+      
+      try {
+        const walletTransactions = await getTransactionsByWalletAddress(
+          walletAddress as string
+        );
+        setTransactions(walletTransactions);
+        
+        // Scroll to bottom after transactions are loaded
+        setTimeout(() => {
+          scrollViewRef.current?.scrollToEnd({ animated: false });
+        }, 10);
+      } catch (error) {
+        console.error("Error loading wallet transactions:", error);
+      } finally {
+        setIsLoading(false);
+      }
+      return;
+    }
+    
+    // For regular contacts, use phone-based loading
     if (!user?.user_id || !contactPhone) {
       setIsLoading(false);
       return;
@@ -140,6 +170,15 @@ export default function RecipientScreen() {
 
   useEffect(() => {
     const initializeRecipient = async () => {
+      // For wallet addresses and .sol domains, skip recipient checking
+      if (type === "walletAddress" || type === "solName") {
+        setIsCheckingRecipient(false);
+        setRecipientExists(true); // Allow payment to proceed
+        await loadTransactions();
+        setIsLoading(false);
+        return;
+      }
+
       if (!contactPhone) {
         setIsCheckingRecipient(false);
         return;
@@ -162,7 +201,7 @@ export default function RecipientScreen() {
     };
 
     initializeRecipient();
-  }, [user?.user_id, contactPhone]);
+  }, [user?.user_id, contactPhone, type]);
 
   // Handle new transaction from payment success
   useEffect(() => {
@@ -188,12 +227,14 @@ export default function RecipientScreen() {
     router.push({
       pathname: "/(tabs)/payment-initiate" as any,
       params: {
-        contactId: recipientData?.user_id,
+        contactId: recipientData?.user_id || contactName,
         contactName,
         contactPhone,
         // Use recipient data from state if available, otherwise fallback to params
         contactAvatarUrl: recipientData?.avatar_url || contactAvatarUrl,
         contactCronId: recipientData?.cron_id || contactCronId,
+        type,
+        walletAddress, // Pass wallet address for wallet/sol payments
       },
     });
   };
@@ -296,7 +337,7 @@ export default function RecipientScreen() {
             <Text className="text-black text-lg font-semibold">
               {maskDisplayName(contactName)}
             </Text>
-            {type !== "walletAddress" && (
+            {type !== "walletAddress" && type !== "solName" && (
               <Text className="text-foreground-secondary text-sm mt-0.5">
                 {maskPhoneNumber(contactPhone)}
               </Text>
@@ -318,14 +359,15 @@ export default function RecipientScreen() {
       >
         {/* Centered Profile Section */}
         <View className="items-center px-4 py-6">
-          {type !== "walletAddress" && renderAvatar()}
+          {type !== "walletAddress" && type !== "solName" && renderAvatar()}
           <Text
-            className={`text-black text-2xl font-semibold ${type !== "walletAddress" ? "mt-4" : ""}`}
+            className={`text-black text-2xl font-semibold ${type !== "walletAddress" && type !== "solName" ? "mt-4" : ""}`}
           >
-            {type !== "walletAddress" && maskDisplayName(contactName)}
+            {maskDisplayName(contactName)}
           </Text>
 
-          {(recipientData?.cron_id || contactCronId) && (
+          {/* Only show Cron ID for regular contacts */}
+          {type !== "walletAddress" && type !== "solName" && (recipientData?.cron_id || contactCronId) && (
             <View className="flex-row items-center mt-2">
               <Text className="text-black text-base font-sans">
                 Cron ID : {recipientData?.cron_id || contactCronId}
@@ -333,13 +375,22 @@ export default function RecipientScreen() {
             </View>
           )}
 
-          {type !== "walletAddress" && (
+          {/* Only show phone for non-wallet/sol types */}
+          {type !== "walletAddress" && type !== "solName" && (
             <Text className="text-black text-base mt-2 font-sans">
               {maskPhoneNumber(contactPhone)}
             </Text>
           )}
 
-          {contactJoinedDate && (
+          {/* Show wallet address for wallet/sol payments */}
+          {(type === "walletAddress" || type === "solName") && walletAddress && (
+            <Text className="text-foreground-secondary text-sm mt-2 font-sans">
+              {`${(walletAddress as string).slice(0, 4)}...${(walletAddress as string).slice(-4)}`}
+            </Text>
+          )}
+
+          {/* Only show joined date for regular contacts */}
+          {type !== "walletAddress" && type !== "solName" && contactJoinedDate && (
             <Text className="text-foreground-secondary text-sm mt-1 font-sans">
               Joined {contactJoinedDate}
             </Text>
@@ -347,6 +398,7 @@ export default function RecipientScreen() {
         </View>
 
         <View className="mt-6 px-4">
+          {/* Show loading or transactions for all payment types */}
           {isLoading ? (
             <View className="flex-1 items-center justify-center py-8">
               <ActivityIndicator size="large" color="#4A3DFF" />
@@ -403,8 +455,8 @@ export default function RecipientScreen() {
                         });
                       }}
                       className={`rounded-2xl w-3/5 overflow-hidden ${transactionType === "sent"
-                          ? "bg-[#4A3DFF0F]"
-                          : "bg-white border border-gray-200"
+                        ? "bg-[#4A3DFF0F]"
+                        : "bg-white border border-gray-200"
                         }`}
                     >
                       <View className="border-b-[3px] border-[#12062B]">

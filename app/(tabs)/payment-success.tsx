@@ -35,6 +35,8 @@ export default function PaymentSuccessScreen() {
     coinDecimals,
     coinSymbol,
     toAddress,
+    type,
+    walletAddress,
   } = useLocalSearchParams();
   const successScreenRef = useRef<View>(null);
   const hasProcessedRef = useRef(false);
@@ -237,6 +239,8 @@ export default function PaymentSuccessScreen() {
         coinSymbol,
         currencyCode,
         currencyFlag,
+        type,
+        walletAddress,
       },
     });
   };
@@ -253,6 +257,8 @@ export default function PaymentSuccessScreen() {
         contactPhone,
         contactAvatarUrl,
         contactCronId,
+        type,
+        walletAddress,
         newTransaction: transactionData
           ? JSON.stringify(transactionData)
           : undefined,
@@ -332,15 +338,23 @@ export default function PaymentSuccessScreen() {
             Paid to
           </Text>
           <Text className="text-black text-xl font-semibold font-sans mb-3">
-            {contact.name.split(" ")[0]}
+            {type === "solName" ? contact.name : (type === "walletAddress" ? `${(walletAddress as string).slice(0, 4)}...${(walletAddress as string).slice(-4)}` : contact.name.split(" ")[0])}
           </Text>
 
-          <View className="flex-row items-center gap-1.5 mb-2">
-            <Logo size={12} color="#000000" fill="#000000" />
-            <Text className="text-gray-500 text-sm font-sans">
-              Cron ID: {contactCronId}
+          {type !== "walletAddress" && type !== "solName" && contactCronId && (
+            <View className="flex-row items-center gap-1.5 mb-2">
+              <Logo size={12} color="#000000" fill="#000000" />
+              <Text className="text-gray-500 text-sm font-sans">
+                Cron ID: {contactCronId}
+              </Text>
+            </View>
+          )}
+
+          {(type === "walletAddress" || type === "solName") && walletAddress && (
+            <Text className="text-gray-500 text-sm font-sans mb-2">
+              {`${(walletAddress as string).slice(0, 8)}...${(walletAddress as string).slice(-8)}`}
             </Text>
-          </View>
+          )}
 
           <Text className="text-gray-500 text-sm font-sans">
             {formattedDate}

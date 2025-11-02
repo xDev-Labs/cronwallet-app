@@ -40,7 +40,7 @@ export default function HistoryScreen() {
       }
 
       const response = await apiService.getTransactionsByUserId(
-        user.user_id,
+        user.primary_address,
         page,
         10
       );
@@ -113,7 +113,7 @@ export default function HistoryScreen() {
   };
 
   const getTransactionDirection = (item: Transaction) => {
-    return item.sender_addr === user?.user_id ? "sent" : "received";
+    return item.sender_addr === user?.primary_address ? "sent" : "received";
   };
 
   const handleTransactionPress = (item: Transaction) => {
@@ -188,6 +188,12 @@ export default function HistoryScreen() {
   if (transactions.length === 0) {
     return (
       <SafeAreaView edges={["top"]} className="flex-1 bg-background-light">
+        <Pressable
+          onPress={() => router.back()}
+          className="p-2 -ml-2 active:opacity-70"
+        >
+          <ChevronLeft size={24} color="#000" />
+        </Pressable>
         <View className="flex-1 items-center justify-center px-6">
           <View className="w-24 h-24 rounded-full bg-gray-100 items-center justify-center mb-4">
             <Clock size={40} color="#9CA3AF" strokeWidth={1.5} />
