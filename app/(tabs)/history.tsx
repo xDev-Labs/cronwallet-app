@@ -113,7 +113,7 @@ export default function HistoryScreen() {
   };
 
   const getTransactionDirection = (item: Transaction) => {
-    return item.sender_uid === user?.user_id ? "sent" : "received";
+    return item.sender_addr === user?.user_id ? "sent" : "received";
   };
 
   const handleTransactionPress = (item: Transaction) => {

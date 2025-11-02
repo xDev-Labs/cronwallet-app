@@ -224,7 +224,7 @@ export default function RecipientScreen() {
 
   const getTransactionType = (transaction: Transaction) => {
     // Check if current user is the sender or receiver
-    if (transaction.sender_uid === user?.user_id) {
+    if (transaction.sender_addr === user?.primary_address) {
       return "sent";
     } else {
       return "received";
@@ -369,7 +369,7 @@ export default function RecipientScreen() {
               const isNewDate =
                 index === 0 ||
                 formatDate(transaction.created_at) !==
-                  formatDate(transactions[index - 1].created_at);
+                formatDate(transactions[index - 1].created_at);
 
               return (
                 <View key={transaction.transaction_hash} className="mb-3">
@@ -402,11 +402,10 @@ export default function RecipientScreen() {
                           },
                         });
                       }}
-                      className={`rounded-2xl w-3/5 overflow-hidden ${
-                        transactionType === "sent"
+                      className={`rounded-2xl w-3/5 overflow-hidden ${transactionType === "sent"
                           ? "bg-[#4A3DFF0F]"
                           : "bg-white border border-gray-200"
-                      }`}
+                        }`}
                     >
                       <View className="border-b-[3px] border-[#12062B]">
                         <View className="border-b-[3px] border-[#4A3DFF] p-5">

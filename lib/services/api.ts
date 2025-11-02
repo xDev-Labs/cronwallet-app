@@ -266,8 +266,8 @@ class ApiService {
 
   async transferSpl(
     encodedTransaction: string,
-    senderUid: string,
-    receiverUid: string,
+    senderAddr: string,
+    receiverAddr: string,
     amount: number,
     token: Array<{ amount: string; token_address: string }>
   ): Promise<ApiResponse<any>> {
@@ -275,8 +275,8 @@ class ApiService {
       method: "POST",
       body: JSON.stringify({
         encodedTransaction,
-        senderUid,
-        receiverUid,
+        senderAddr,
+        receiverAddr,
         amount,
         token,
       }),

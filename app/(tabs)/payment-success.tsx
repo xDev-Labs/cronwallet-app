@@ -104,8 +104,8 @@ export default function PaymentSuccessScreen() {
       // Execute transaction
       const response = await apiService.transferSpl(
         encodedTransaction,
-        user?.user_id as string,
-        contactId as string, // Using contactId as recipient user ID
+        smartAccountAddress,
+        toAddress as string, // Using contactId as recipient user ID
         Number(coinAmount),
         [{ amount: coinAmount as string, token_address: coinAddress as string }]
       );
@@ -116,8 +116,8 @@ export default function PaymentSuccessScreen() {
         // Construct full transaction object for display
         const newTransaction = {
           transaction_hash: response.data.signature,
-          sender_uid: user?.user_id as string,
-          receiver_uid: contactId as string,
+          sender_addr: user?.primary_address as string,
+          receiver_addr: toAddress as string,
           amount: Number(amount),
           token: [
             {

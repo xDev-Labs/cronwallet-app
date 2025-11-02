@@ -21,8 +21,8 @@ export function mapBackendTransactionToTransaction(
 
   return {
     transaction_hash: backendTransaction.transaction_hash,
-    sender_uid: backendTransaction.sender_uid,
-    receiver_uid: backendTransaction.receiver_uid,
+    sender_addr: backendTransaction.sender_addr,
+    receiver_addr: backendTransaction.receiver_addr,
     amount: backendTransaction.amount || 0,
     token: backendTransaction.token || [],
     chain_id: backendTransaction.chain_id || 1,
@@ -31,8 +31,8 @@ export function mapBackendTransactionToTransaction(
     completed_at: backendTransaction.completed_at,
     receiver: backendTransaction.receiver
       ? {
-          phone_number: backendTransaction.receiver.phone_number,
-        }
+        phone_number: backendTransaction.receiver.phone_number,
+      }
       : undefined,
   };
 }
@@ -45,8 +45,8 @@ export function mapTransactionToBackendCreate(
 ): any {
   return {
     transaction_hash: transaction.transaction_hash,
-    sender_uid: transaction.sender_uid,
-    receiver_uid: transaction.receiver_uid,
+    sender_addr: transaction.sender_addr,
+    receiver_addr: transaction.receiver_addr,
     amount: transaction.amount,
     token: transaction.token,
     chain_id: transaction.chain_id,
@@ -62,10 +62,10 @@ export function mapTransactionToBackendUpdate(
 ): any {
   const updateData: any = {};
 
-  if (transaction.sender_uid !== undefined)
-    updateData.sender_uid = transaction.sender_uid;
-  if (transaction.receiver_uid !== undefined)
-    updateData.receiver_uid = transaction.receiver_uid;
+  if (transaction.sender_addr !== undefined)
+    updateData.sender_addr = transaction.sender_addr;
+  if (transaction.receiver_addr !== undefined)
+    updateData.receiver_addr = transaction.receiver_addr;
   if (transaction.amount !== undefined) updateData.amount = transaction.amount;
   if (transaction.token !== undefined) updateData.token = transaction.token;
   if (transaction.chain_id !== undefined)
@@ -82,8 +82,8 @@ export function mapTransactionToBackendUpdate(
  */
 export function mapFrontendToCreateDto(transactionData: {
   transaction_hash: string;
-  sender_uid: string;
-  receiver_uid: string;
+  sender_addr: string;
+  receiver_addr: string;
   amount: number;
   token: Array<{ amount: string; token_address: string }>;
   chain_id: number;
@@ -91,8 +91,8 @@ export function mapFrontendToCreateDto(transactionData: {
 }): CreateTransactionDto {
   return {
     transaction_hash: transactionData.transaction_hash,
-    sender_uid: transactionData.sender_uid,
-    receiver_uid: transactionData.receiver_uid,
+    sender_addr: transactionData.sender_addr,
+    receiver_addr: transactionData.receiver_addr,
     amount: transactionData.amount,
     token: transactionData.token,
     chain_id: transactionData.chain_id,
