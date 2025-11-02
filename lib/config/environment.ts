@@ -28,6 +28,7 @@ export const API_CONFIG = {
     TRANSACTION: {
       GET_BY_HASH: "/transaction",
       GET_BY_USER_ID: "/transaction/user",
+      GET_BY_WALLET: "/transaction/wallet",
       CREATE: "/transaction",
     },
   },

@@ -266,8 +266,8 @@ class ApiService {
 
   async transferSpl(
     encodedTransaction: string,
-    senderUid: string,
-    receiverUid: string,
+    senderAddr: string,
+    receiverAddr: string,
     amount: number,
     token: Array<{ amount: string; token_address: string }>
   ): Promise<ApiResponse<any>> {
@@ -275,8 +275,8 @@ class ApiService {
       method: "POST",
       body: JSON.stringify({
         encodedTransaction,
-        senderUid,
-        receiverUid,
+        senderAddr,
+        receiverAddr,
         amount,
         token,
       }),
@@ -316,6 +316,28 @@ class ApiService {
       url += `&receiver=${encodeURIComponent(receiver)}`;
     }
 
+    return this.makeRequest(url, {
+      method: "GET",
+    });
+  }
+
+  async getTransactionsByWalletAddress(
+    walletAddress: string,
+    page: number = 1,
+    limit: number = 10
+  ): Promise<
+    ApiResponse<{
+      walletAddress: string;
+      transactions: Transaction[];
+      pagination: {
+        page: number;
+        limit: number;
+        total: number;
+        totalPages: number;
+      };
+    }>
+  > {
+    const url = `${API_CONFIG.ENDPOINTS.TRANSACTION.GET_BY_WALLET}/${walletAddress}?page=${page}&limit=${limit}`;
     return this.makeRequest(url, {
       method: "GET",
     });

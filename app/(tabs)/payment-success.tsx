@@ -35,6 +35,8 @@ export default function PaymentSuccessScreen() {
     coinDecimals,
     coinSymbol,
     toAddress,
+    type,
+    walletAddress,
   } = useLocalSearchParams();
   const successScreenRef = useRef<View>(null);
   const hasProcessedRef = useRef(false);
@@ -104,8 +106,8 @@ export default function PaymentSuccessScreen() {
       // Execute transaction
       const response = await apiService.transferSpl(
         encodedTransaction,
-        user?.user_id as string,
-        contactId as string, // Using contactId as recipient user ID
+        smartAccountAddress,
+        toAddress as string, // Using contactId as recipient user ID
         Number(coinAmount),
         [{ amount: coinAmount as string, token_address: coinAddress as string }]
       );
@@ -116,8 +118,8 @@ export default function PaymentSuccessScreen() {
         // Construct full transaction object for display
         const newTransaction = {
           transaction_hash: response.data.signature,
-          sender_uid: user?.user_id as string,
-          receiver_uid: contactId as string,
+          sender_addr: user?.primary_address as string,
+          receiver_addr: toAddress as string,
           amount: Number(amount),
           token: [
             {
@@ -237,6 +239,8 @@ export default function PaymentSuccessScreen() {
         coinSymbol,
         currencyCode,
         currencyFlag,
+        type,
+        walletAddress,
       },
     });
   };
@@ -253,6 +257,8 @@ export default function PaymentSuccessScreen() {
         contactPhone,
         contactAvatarUrl,
         contactCronId,
+        type,
+        walletAddress,
         newTransaction: transactionData
           ? JSON.stringify(transactionData)
           : undefined,
@@ -332,15 +338,23 @@ export default function PaymentSuccessScreen() {
             Paid to
           </Text>
           <Text className="text-black text-xl font-semibold font-sans mb-3">
-            {contact.name.split(" ")[0]}
+            {type === "solName" ? contact.name : (type === "walletAddress" ? `${(walletAddress as string).slice(0, 4)}...${(walletAddress as string).slice(-4)}` : contact.name.split(" ")[0])}
           </Text>
 
-          <View className="flex-row items-center gap-1.5 mb-2">
-            <Logo size={12} color="#000000" fill="#000000" />
-            <Text className="text-gray-500 text-sm font-sans">
-              Cron ID: {contactCronId}
+          {type !== "walletAddress" && type !== "solName" && contactCronId && (
+            <View className="flex-row items-center gap-1.5 mb-2">
+              <Logo size={12} color="#000000" fill="#000000" />
+              <Text className="text-gray-500 text-sm font-sans">
+                Cron ID: {contactCronId}
+              </Text>
+            </View>
+          )}
+
+          {(type === "walletAddress" || type === "solName") && walletAddress && (
+            <Text className="text-gray-500 text-sm font-sans mb-2">
+              {`${(walletAddress as string).slice(0, 8)}...${(walletAddress as string).slice(-8)}`}
             </Text>
-          </View>
+          )}
 
           <Text className="text-gray-500 text-sm font-sans">
             {formattedDate}

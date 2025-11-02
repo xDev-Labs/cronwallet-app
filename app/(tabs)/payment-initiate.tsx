@@ -25,7 +25,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function PaymentInitiateScreen() {
-    const { contactId, contactName, contactPhone, contactAvatarUrl, contactCronId } = useLocalSearchParams();
+    const { contactId, contactName, contactPhone, contactAvatarUrl, contactCronId, type, walletAddress } = useLocalSearchParams();
     const { user } = useAuth();
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [selectedCoin, setSelectedCoin] = useState<Token | null>(null);
@@ -218,6 +218,8 @@ export default function PaymentInitiateScreen() {
                 coinAddress: selectedCoin!.mintAddr,
                 currencyCode: selectedCurrency.code,
                 currencyFlag: selectedCurrency.flag,
+                type,
+                walletAddress,
             },
         });
         setAmount('');
@@ -234,7 +236,7 @@ export default function PaymentInitiateScreen() {
                     <View className="flex-1">
                         {/* Header */}
                         <View className="flex-row items-center px-4 py-3">
-                            <TouchableOpacity className="p-2" onPress={() => router.push({ pathname: '/(tabs)/recipient' as any, params: { contactId, contactName, contactPhone, contactAvatarUrl, contactCronId } })}>
+                            <TouchableOpacity className="p-2" onPress={() => router.push({ pathname: '/(tabs)/recipient' as any, params: { contactId, contactName, contactPhone, contactAvatarUrl, contactCronId, type, walletAddress } })}>
                                 <ChevronLeft size={28} color="#000" pointerEvents="none" />
                             </TouchableOpacity>
                         </View>

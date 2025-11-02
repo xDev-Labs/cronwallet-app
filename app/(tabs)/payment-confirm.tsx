@@ -26,6 +26,8 @@ export default function PaymentConfirmScreen() {
         coinSymbol,
         currencyCode,
         currencyFlag,
+        type,
+        walletAddress,
     } = useLocalSearchParams();
     const sliderRef = useRef<SlideToConfirmHandle>(null);
     const [status, setStatus] = useState<'idle' | 'processing' | 'failed'>('idle');
@@ -39,14 +41,27 @@ export default function PaymentConfirmScreen() {
         setStatus('processing');
 
         try {
-            // Validate recipient exists before proceeding
-            const normalizedPhone = normalizePhoneNumber(contactPhone as string);
-            const recipientData = await apiService.getUserByPhoneNumber(normalizedPhone);
+            let toAddress: string;
 
-            if (!recipientData.success || !recipientData.data?.primary_address) {
-                setStatus('failed');
-                sliderRef.current?.reset();
-                return;
+            // For wallet addresses and .sol domains, use the walletAddress directly
+            if (type === 'walletAddress' || type === 'solName') {
+                if (!walletAddress) {
+                    setStatus('failed');
+                    sliderRef.current?.reset();
+                    return;
+                }
+                toAddress = walletAddress as string;
+            } else {
+                // For regular contacts, validate recipient exists
+                const normalizedPhone = normalizePhoneNumber(contactPhone as string);
+                const recipientData = await apiService.getUserByPhoneNumber(normalizedPhone);
+
+                if (!recipientData.success || !recipientData.data?.primary_address) {
+                    setStatus('failed');
+                    sliderRef.current?.reset();
+                    return;
+                }
+                toAddress = recipientData.data.primary_address;
             }
 
             // Navigate to payment success screen with all necessary transaction details
@@ -66,7 +81,9 @@ export default function PaymentConfirmScreen() {
                     coinSymbol,
                     currencyCode,
                     currencyFlag,
-                    toAddress: recipientData.data.primary_address,
+                    toAddress,
+                    type,
+                    walletAddress,
                 },
             });
         } catch (e) {
@@ -125,6 +142,8 @@ export default function PaymentConfirmScreen() {
                             contactPhone,
                             contactAvatarUrl,
                             contactCronId,
+                            type,
+                            walletAddress,
                         }
                     })}
                     className="p-2"
@@ -151,15 +170,28 @@ export default function PaymentConfirmScreen() {
                         <View className="flex-row items-center">
                             {renderAvatar()}
                             <View className="ml-3 flex-1">
-                                <View className="flex-row items-center mb-1">
-                                    <Logo size={12} color="#000000" fill="#000000" />
-                                    <UIText className="text-black font-sans text-base font-semibold ml-2">
-                                        {contactCronId || `${contactName}`}
-                                    </UIText>
-                                </View>
-                                <UIText className="text-foreground-secondary text-sm font-sans">
-                                    {contactPhone || 'No phone'}
-                                </UIText>
+                                {type !== "walletAddress" && type !== "solName" ? (
+                                    <>
+                                        <View className="flex-row items-center mb-1">
+                                            <Logo size={12} color="#000000" fill="#000000" />
+                                            <UIText className="text-black font-sans text-base font-semibold ml-2">
+                                                {contactCronId || `${contactName}`}
+                                            </UIText>
+                                        </View>
+                                        <UIText className="text-foreground-secondary text-sm font-sans">
+                                            {contactPhone || 'No phone'}
+                                        </UIText>
+                                    </>
+                                ) : (
+                                    <>
+                                        <UIText className="text-black font-sans text-base font-semibold mb-1">
+                                            {contactName}
+                                        </UIText>
+                                        <UIText className="text-foreground-secondary text-sm font-sans">
+                                            {walletAddress && `${(walletAddress as string).slice(0, 4)}...${(walletAddress as string).slice(-4)}`}
+                                        </UIText>
+                                    </>
+                                )}
                             </View>
                         </View>
                     </View>
