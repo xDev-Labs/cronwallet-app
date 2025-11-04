@@ -31,20 +31,56 @@ export default function CodeInput({ length, onComplete, error, value, onChange }
     }, [value, length]);
 
     const handleChange = (text: string, index: number) => {
-        if (!/^\d*$/.test(text)) return;
+        // Filter out non-digit characters
+        const digitsOnly = text.replace(/\D/g, '');
 
-        const newCode = [...code];
-        newCode[index] = text;
-        setCode(newCode);
-
-        const codeString = newCode.join('');
-        onChange?.(codeString);
-
-        if (text && index < length - 1) {
-            inputRefs.current[index + 1]?.focus();
+        if (!digitsOnly) {
+            // If empty or no digits, clear the current input
+            const newCode = [...code];
+            newCode[index] = '';
+            setCode(newCode);
+            onChange?.(newCode.join(''));
+            return;
         }
 
-        // Only auto-complete if onComplete is provided and no onChange
+        const newCode = [...code];
+
+        // Check if this is a paste operation (multiple characters)
+        if (digitsOnly.length > 1) {
+            // Paste operation: distribute digits across inputs starting from current index
+            const availableSlots = length - index;
+            const digitsToPaste = digitsOnly.slice(0, availableSlots);
+
+            // Fill inputs starting from current index
+            for (let i = 0; i < digitsToPaste.length; i++) {
+                newCode[index + i] = digitsToPaste[i];
+            }
+
+            setCode(newCode);
+            onChange?.(newCode.join(''));
+            
+            // Focus the next empty input or the last filled input
+            const nextEmptyIndex = newCode.findIndex((digit, i) => i > index && digit === '');
+            const targetIndex = nextEmptyIndex !== -1 ? nextEmptyIndex : Math.min(index + digitsToPaste.length, length - 1);
+            
+            setTimeout(() => {
+                inputRefs.current[targetIndex]?.focus();
+            }, 0);
+
+        } else {
+            // Single character input - only take the first character
+            newCode[index] = digitsOnly[0];
+            setCode(newCode);
+            onChange?.(newCode.join(''));
+
+            // Auto-focus next input for single character input
+            if (digitsOnly[0] && index < length - 1) {
+                inputRefs.current[index + 1]?.focus();
+            }
+        }
+
+        // Check for completion
+        const codeString = newCode.join('');
         if (!onChange && onComplete && newCode.every(digit => digit !== '') && newCode.length === length) {
             onComplete(codeString);
         }
@@ -77,8 +113,7 @@ export default function CodeInput({ length, onComplete, error, value, onChange }
                     onFocus={() => setFocusedIndex(index)}
                     onBlur={() => setFocusedIndex(null)}
                     keyboardType="number-pad"
-                    maxLength={1}
-                    selectTextOnFocus
+                    // selectTextOnFocus
                     accessible={true}
                     accessibilityLabel={`Digit ${index + 1} of ${length}`}
                 />

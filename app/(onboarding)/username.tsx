@@ -44,6 +44,12 @@ export default function UsernameScreen() {
     if (text.length > 20) {
       return "Username must be less than 20 characters";
     }
+    if (/^\d+$/.test(text)) {
+      return "Username cannot be only numbers";
+    }
+    if (/^\d/.test(text)) {
+      return "Username cannot start with a number";
+    }
     if (!/^[a-zA-Z0-9_]+$/.test(text)) {
       return "Username can only contain letters, numbers, and underscores";
     }
@@ -59,15 +65,29 @@ export default function UsernameScreen() {
     setIsAvailable(false);
   };
 
-  // Check cron ID availability with debounce
+  // Check username validation and cron ID availability with debounce
   useEffect(() => {
     if (username.length >= 3) {
       const timeoutId = setTimeout(async () => {
-        await checkCronIdAvailability(username);
+        // First validate the username
+        const validationError = validateUsername(username);
+        
+        if (validationError) {
+          // If validation fails, show error and don't check availability
+          setError(validationError);
+          setAvailabilityMessage("");
+          setIsAvailable(false);
+        } else {
+          // If validation passes, clear error and check availability
+          setError("");
+          await checkCronIdAvailability(username);
+        }
       }, 500); // 500ms debounce
 
       return () => clearTimeout(timeoutId);
     } else {
+      // Clear everything if username is too short
+      setError("");
       setAvailabilityMessage("");
       setIsAvailable(false);
       return undefined;
@@ -192,10 +212,14 @@ export default function UsernameScreen() {
                 onBlur={() => setIsFocused(false)}
               />
 
-              {/* Availability Status */}
+              {/* Validation Error and Availability Status */}
               {username.length >= 3 && (
                 <View className="mt-2">
-                  {isCheckingAvailability ? (
+                  {error ? (
+                    <Text className="text-error text-sm font-sans">
+                      {error}
+                    </Text>
+                  ) : isCheckingAvailability ? (
                     <Text className="text-foreground-tertiary text-sm font-sans">
                       Checking availability...
                     </Text>
