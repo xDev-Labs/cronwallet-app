@@ -7,7 +7,6 @@ import { mapBackendUserToUser } from "@/lib/utils/userMapping";
 
 import * as LocalAuthentication from "expo-local-authentication";
 import { useRouter } from "expo-router";
-import { ScanFace, Shield, Smartphone } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import {
   Alert,
@@ -76,14 +75,6 @@ export default function BiometricSetupScreen() {
   };
 
   const handleEnableBiometric = async () => {
-    if (!isAvailable || !isEnrolled) {
-      Alert.alert(
-        "Biometric Not Available",
-        "Please set up Face ID or Touch ID in your device settings first.",
-        [{ text: "OK" }]
-      );
-      return;
-    }
 
     setIsLoading(true);
 
@@ -93,6 +84,8 @@ export default function BiometricSetupScreen() {
         fallbackLabel: "Use Passcode",
         cancelLabel: "Cancel",
       });
+
+      console.log("Biometric result:", result);
 
       if (result.success) {
         // Update user in backend with face_id_enabled = true
@@ -146,56 +139,6 @@ export default function BiometricSetupScreen() {
       );
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleSkip = async () => {
-    try {
-      // Save user without biometric enabled
-      // const newUser: User = {
-      //     id: Date.now().toString(),
-      //     phoneNumber: (phoneNumber as string) || '',
-      //     countryCode: (countryCode as string) || '',
-      //     hasCompletedOnboarding: false,
-      //     biometricEnabled: false,
-      //     createdAt: new Date().toISOString(),
-      // };
-
-      // await saveUser(newUser);
-      router.replace("/(onboarding)/username");
-    } catch (error) {
-      console.error("Error saving user:", error);
-      Alert.alert("Error", "Failed to create account. Please try again.");
-    }
-  };
-
-  const getBiometricIcon = () => {
-    if (biometricType === "faceId") {
-      return <ScanFace size={80} color="#4A3DFF" strokeWidth={1.5} />;
-    } else if (biometricType === "fingerprint") {
-      return <Smartphone size={80} color="#4A3DFF" strokeWidth={1.5} />;
-    } else {
-      return <Shield size={80} color="#4A3DFF" strokeWidth={1.5} />;
-    }
-  };
-
-  const getBiometricTitle = () => {
-    if (biometricType === "faceId") {
-      return "Enable Face ID";
-    } else if (biometricType === "fingerprint") {
-      return "Enable Touch ID";
-    } else {
-      return "Enable Biometric";
-    }
-  };
-
-  const getBiometricDescription = () => {
-    if (biometricType === "faceId") {
-      return "Use Face ID for quick and secure access to your account";
-    } else if (biometricType === "fingerprint") {
-      return "Use Touch ID for quick and secure access to your account";
-    } else {
-      return "Use biometric authentication for quick and secure access";
     }
   };
 
