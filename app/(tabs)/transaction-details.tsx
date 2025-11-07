@@ -42,6 +42,9 @@ export default function TransactionDetailsScreen() {
           type: params.type,
         },
       });
+    } else if (params.fromHistory === "true") {
+      // If coming from history page, navigate back to history
+      router.push("/(tabs)/history");
     } else {
       router.back();
     }
@@ -140,7 +143,7 @@ export default function TransactionDetailsScreen() {
       transaction?.token &&
       transaction.token.length > 0 &&
       transaction.token[0].token_address ===
-      "DMC3nUVXBLNrB8f97wLqwkNw9DD7EXgqhPgev8gVTv7g"
+        "DMC3nUVXBLNrB8f97wLqwkNw9DD7EXgqhPgev8gVTv7g"
     ) {
       // Assuming ETH for now, could be made dynamic based on token_address
       return "USDC";
@@ -244,7 +247,8 @@ export default function TransactionDetailsScreen() {
                 To
               </Text>
               <Text className="text-base text-foreground-dark font-semibold">
-                {transaction.receiver?.phone_number || shortenTxnHash(transaction.receiver_addr)}
+                {transaction.receiver?.phone_number ||
+                  shortenTxnHash(transaction.receiver_addr)}
               </Text>
             </View>
 

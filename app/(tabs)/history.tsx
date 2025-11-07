@@ -110,6 +110,7 @@ export default function HistoryScreen() {
       params: {
         transactionData: JSON.stringify(item),
         userId: user?.user_id,
+        fromHistory: "true",
       },
     });
   };
@@ -117,7 +118,6 @@ export default function HistoryScreen() {
   const renderTransaction = ({ item }: { item: Transaction }) => {
     const direction = getTransactionDirection(item);
     const isSent = direction === "sent";
-
 
     return (
       <Pressable
@@ -150,7 +150,8 @@ export default function HistoryScreen() {
               </View>
               <Text className="text-sm text-foreground-tertiary mb-3">
                 {isSent ? "Sent to" : "Received from"}{" "}
-                {item.receiver?.phone_number || shortenTxnHash(item.receiver_addr)}
+                {item.receiver?.phone_number ||
+                  shortenTxnHash(item.receiver_addr)}
               </Text>
               <Text className="text-xs text-foreground-tertiary">
                 {formatDate(item.created_at)}
