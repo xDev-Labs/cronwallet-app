@@ -99,19 +99,6 @@ export default function HistoryScreen() {
     });
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "completed":
-        return "text-green-600";
-      case "pending":
-        return "text-yellow-600";
-      case "failed":
-        return "text-red-600";
-      default:
-        return "text-gray-600";
-    }
-  };
-
   const getTransactionDirection = (item: Transaction) => {
     return item.sender_addr === user?.primary_address ? "sent" : "received";
   };
@@ -131,38 +118,39 @@ export default function HistoryScreen() {
     const isSent = direction === "sent";
 
     return (
-      <Pressable onPress={() => handleTransactionPress(item)}>
-        <View className="bg-white rounded-xl p-4 mb-3 shadow-sm border border-gray-100">
-          <View className="flex-row justify-between items-center">
+      <Pressable
+        onPress={() => handleTransactionPress(item)}
+        className="active:opacity-80"
+      >
+        <View
+          className="bg-white rounded-2xl p-5 mb-3 shadow-sm"
+          style={{
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.05,
+            shadowRadius: 8,
+            elevation: 2,
+          }}
+        >
+          <View className="flex-row justify-between items-start">
             <View className="flex-1">
-              <View className="flex-row items-center mb-1">
+              <View className="flex-row items-center mb-2">
                 <Text
-                  className={`text-lg font-bold ${isSent ? "text-red-600" : "text-green-600"}`}
+                  className={`text-xl font-bold ${isSent ? "text-red-600" : "text-green-600"}`}
                 >
                   {isSent ? "-" : "+"}
                 </Text>
                 <Text
-                  className={`text-lg font-bold ml-1 ${isSent ? "text-red-600" : "text-green-600"}`}
+                  className={`text-xl font-bold ml-1 ${isSent ? "text-red-600" : "text-green-600"}`}
                 >
                   {formatAmount(item.amount)}
                 </Text>
               </View>
-              <Text className="text-sm text-foreground-tertiary">
+              <Text className="text-sm text-foreground-tertiary mb-3">
                 {isSent ? "Sent to" : "Received from"}{" "}
                 {item.receiver?.phone_number || "Unknown"}
               </Text>
-            </View>
-            <View className="items-end">
-              <View
-                className={`px-2 py-1 rounded-full ${getStatusColor(item.status)} bg-opacity-10`}
-              >
-                <Text
-                  className={`text-xs font-medium ${getStatusColor(item.status)}`}
-                >
-                  {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
-                </Text>
-              </View>
-              <Text className="text-xs text-foreground-tertiary mt-1">
+              <Text className="text-xs text-foreground-tertiary">
                 {formatDate(item.created_at)}
               </Text>
             </View>
@@ -175,10 +163,27 @@ export default function HistoryScreen() {
   if (isLoading) {
     return (
       <SafeAreaView edges={["top"]} className="flex-1 bg-background-light">
+        <View className="px-4 pt-4">
+          <View className="flex-row justify-between items-center mb-4">
+            <Pressable
+              onPress={() => router.back()}
+              className="p-2 -ml-2 active:opacity-70"
+            >
+              <ChevronLeft size={24} color="#000" />
+            </Pressable>
+            <Text variant="h3" className="text-black text-center font-semibold">
+              Transaction History
+            </Text>
+            <View className="w-10" />
+          </View>
+        </View>
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="large" color="#4A3DFF" />
-          <Text className="text-base text-foreground-tertiary mt-4">
+          <Text className="text-xl text-foreground-dark font-semibold mt-6 mb-2">
             Loading transactions...
+          </Text>
+          <Text className="text-base text-foreground-tertiary text-center px-8">
+            Please wait while we fetch your transaction history
           </Text>
         </View>
       </SafeAreaView>
@@ -188,27 +193,52 @@ export default function HistoryScreen() {
   if (transactions.length === 0) {
     return (
       <SafeAreaView edges={["top"]} className="flex-1 bg-background-light">
-        <Pressable
-          onPress={() => router.back()}
-          className="p-2 -ml-2 active:opacity-70"
-        >
-          <ChevronLeft size={24} color="#000" />
-        </Pressable>
-        <View className="flex-1 items-center justify-center px-6">
-          <View className="w-24 h-24 rounded-full bg-gray-100 items-center justify-center mb-4">
-            <Clock size={40} color="#9CA3AF" strokeWidth={1.5} />
+        <View className="px-4 pt-4">
+          <View className="flex-row justify-between items-center mb-4">
+            <Pressable
+              onPress={() => router.back()}
+              className="p-2 -ml-2 active:opacity-70"
+            >
+              <ChevronLeft size={24} color="#000" />
+            </Pressable>
+            <Text variant="h3" className="text-black text-center font-semibold">
+              Transaction History
+            </Text>
+            <View className="w-10" />
           </View>
-          <Text className="text-xl font-bold text-foreground-dark mb-2">
+        </View>
+        <View className="flex-1 items-center justify-center px-6">
+          <View
+            className="w-24 h-24 rounded-full bg-gray-50 items-center justify-center mb-6 border-2 border-gray-200"
+            style={{
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.05,
+              shadowRadius: 8,
+              elevation: 2,
+            }}
+          >
+            <Clock size={48} color="#9CA3AF" strokeWidth={1.5} />
+          </View>
+          <Text className="text-2xl font-bold text-foreground-dark mb-3 text-center">
             No transaction history
           </Text>
-          <Text className="text-base text-foreground-tertiary text-center mb-6">
-            Your payment history will appear here
+          <Text className="text-base text-foreground-tertiary text-center mb-8 px-4">
+            Your payment history will appear here once you make your first
+            transaction
           </Text>
           <Pressable
             onPress={handleRefresh}
-            className="bg-primary px-6 py-3 rounded-xl"
+            className="bg-[#4A3DFF] px-8 py-4 rounded-2xl active:opacity-80"
+            style={{
+              shadowColor: "#4A3DFF",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.3,
+              shadowRadius: 8,
+              elevation: 4,
+            }}
           >
-            <Text className="text-white font-semibold">Refresh</Text>
+            <Text className="text-white font-semibold text-base">Refresh</Text>
           </Pressable>
         </View>
       </SafeAreaView>
@@ -217,7 +247,7 @@ export default function HistoryScreen() {
 
   return (
     <SafeAreaView edges={["top"]} className="flex-1 bg-background-light">
-      <View className="flex-1 px-4 pt-4">
+      <View className="px-4 pt-4">
         <View className="flex-row justify-between items-center mb-4">
           <Pressable
             onPress={() => router.back()}
@@ -225,66 +255,62 @@ export default function HistoryScreen() {
           >
             <ChevronLeft size={24} color="#000" />
           </Pressable>
-          <Text
-            variant="h3"
-            className="text-black text-center font-semibold"
-          >
+          <Text variant="h3" className="text-black text-center font-semibold">
             Transaction History
           </Text>
-
           <Pressable
             onPress={handleRefresh}
             disabled={isRefreshing}
-            className="p-2"
+            className="p-2 active:opacity-70"
           >
             <RefreshCw
-              size={20}
-              color="#4A3DFF"
+              size={22}
+              color={isRefreshing ? "#9CA3AF" : "#4A3DFF"}
               className={isRefreshing ? "animate-spin" : ""}
             />
           </Pressable>
         </View>
-
-        <FlatList
-          data={transactions}
-          keyExtractor={(item) => item.transaction_hash}
-          renderItem={renderTransaction}
-          refreshControl={
-            <RefreshControl
-              refreshing={isRefreshing}
-              onRefresh={handleRefresh}
-              colors={["#4A3DFF"]}
-              tintColor="#4A3DFF"
-            />
-          }
-          onEndReached={loadMoreTransactions}
-          onEndReachedThreshold={0.1}
-          ListFooterComponent={() => {
-            if (isLoadingMore) {
-              return (
-                <View className="py-4 items-center">
-                  <ActivityIndicator size="small" color="#4A3DFF" />
-                  <Text className="text-sm text-foreground-tertiary mt-2">
-                    Loading more transactions...
-                  </Text>
-                </View>
-              );
-            }
-            if (!hasMoreData && transactions.length > 0) {
-              return (
-                <View className="py-4 items-center">
-                  <Text className="text-sm text-foreground-tertiary">
-                    No more transactions
-                  </Text>
-                </View>
-              );
-            }
-            return null;
-          }}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 20 }}
-        />
       </View>
+
+      <FlatList
+        data={transactions}
+        keyExtractor={(item) => item.transaction_hash}
+        renderItem={renderTransaction}
+        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 20 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={handleRefresh}
+            colors={["#4A3DFF"]}
+            tintColor="#4A3DFF"
+          />
+        }
+        onEndReached={loadMoreTransactions}
+        onEndReachedThreshold={0.1}
+        ListFooterComponent={() => {
+          if (isLoadingMore) {
+            return (
+              <View className="py-6 items-center">
+                <ActivityIndicator size="small" color="#4A3DFF" />
+                <Text className="text-sm text-foreground-tertiary mt-3">
+                  Loading more transactions...
+                </Text>
+              </View>
+            );
+          }
+          if (!hasMoreData && transactions.length > 0) {
+            return (
+              <View className="py-6 items-center">
+                <Text className="text-sm text-foreground-tertiary">
+                  No more transactions
+                </Text>
+              </View>
+            );
+          }
+          return null;
+        }}
+        showsVerticalScrollIndicator={false}
+      />
     </SafeAreaView>
   );
 }
