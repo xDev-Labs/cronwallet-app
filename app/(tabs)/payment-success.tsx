@@ -72,15 +72,18 @@ export default function PaymentSuccessScreen() {
       const smartAccountAddress = user?.primary_address as string;
       const ownerPublicKey = (await storage.getPublicKey()) as string;
 
-      if (
-        !smartAccountAddress ||
-        !ownerPublicKey ||
-        !toAddress ||
-        !coinAddress ||
-        !coinDecimals ||
-        !coinAmount
-      ) {
-        throw new Error("Missing required transaction parameters");
+      const missingParams = [];
+      if (!smartAccountAddress) missingParams.push("smartAccountAddress");
+      if (!ownerPublicKey) missingParams.push("ownerPublicKey");
+      if (!toAddress) missingParams.push("toAddress");
+      if (!coinAddress) missingParams.push("coinAddress");
+      if (!coinDecimals) missingParams.push("coinDecimals");
+      if (!coinAmount) missingParams.push("coinAmount");
+
+      if (missingParams.length > 0) {
+        throw new Error(
+          `Missing required transaction parameters: ${missingParams.join(", ")}`
+        );
       }
       let encodedTransaction = null;
 
