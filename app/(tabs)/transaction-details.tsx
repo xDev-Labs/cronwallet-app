@@ -140,7 +140,7 @@ export default function TransactionDetailsScreen() {
       transaction?.token &&
       transaction.token.length > 0 &&
       transaction.token[0].token_address ===
-        "DMC3nUVXBLNrB8f97wLqwkNw9DD7EXgqhPgev8gVTv7g"
+      "DMC3nUVXBLNrB8f97wLqwkNw9DD7EXgqhPgev8gVTv7g"
     ) {
       // Assuming ETH for now, could be made dynamic based on token_address
       return "USDC";
@@ -244,7 +244,7 @@ export default function TransactionDetailsScreen() {
                 To
               </Text>
               <Text className="text-base text-foreground-dark font-semibold">
-                {transaction.receiver?.phone_number || "Unknown"}
+                {transaction.receiver?.phone_number || shortenTxnHash(transaction.receiver_addr)}
               </Text>
             </View>
 
@@ -271,7 +271,7 @@ export default function TransactionDetailsScreen() {
             {/* Order ID */}
             <View className="flex-row justify-between items-center py-4 border-b border-gray-100">
               <Text className="text-sm text-foreground-tertiary font-medium">
-                Order ID
+                Transaction ID
               </Text>
               <Pressable
                 onPress={handleCopyOrderId}
