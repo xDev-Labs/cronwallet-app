@@ -18,6 +18,7 @@ import {
     Modal,
     Platform,
     Text,
+    TextInput,
     TouchableOpacity,
     TouchableWithoutFeedback,
     View
@@ -34,8 +35,9 @@ export default function PaymentInitiateScreen() {
     const [isCurrencyModalVisible, setIsCurrencyModalVisible] = useState(false);
     const [selectedCurrency, setSelectedCurrency] = useState({ name: 'USD', code: 'USD', flag: 'us' });
     const currencySlideAnim = useRef(new Animated.Value(0)).current;
+    const amountInputRef = useRef<TextInput>(null);
 
-    const [amount, setAmount] = useState('0.00');
+    const [amount, setAmount] = useState('');
     const [coinAmount, setCoinAmount] = useState(0.00);
     const [isLoading, setIsLoading] = useState(false);
     const [userTokens, setUserTokens] = useState<Token[]>([]);
@@ -65,7 +67,7 @@ export default function PaymentInitiateScreen() {
                     setUserTokens(tokens);
                     // Set default selected coin to the first token if available
                     if (tokens.length > 0 && !selectedCoin) {
-                        setSelectedCoin(tokens[0]);
+                        setSelectedCoin(tokens[tokens.length - 1]);
                     }
                 }
             } catch (error) {
@@ -121,9 +123,29 @@ export default function PaymentInitiateScreen() {
         });
     };
 
-    const selectCurrency = (currency: any) => {
-        setSelectedCurrency(currency);
-        closeCurrencyModal();
+    const renderAvatar = () => {
+        if (contactAvatarUrl && typeof contactAvatarUrl === 'string' && contactAvatarUrl.trim()) {
+            return (
+                <Image
+                    source={{ uri: contactAvatarUrl }}
+                    className="w-12 h-12 rounded-full"
+                />
+            );
+        }
+
+        const name = typeof contactName === 'string' ? contactName : 'Unknown';
+        const initial = name.charAt(0).toUpperCase();
+        const colors = ['#E91E63', '#9C27B0', '#FF5722', '#2196F3', '#4CAF50'];
+        const colorIndex = name.charCodeAt(0) % colors.length;
+
+        return (
+            <View
+                className="w-12 h-12 rounded-full items-center justify-center"
+                style={{ backgroundColor: colors[colorIndex] }}
+            >
+                <Text className="text-white text-xl font-bold">{initial}</Text>
+            </View>
+        );
     };
 
     const convertAmount = async (inputAmount: string, currency: string, token: Token | null) => {
@@ -184,6 +206,15 @@ export default function PaymentInitiateScreen() {
         return () => clearTimeout(timer);
     }, [amount, selectedCurrency.code, selectedCoin]);
 
+    // Auto-focus input when screen loads
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            amountInputRef.current?.focus();
+        }, 100);
+
+        return () => clearTimeout(timer);
+    }, []);
+
     const numericAmount = parseFloat(amount);
     const isTransferDisabled = !amount || Number.isNaN(numericAmount) || numericAmount <= 0 || isLoading || hasInsufficientBalance || !selectedCoin;
 
@@ -226,6 +257,47 @@ export default function PaymentInitiateScreen() {
         setCoinAmount(0.00);
     };
 
+    // Mask sensitive data based on payment type
+    const maskPhoneNumber = (phone: string | string[] | undefined): string => {
+        if (!phone) return "No phone";
+        const phoneStr = Array.isArray(phone) ? phone[0] : phone;
+
+        // Mask wallet address
+        if (type === "walletAddress" && phoneStr && phoneStr.length > 20) {
+            // Show first 8 and last 8 characters for wallet addresses
+            const firstPart = phoneStr.slice(0, 8);
+            const lastPart = phoneStr.slice(-8);
+            return `${firstPart}...${lastPart}`;
+        }
+
+        // Mask phone number
+        if (type === "cronId" && phoneStr && phoneStr.length > 6) {
+            // Show first 3 and last 4 digits, mask the rest
+            const firstPart = phoneStr.slice(0, 3);
+            const lastPart = phoneStr.slice(-4);
+            const maskedLength = phoneStr.length - 7;
+            const masked = "*".repeat(Math.max(maskedLength, 4));
+            return `${firstPart}${masked}${lastPart}`;
+        }
+
+        return phoneStr || "No phone";
+    };
+
+    // Mask display name when it's a wallet address
+    const maskDisplayName = (name: string | string[] | undefined): string => {
+        if (!name) return "Unknown";
+        const nameStr = Array.isArray(name) ? name[0] : name;
+
+        // Mask wallet address in name
+        if (type === "walletAddress" && nameStr && nameStr.length > 20) {
+            const firstPart = nameStr.slice(0, 8);
+            const lastPart = nameStr.slice(-8);
+            return `${firstPart}...${lastPart}`;
+        }
+
+        return nameStr || "Unknown";
+    };
+
     return (
         <SafeAreaView edges={['top']} className="flex-1 bg-white">
             <KeyboardAvoidingView
@@ -242,51 +314,39 @@ export default function PaymentInitiateScreen() {
                         </View>
 
                         {/* Main Content */}
-                        <View className="flex-1 px-4">
-                            {/* You send exactly section */}
-                            <View className="mb-8">
-                                <Text className="font-sans text-black text-base mb-3">You send exactly</Text>
-                                <View className="flex-row items-center justify-between">
-                                    <View className="flex-1 mr-4">
-                                        <TouchableOpacity
-                                            className="w-2/3 bg-gray-100 rounded-xl p-4 flex-row items-center justify-between"
-                                            onPress={openCurrencyModal}
-                                        >
-                                            <View className="flex-row items-center">
-                                                <Image
-                                                    source={{ uri: `https://flagcdn.com/w20/${selectedCurrency.flag}.png` }}
-                                                    className="w-6 h-4 mr-2"
-                                                />
-                                                <Text className="text-black font-medium">{selectedCurrency.code}</Text>
-                                            </View>
-                                            <ChevronDown size={16} color="#000" />
-                                        </TouchableOpacity>
-                                    </View>
-                                    <Input
-                                        className="w-1/3 text-right text-[#4A3DFF] text-4xl font-bold bg-white border-0"
-                                        placeholder="0.00"
-                                        value={amount}
-                                        onChangeText={setAmount}
-                                        keyboardType="decimal-pad"
-                                    />
-                                </View>
-                                {hasInsufficientBalance && selectedCoin && (
-                                    <Text className=" font-sans text-red-500 text-sm text-right mt-2">
-                                        Insufficient balance (Available: {(selectedCoin.balance)} {selectedCoin.symbol.toUpperCase()})
+                        <View className="flex-1 px-4 justify-center items-center ">
+
+                            <View className="flex items-center justify-center mb-12">
+                                {renderAvatar()}
+                                <View className="">
+                                    <Text className="text-black text-lg font-semibold">
+                                        {maskDisplayName(contactName)}
                                     </Text>
-                                )}
+                                    {type !== "walletAddress" && type !== "solName" && (
+                                        <Text className="text-foreground-secondary text-center text-sm mt-0.5">
+                                            {maskPhoneNumber(contactPhone)}
+                                        </Text>
+                                    )}
+                                </View>
                             </View>
 
                             {/* Recipient gets section */}
-                            <View className="mb-8">
-                                <Text className="text-black font-sans text-base mb-3">Recipient gets</Text>
-                                <View className="flex-row items-center justify-between">
-                                    <View className="flex-1 mr-4">
+                            <View className="mb-8 flex items-center">
+                                <Input
+                                    ref={amountInputRef}
+                                    className="border-0 h-20 text-[#4A3DFF] text-6xl font-bold bg-white text-center"
+                                    placeholder="0"
+                                    value={amount}
+                                    onChangeText={setAmount}
+                                    keyboardType="decimal-pad"
+                                />
+                                <View className="flex-row items-center mt-4">
+                                    <View className="">
                                         <TouchableOpacity
-                                            className="w-2/3 bg-gray-100 rounded-xl p-4 flex-row items-center justify-between"
+                                            className=" bg-gray-100 rounded-xl p-4 flex-row items-center justify-between"
                                             onPress={openModal}
                                         >
-                                            <View className="flex-row items-center">
+                                            <View className="flex-row items-center ">
                                                 {selectedCoin && (
                                                     <>
                                                         <CryptoIcon symbol={selectedCoin.name.toLowerCase()} size={24} variant="branded" />
@@ -297,29 +357,7 @@ export default function PaymentInitiateScreen() {
                                             <ChevronDown size={16} color="#000" />
                                         </TouchableOpacity>
                                     </View>
-                                    <View className="w-1/3 items-end justify-center">
-                                        {isLoading ? (
-                                            <ActivityIndicator size="small" color="#4A3DFF" />
-                                        ) : (
-                                            <Text className="text-right text-[#4A3DFF] text-4xl font-bold">{coinAmount.toFixed(2)}</Text>
-                                        )}
-                                    </View>
-                                </View>
-                            </View>
 
-                            {/* Estimated fees section */}
-                            <View className="border-2 border-dashed border-green-500 rounded-xl p-4 mb-8">
-                                <View className="flex-row items-center justify-between">
-                                    <View className="flex-1">
-                                        <View className="flex-row items-center mb-2">
-                                            <View className="w-5 h-5 bg-black rounded items-center justify-center mr-2">
-                                                <Text className="text-white text-xs">$</Text>
-                                            </View>
-                                            <Text className="font-sans text-gray-500 text-sm">Estimated fees</Text>
-                                        </View>
-                                        <Text className="font-sans text-black text-sm">Included in USD amount:</Text>
-                                    </View>
-                                    <Text className="text-green-500 font-bold text-lg">FREE</Text>
                                 </View>
                             </View>
                         </View>
@@ -382,7 +420,7 @@ export default function PaymentInitiateScreen() {
                             ) : userTokens.length === 0 ? (
                                 <Text className="text-gray-500 text-center py-8">No tokens available</Text>
                             ) : (
-                                userTokens.map((token, index) => (
+                                userTokens.map((token) => (
                                     <CoinSelectionItem
                                         key={token.mintAddr}
                                         coin={token}
@@ -398,55 +436,6 @@ export default function PaymentInitiateScreen() {
                 </View>
             </Modal>
 
-            {/* Currency Selection Modal */}
-            <Modal
-                visible={isCurrencyModalVisible}
-                transparent={true}
-                animationType="none"
-                onRequestClose={closeCurrencyModal}
-            >
-                <View className="flex-1 justify-end bg-black/50">
-                    <TouchableOpacity
-                        className="flex-1"
-                        onPress={closeCurrencyModal}
-                        activeOpacity={1}
-                    />
-                    <Animated.View
-                        className="bg-white rounded-t-3xl"
-                        style={{
-                            transform: [{
-                                translateY: currencySlideAnim.interpolate({
-                                    inputRange: [0, 1],
-                                    outputRange: [400, 0]
-                                })
-                            }]
-                        }}
-                    >
-                        <View className="p-6">
-                            <Text className="text-black text-xl font-bold mb-6">Select Currency</Text>
-
-                            {currencies.map((currency, index) => (
-                                <TouchableOpacity
-                                    key={index}
-                                    className="flex-row items-center justify-between py-4 border-b border-gray-100"
-                                    onPress={() => selectCurrency(currency)}
-                                >
-                                    <View className="flex-row items-center">
-                                        <Image
-                                            source={{ uri: `https://flagcdn.com/w40/${currency.flag}.png` }}
-                                            className="w-8 h-6 mr-3"
-                                        />
-                                        <View>
-                                            <Text className="text-black text-base font-medium">{currency.code}</Text>
-                                            <Text className="text-gray-500 text-sm">{currency.name}</Text>
-                                        </View>
-                                    </View>
-                                </TouchableOpacity>
-                            ))}
-                        </View>
-                    </Animated.View>
-                </View>
-            </Modal>
         </SafeAreaView>
     );
 }
