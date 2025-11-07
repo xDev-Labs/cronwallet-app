@@ -203,19 +203,6 @@ export default function PaymentConfirmScreen() {
                         Transfer Details
                     </UIText>
                     <View className="bg-white rounded-xl p-4 border border-gray-100">
-                        {/* You Send */}
-                        <View className="flex-row items-center justify-between mb-4">
-                            <View className="flex-row items-center">
-                                <Image
-                                    source={{ uri: `https://flagcdn.com/w20/${currencyFlag || 'us'}.png` }}
-                                    className="w-6 h-4 mr-2"
-                                />
-                                <UIText className="text-black font-sans ml-2">{currencyCode || 'USD'}</UIText>
-                            </View>
-                            <UIText className="text-[#4A3DFF] text-3xl font-bold">
-                                {amount || '0.00'}
-                            </UIText>
-                        </View>
 
                         {/* Receiver Gets */}
                         <View className="flex-row items-center justify-between mb-4">
