@@ -118,16 +118,17 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView edges={["top"]} className="flex-1 bg-white">
-
       <View className="px-4 py-6 ">
         <View className="p-8 bg-[#12062B] rounded-2xl">
           {/* Top Row: Avatar + User Info | QR + Copy */}
           <View className="flex-row items-center justify-between">
             {/* Left Side: Avatar + User Info */}
             <View className="flex-row items-center">
-              <Pressable>
+              <Pressable onPress={() => router.push("/(tabs)/profile")}>
                 <Image
-                  source={{ uri: "https://visual-lime-chickadee.myfilebase.com/ipfs/QmS4qaqwEuQnDyQAAZ5Ghm6KzAoW2m9YRnQ1ku4Q23JX98" }}
+                  source={{
+                    uri: "https://visual-lime-chickadee.myfilebase.com/ipfs/QmS4qaqwEuQnDyQAAZ5Ghm6KzAoW2m9YRnQ1ku4Q23JX98",
+                  }}
                   className="w-12 h-12 rounded-full items-center justify-center mr-4"
                   resizeMode="cover"
                 />
@@ -149,7 +150,6 @@ export default function HomeScreen() {
               </Pressable>
             </View>
           </View>
-
         </View>
       </View>
 
@@ -195,7 +195,6 @@ export default function HomeScreen() {
             </View>
           </View>
         </View>
-
       </ScrollView>
 
       {/* Wallet Selection Modal */}
