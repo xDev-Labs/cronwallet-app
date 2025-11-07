@@ -95,7 +95,6 @@ export default function PaymentSuccessScreen() {
           new PublicKey(ownerPublicKey)
         );
       } else {
-
         // Create encoded transaction
         encodedTransaction = await transferSpl(
           Number(coinAmount) * 10 ** Number(coinDecimals),
@@ -275,13 +274,15 @@ export default function PaymentSuccessScreen() {
   // Render loading state
   if (isProcessing) {
     return (
-      <SafeAreaView edges={["top"]} className="flex-1 bg-white">
+      <SafeAreaView edges={["top"]} className="flex-1 bg-background-light">
         <View className="flex-1 items-center justify-center px-4">
-          <ActivityIndicator size="large" color="#4A3DFF" />
-          <Text className="text-black text-lg font-medium font-sans mt-6 text-center">
+          <View className="mb-6">
+            <ActivityIndicator size="large" color="#4A3DFF" />
+          </View>
+          <Text className="text-foreground-dark text-xl font-semibold mt-4 text-center mb-2">
             Processing transaction...
           </Text>
-          <Text className="text-gray-500 text-sm font-sans mt-2 text-center">
+          <Text className="text-foreground-tertiary text-base text-center px-8">
             Please wait while we complete your payment
           </Text>
         </View>
@@ -292,22 +293,49 @@ export default function PaymentSuccessScreen() {
   // Render error state
   if (transactionError) {
     return (
-      <SafeAreaView edges={["top"]} className="flex-1 bg-white">
+      <SafeAreaView edges={["top"]} className="flex-1 bg-background-light">
         <View className="flex-1 items-center justify-center px-4">
-          <View className="w-20 h-20 bg-red-100 rounded-full items-center justify-center mb-6">
-            <Text className="text-red-500 text-4xl">⚠️</Text>
+          <View
+            className="w-24 h-24 bg-red-50 rounded-full items-center justify-center mb-6 border-2 border-red-200"
+            style={{
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.1,
+              shadowRadius: 8,
+              elevation: 2,
+            }}
+          >
+            <Text className="text-red-500 text-5xl">⚠️</Text>
           </View>
-          <Text className="text-black text-xl font-semibold font-sans mb-2 text-center">
+          <Text className="text-foreground-dark text-2xl font-bold mb-3 text-center">
             Transaction Failed
           </Text>
-          <Text className="text-gray-500 text-base font-sans text-center mb-6">
-            {transactionError}
-          </Text>
-          <TouchableOpacity
-            className="bg-[#4A3DFF] py-3.5 px-8 rounded-3xl"
-            onPress={handleRetry}
+          <View
+            className="bg-white rounded-2xl p-6 mb-8 mx-4 shadow-sm"
+            style={{
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.05,
+              shadowRadius: 8,
+              elevation: 2,
+            }}
           >
-            <Text className="text-white text-base font-semibold font-sans">
+            <Text className="text-foreground-tertiary text-base text-center">
+              {transactionError}
+            </Text>
+          </View>
+          <TouchableOpacity
+            className="bg-[#4A3DFF] py-4 px-12 rounded-2xl active:opacity-80"
+            onPress={handleRetry}
+            style={{
+              shadowColor: "#4A3DFF",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.3,
+              shadowRadius: 8,
+              elevation: 4,
+            }}
+          >
+            <Text className="text-white text-base font-semibold">
               Try Again
             </Text>
           </TouchableOpacity>
@@ -317,57 +345,128 @@ export default function PaymentSuccessScreen() {
   }
 
   // Render success state
+  const recipientName =
+    type === "solName"
+      ? contact.name
+      : type === "walletAddress"
+        ? `${(walletAddress as string).slice(0, 4)}...${(walletAddress as string).slice(-4)}`
+        : contact.name.split(" ")[0];
+
   return (
-    <SafeAreaView edges={["top"]} className="flex-1 justify-center bg-white">
-      <View
-        ref={successScreenRef}
-        collapsable={false}
-        className="flex-1 px-4 pt-[60px] bg-white justify-center"
-      >
-        <View className="items-center mb-10">
-          <View className="mb-4">
-            <CheckSquared size={40} color="#4CAF50" />
-          </View>
+    <SafeAreaView edges={["top"]} className="flex-1 bg-background-light">
+      <View ref={successScreenRef} collapsable={false} className="flex-1">
+        {/* Success Header Card */}
+        <View className="px-4 pt-8 pb-6">
+          <View
+            className="bg-white rounded-2xl p-8 items-center shadow-sm"
+            style={{
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.05,
+              shadowRadius: 8,
+              elevation: 2,
+            }}
+          >
+            {/* Success Icon */}
+            <View className="w-20 h-20 bg-green-50 rounded-full items-center justify-center mb-6 border-2 border-green-200">
+              <CheckSquared size={48} color="#22C55E" />
+            </View>
 
-          <Text className="text-black text-2xl font-semibold font-sans mb-6">
-            Payment Completed
-          </Text>
+            {/* Success Title */}
+            <Text className="text-foreground-dark text-3xl font-bold mb-2 text-center">
+              Payment Completed
+            </Text>
 
-          <Text className="text-black text-2xl font-normal font-sans mb-6">
-            {amount} {coinSymbol}
-          </Text>
-
-          <Text className="text-gray-500 text-base font-sans mb-2">
-            Paid to
-          </Text>
-          <Text className="text-black text-xl font-semibold font-sans mb-3">
-            {type === "solName" ? contact.name : (type === "walletAddress" ? `${(walletAddress as string).slice(0, 4)}...${(walletAddress as string).slice(-4)}` : contact.name.split(" ")[0])}
-          </Text>
-
-          {type !== "walletAddress" && type !== "solName" && contactCronId && (
-            <View className="flex-row items-center gap-1.5 mb-2">
-              <Logo size={12} color="#000000" fill="#000000" />
-              <Text className="text-gray-500 text-sm font-sans">
-                Cron ID: {contactCronId}
+            {/* Amount */}
+            <View className="items-center mb-6">
+              <Text className="text-foreground-tertiary text-sm mb-2">
+                Amount Sent
+              </Text>
+              <Text className="text-foreground-dark text-4xl font-bold">
+                {amount} {coinSymbol}
               </Text>
             </View>
-          )}
+          </View>
+        </View>
 
-          {(type === "walletAddress" || type === "solName") && walletAddress && (
-            <Text className="text-gray-500 text-sm font-sans mb-2">
-              {`${(walletAddress as string).slice(0, 8)}...${(walletAddress as string).slice(-8)}`}
-            </Text>
-          )}
+        {/* Transaction Details Card */}
+        <View className="px-4 pb-6">
+          <View
+            className="bg-white rounded-2xl p-6 shadow-sm"
+            style={{
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.05,
+              shadowRadius: 8,
+              elevation: 2,
+            }}
+          >
+            {/* Paid to */}
+            <View className="mb-5 pb-5 border-b border-gray-100">
+              <Text className="text-foreground-tertiary text-sm font-medium mb-2">
+                Paid to
+              </Text>
+              <Text className="text-foreground-dark text-xl font-bold">
+                {recipientName}
+              </Text>
+            </View>
 
-          <Text className="text-gray-500 text-sm font-sans">
-            {formattedDate}
-          </Text>
+            {/* Cron ID or Wallet Address */}
+            {type !== "walletAddress" &&
+              type !== "solName" &&
+              contactCronId && (
+                <View className="mb-5 pb-5 border-b border-gray-100">
+                  <Text className="text-foreground-tertiary text-sm font-medium mb-2">
+                    Cron ID
+                  </Text>
+                  <View className="flex-row items-center gap-2">
+                    <Logo size={16} color="#000000" fill="#000000" />
+                    <Text className="text-foreground-dark text-base font-semibold">
+                      {contactCronId}
+                    </Text>
+                  </View>
+                </View>
+              )}
+
+            {(type === "walletAddress" || type === "solName") &&
+              walletAddress && (
+                <View className="mb-5 pb-5 border-b border-gray-100">
+                  <Text className="text-foreground-tertiary text-sm font-medium mb-2">
+                    Wallet Address
+                  </Text>
+                  <Text className="text-foreground-dark text-base font-semibold font-mono">
+                    {`${(walletAddress as string).slice(0, 8)}...${(walletAddress as string).slice(-8)}`}
+                  </Text>
+                </View>
+              )}
+
+            {/* Date and Time */}
+            <View>
+              <Text className="text-foreground-tertiary text-sm font-medium mb-2">
+                Date & Time
+              </Text>
+              <Text className="text-foreground-dark text-base font-semibold">
+                {formattedDate}
+              </Text>
+            </View>
+          </View>
         </View>
       </View>
 
-      <View className="p-4 gap-3 bg-white mb-6">
+      {/* Done Button */}
+      <View className="px-4 pb-6 pt-2">
         <Pressable>
-          <Button onPress={handleDone} className="w-full">
+          <Button
+            onPress={handleDone}
+            className="w-full"
+            style={{
+              shadowColor: "#4A3DFF",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.3,
+              shadowRadius: 8,
+              elevation: 4,
+            }}
+          >
             Done
           </Button>
         </Pressable>
