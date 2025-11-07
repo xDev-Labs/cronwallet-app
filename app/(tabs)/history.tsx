@@ -2,6 +2,7 @@ import { Text } from "@/components/ui/text";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { apiService } from "@/lib/services/api";
 import type { Transaction } from "@/lib/types/transaction.types";
+import { shortenTxnHash } from "@/lib/utils";
 import { mapBackendTransactionToTransaction } from "@/lib/utils/transactionMapping";
 import { router } from "expo-router";
 import { ChevronLeft, Clock, RefreshCw } from "lucide-react-native";
@@ -117,6 +118,7 @@ export default function HistoryScreen() {
     const direction = getTransactionDirection(item);
     const isSent = direction === "sent";
 
+
     return (
       <Pressable
         onPress={() => handleTransactionPress(item)}
@@ -148,7 +150,7 @@ export default function HistoryScreen() {
               </View>
               <Text className="text-sm text-foreground-tertiary mb-3">
                 {isSent ? "Sent to" : "Received from"}{" "}
-                {item.receiver?.phone_number || "Unknown"}
+                {item.receiver?.phone_number || shortenTxnHash(item.receiver_addr)}
               </Text>
               <Text className="text-xs text-foreground-tertiary">
                 {formatDate(item.created_at)}
