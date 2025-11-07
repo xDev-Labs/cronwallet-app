@@ -1,17 +1,20 @@
 import { Checks } from "@/components/icons/Checks";
 import { Text } from "@/components/ui/text";
+import { useAuth } from "@/lib/contexts/AuthContext";
 import { Transaction } from "@/lib/types";
 import { shortenTxnHash } from "@/lib/utils";
 import * as Clipboard from "expo-clipboard";
 import { router, useLocalSearchParams } from "expo-router";
 import { ChevronLeft, Copy } from "lucide-react-native";
 import { useEffect, useState } from "react";
-import { Alert, Pressable, View } from "react-native";
+import { Alert, Pressable, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function TransactionDetailsScreen() {
   const params = useLocalSearchParams();
+  const { user } = useAuth();
   const [transaction, setTransaction] = useState<Transaction | null>(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     // Parse transaction data from params
@@ -48,7 +51,8 @@ export default function TransactionDetailsScreen() {
     if (transaction?.transaction_hash) {
       try {
         await Clipboard.setStringAsync(transaction.transaction_hash);
-        Alert.alert("Copied", "Order ID copied to clipboard");
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
       } catch (error) {
         console.error("Error copying to clipboard:", error);
         Alert.alert("Error", "Failed to copy Order ID");
@@ -98,13 +102,29 @@ export default function TransactionDetailsScreen() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "completed":
-        return "text-green-600";
+        return {
+          text: "text-green-600",
+          bg: "bg-green-50",
+          border: "border-green-200",
+        };
       case "pending":
-        return "text-yellow-600";
+        return {
+          text: "text-yellow-600",
+          bg: "bg-yellow-50",
+          border: "border-yellow-200",
+        };
       case "failed":
-        return "text-red-600";
+        return {
+          text: "text-red-600",
+          bg: "bg-red-50",
+          border: "border-red-200",
+        };
       default:
-        return "text-gray-600";
+        return {
+          text: "text-gray-600",
+          bg: "bg-gray-50",
+          border: "border-gray-200",
+        };
     }
   };
 
@@ -140,101 +160,146 @@ export default function TransactionDetailsScreen() {
     );
   }
 
+  const statusColors = getStatusColor(transaction.status);
+  const isSent = transaction.sender_addr === user?.primary_address;
+
   return (
     <SafeAreaView edges={["top"]} className="flex-1 bg-background-light">
       {/* Header */}
-      <View className="flex-row items-center px-4 py-4 bg-white">
-        <Pressable onPress={handleBackPress} className="mr-4">
-          <ChevronLeft size={24} color="#000" />
-        </Pressable>
-        <Text className="text-xl font-sans text-black">Payment Details</Text>
+      <View className="px-4 pt-4">
+        <View className="flex-row justify-between items-center mb-4">
+          <Pressable
+            onPress={handleBackPress}
+            className="p-2 -ml-2 active:opacity-70"
+          >
+            <ChevronLeft size={24} color="#000" />
+          </Pressable>
+          <Text variant="h3" className="text-black text-center font-semibold">
+            Payment Details
+          </Text>
+          <View className="w-10" />
+        </View>
       </View>
 
-      <View className="flex-1 px-4 py-6">
-        {/* Amount Section */}
-        <View className="bg-white rounded-xl p-6 mb-6 border-b border-[#DDDDDD]">
-          <Text className="text-center font-sans text-base text-foreground-tertiary mb-2">
-            Amount
-          </Text>
-          <Text className="text-center text-3xl font-sans font-semibold text-foreground-dark mb-2">
-            {formatAmount(transaction.amount)}
-          </Text>
-          <Text className="text-center font-sans text-sm text-foreground-tertiary mb-4">
-            {getCryptoAmount()} {getCryptoSymbol()}
-          </Text>
-
-          {/* Status Badge */}
-          <View className="flex-row items-center justify-center">
-            <View className="w-4 h-4 bg-green-600 rounded-sm items-center justify-center mr-2">
-              <Checks size={12} color="white" />
-            </View>
-            <Text
-              className={`text-sm font-medium ${getStatusColor(transaction.status)}`}
-            >
-              {transaction.status.charAt(0).toUpperCase() +
-                transaction.status.slice(1)}
+      <ScrollView
+        className="flex-1"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 20 }}
+      >
+        <View className="px-4 pt-2">
+          {/* Amount Section */}
+          <View
+            className="bg-white rounded-2xl p-8 mb-4 shadow-sm"
+            style={{
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.05,
+              shadowRadius: 8,
+              elevation: 2,
+            }}
+          >
+            <Text className="text-center text-sm text-foreground-tertiary mb-3">
+              Amount
             </Text>
-          </View>
-        </View>
-
-        {/* Transaction Details */}
-        <View className="bg-white rounded-xl p-4 ">
-          {/* To */}
-          <View className="flex-row justify-between items-center py-3">
-            <Text className="text-base text-foreground-tertiary font-sans">
-              To
+            <Text className="text-center text-4xl font-bold text-foreground-dark mb-3">
+              {isSent ? "-" : "+"}
+              {formatAmount(transaction.amount)}
             </Text>
-            <Text className="text-base text-foreground-dark font-medium">
-              {transaction.receiver?.phone_number || "Unknown"}
-            </Text>
-          </View>
-
-          {/* Date */}
-          <View className="flex-row justify-between items-center py-3 ">
-            <Text className="text-base text-foreground-tertiary font-sans">
-              Date
-            </Text>
-            <Text className="text-base text-foreground-dark font-medium">
-              {formatDate(transaction.created_at)}
-            </Text>
-          </View>
-
-          {/* Time */}
-          <View className="flex-row justify-between items-center py-3 ">
-            <Text className="text-base text-foreground-tertiary font-sans">
-              Time
-            </Text>
-            <Text className="text-base text-foreground-dark font-medium">
-              {formatTime(transaction.created_at)}
-            </Text>
-          </View>
-
-          {/* Order ID */}
-          <View className="flex-row justify-between items-center py-3">
-            <Text className="text-base text-foreground-tertiary font-sans">
-              Order ID
-            </Text>
-            <View className="flex-row items-center">
-              <Text className="text-base text-foreground-dark font-medium mr-2">
-                {shortenTxnHash(transaction.transaction_hash)}
-              </Text>
-              <Pressable onPress={handleCopyOrderId}>
-                <Copy size={16} color="#6B7280" />
-              </Pressable>
-            </View>
-          </View>
-
-          {/* Paid with */}
-          <View className="flex-row justify-between items-center py-3">
-            <Text className="text-base text-foreground-tertiary font-sans">
-              Paid with
-            </Text>
-            <Text className="text-base text-foreground-dark font-medium">
+            <Text className="text-center text-sm text-foreground-tertiary mb-6">
               {getCryptoAmount()} {getCryptoSymbol()}
             </Text>
+
+            {/* Status Badge */}
+            <View className="items-center">
+              <View
+                className={`flex-row items-center px-4 py-2 rounded-full border ${statusColors.bg} ${statusColors.border}`}
+              >
+                {transaction.status === "completed" && (
+                  <View className="w-3 h-3 bg-green-600 rounded-full items-center justify-center mr-2">
+                    <Checks size={8} color="white" />
+                  </View>
+                )}
+                <Text className={`text-sm font-semibold ${statusColors.text}`}>
+                  {transaction.status.charAt(0).toUpperCase() +
+                    transaction.status.slice(1)}
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Transaction Details */}
+          <View
+            className="bg-white rounded-2xl p-5 shadow-sm"
+            style={{
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.05,
+              shadowRadius: 8,
+              elevation: 2,
+            }}
+          >
+            {/* To */}
+            <View className="flex-row justify-between items-center py-4 border-b border-gray-100">
+              <Text className="text-sm text-foreground-tertiary font-medium">
+                To
+              </Text>
+              <Text className="text-base text-foreground-dark font-semibold">
+                {transaction.receiver?.phone_number || "Unknown"}
+              </Text>
+            </View>
+
+            {/* Date */}
+            <View className="flex-row justify-between items-center py-4 border-b border-gray-100">
+              <Text className="text-sm text-foreground-tertiary font-medium">
+                Date
+              </Text>
+              <Text className="text-base text-foreground-dark font-semibold">
+                {formatDate(transaction.created_at)}
+              </Text>
+            </View>
+
+            {/* Time */}
+            <View className="flex-row justify-between items-center py-4 border-b border-gray-100">
+              <Text className="text-sm text-foreground-tertiary font-medium">
+                Time
+              </Text>
+              <Text className="text-base text-foreground-dark font-semibold">
+                {formatTime(transaction.created_at)}
+              </Text>
+            </View>
+
+            {/* Order ID */}
+            <View className="flex-row justify-between items-center py-4 border-b border-gray-100">
+              <Text className="text-sm text-foreground-tertiary font-medium">
+                Order ID
+              </Text>
+              <Pressable
+                onPress={handleCopyOrderId}
+                className="flex-row items-center gap-2 active:opacity-70"
+              >
+                <Text className="text-base text-foreground-dark font-semibold">
+                  {shortenTxnHash(transaction.transaction_hash)}
+                </Text>
+                <Copy
+                  size={18}
+                  color={copied ? "#22C55E" : "#4A3DFF"}
+                  strokeWidth={2}
+                />
+              </Pressable>
+            </View>
+
+            {/* Paid with */}
+            <View className="flex-row justify-between items-center py-4">
+              <Text className="text-sm text-foreground-tertiary font-medium">
+                Paid with
+              </Text>
+              <Text className="text-base text-foreground-dark font-semibold">
+                {getCryptoAmount()} {getCryptoSymbol()}
+              </Text>
+            </View>
           </View>
         </View>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
