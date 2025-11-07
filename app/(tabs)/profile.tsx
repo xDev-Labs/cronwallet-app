@@ -1,10 +1,9 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import * as Clipboard from "expo-clipboard";
 import { router } from "expo-router";
-import { Copy } from "lucide-react-native";
+import { ChevronLeft, Copy } from "lucide-react-native";
 import { useState } from "react";
 import { Alert, Pressable, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -32,6 +31,20 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView edges={["top"]} className="flex-1 bg-background-light">
+      <View className="px-4 pt-4">
+        <View className="flex-row justify-between items-center">
+          <Pressable
+            onPress={() => router.back()}
+            className="p-2 -ml-2 active:opacity-70"
+          >
+            <ChevronLeft size={24} color="#000" />
+          </Pressable>
+          {/* <Text variant="h3" className="text-black text-center font-semibold">
+            Profile
+          </Text> */}
+          {/* <View className="w-10" /> */}
+        </View>
+      </View>
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         <View className="items-center py-8">
           {/* Avatar */}
