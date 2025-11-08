@@ -47,6 +47,42 @@ export default function PhoneAuthScreen() {
     return selectedCountry.regex.test(phoneNumber);
   }
 
+  const getPhoneMaxLength = (regex: RegExp): number => {
+    const source = regex.source;
+
+    // Match patterns like {9,12} or {10}
+    const matches = [...source.matchAll(/\{(\d+)(?:,(\d+))?\}/g)];
+
+    if (matches.length === 0) {
+      // fallback: count \d occurrences if no quantifier found
+      const digitCount = (source.match(/\\d/g) || []).length;
+      return digitCount || 0;
+    }
+
+    // Extract all upper bounds (or lower if no upper)
+    const lengths = matches.map(([_, min, max]) => Number(max || min));
+    console.log(lengths)
+
+    // Return the maximum upper bound found
+    return Math.max(...lengths);
+  };
+
+  const generatePlaceHolder = (length: number) : string => {
+    if (length <= 4) return "0".repeat(length);
+
+    let groupSize = 3;
+    if (length % 4 === 0) groupSize = 4;
+    else if (length === 10) groupSize = 5;
+    else if (length === 8) groupSize = 4;
+
+    const zeros = "0".repeat(length);
+    return zeros.match(new RegExp(`.{1,${groupSize}}`, "g"))!.join("-");
+  }
+
+  const maxLength = getPhoneMaxLength(selectedCountry.regex);
+  const placeHolder = generatePlaceHolder(maxLength);
+
+
   const handleNext = async () => {
     setIsLoading(true);
     try {
@@ -125,10 +161,10 @@ export default function PhoneAuthScreen() {
                 {/* Phone Number Input */}
                 <Input
                   className="font-sans border-0 flex-1 -mt-2 bg-transparent px-2 text-foreground-dark"
-                  placeholder="00000 00000"
+                  placeholder={placeHolder}
                   placeholderTextColor="#A0A0A0"
                   keyboardType="phone-pad"
-                  maxLength={10}
+                  maxLength={maxLength}
                   value={phoneNumber}
                   onChangeText={handlePhoneNumberChange}
                   onFocus={() => setIsFocused(true)}
