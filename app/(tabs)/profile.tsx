@@ -1,4 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import * as Clipboard from "expo-clipboard";
@@ -108,9 +109,9 @@ export default function ProfileScreen() {
           </View>
 
           {/* Logout Button */}
-          {/* <Button onPress={handleLogout} variant="outline" className="mt-4">
+          <Button onPress={handleLogout} variant="outline" className="mt-4">
             Logout
-          </Button> */}
+          </Button>
         </View>
       </ScrollView>
     </SafeAreaView>

@@ -54,6 +54,7 @@ export default function SplashScreen() {
         // Route based on user state
         if (user) {
           if (onboardingComplete) {
+            // Onboarding is complete - user can access the app
             // Check if biometric is enabled and not already authenticated in this session
             if (user.face_id_enabled && !isBiometricAuthenticated) {
               router.replace("/(auth)/biometric-lock");
@@ -61,9 +62,18 @@ export default function SplashScreen() {
               router.replace("/(tabs)");
             }
           } else {
-            router.replace("/(auth)/biometric-setup");
+            // Onboarding not complete - determine where in the flow they are
+            if (!user.cron_id) {
+              // No cron_id yet - start from biometric setup (which will route to username)
+              router.replace("/(auth)/biometric-setup");
+            } else {
+              // Has cron_id but onboarding not marked complete
+              // Skip biometric setup and username, go to setting-up to complete
+              router.replace("/(onboarding)/setting-up");
+            }
           }
         } else {
+          // No user - start authentication flow
           router.replace("/(auth)/phone-auth");
         }
       }, 2500);

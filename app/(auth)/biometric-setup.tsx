@@ -122,7 +122,14 @@ export default function BiometricSetupScreen() {
           }
         }
 
-        router.replace("/(onboarding)/username");
+        // Check if user already has a cron_id
+        if (user?.cron_id) {
+          // User already has username, go to setting-up
+          router.replace("/(onboarding)/setting-up");
+        } else {
+          // User needs to claim username
+          router.replace("/(onboarding)/username");
+        }
       } else {
         Alert.alert(
           "Authentication Failed",
