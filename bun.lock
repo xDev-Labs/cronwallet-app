@@ -9,6 +9,7 @@
         "@expo/metro-runtime": "~6.1.2",
         "@expo/vector-icons": "^15.0.2",
         "@google-cloud/recaptcha-enterprise-react-native": "^18.8.0",
+        "@microsoft/react-native-clarity": "^4.3.3",
         "@react-native-async-storage/async-storage": "^2.2.0",
         "@react-native-firebase/app": "^23.4.1",
         "@react-native-firebase/auth": "^23.4.1",
@@ -497,6 +498,8 @@
     "@jridgewell/sourcemap-codec": ["@jridgewell/sourcemap-codec@1.5.5", "", {}, "sha512-cYQ9310grqxueWbl+WuIUIaiUaDcj7WOq5fVhEljNVgRfOUhY9fy2zTvfoqWsnebh8Sl70VScFbICvJnLKB0Og=="],
 
     "@jridgewell/trace-mapping": ["@jridgewell/trace-mapping@0.3.31", "", { "dependencies": { "@jridgewell/resolve-uri": "^3.1.0", "@jridgewell/sourcemap-codec": "^1.4.14" } }, "sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw=="],
+
+    "@microsoft/react-native-clarity": ["@microsoft/react-native-clarity@4.3.3", "", { "peerDependencies": { "react": "*", "react-native": "*", "react-native-svg": ">=14.0.0" }, "optionalPeers": ["react-native-svg"] }, "sha512-oe84ihvez/KahfsTkLX2PghI8N2vAFFeaVHzgEQffSsMPBruvCu8DFd1L9pmepmCz5xlSaTHKDakxErOJUQz2g=="],
 
     "@napi-rs/wasm-runtime": ["@napi-rs/wasm-runtime@0.2.12", "", { "dependencies": { "@emnapi/core": "^1.4.3", "@emnapi/runtime": "^1.4.3", "@tybys/wasm-util": "^0.10.0" } }, "sha512-ZVWUcfwY4E/yPitQJl481FjFo3K22D6qF0DuFH6Y/nbnE11GY5uguDxZMGXPQ8WQ0128MXQD7TnfHyK4oWoIJQ=="],
 

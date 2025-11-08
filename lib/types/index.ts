@@ -28,3 +28,12 @@ export type {
   PaginatedResponse,
   RouteParams,
 } from "./common.types";
+
+// Clarity types
+export type {
+  ClarityConfig,
+  ClarityCustomEvent,
+  ClaritySDK,
+  ClarityUser,
+  NetworkCaptureConfig,
+} from "./clarity.types";
