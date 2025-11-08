@@ -43,6 +43,10 @@ export default function PhoneAuthScreen() {
     setPhoneNumber(digitsOnly);
   };
 
+  const isValidPhoneNumber = () => {
+    return selectedCountry.regex.test(phoneNumber);
+  }
+
   const handleNext = async () => {
     setIsLoading(true);
     try {
@@ -74,7 +78,7 @@ export default function PhoneAuthScreen() {
     }
   };
 
-  const isButtonEnabled = phoneNumber.length >= 10 && !isLoading;
+  const isButtonEnabled = isValidPhoneNumber() && !isLoading;
 
   return (
     <SafeAreaView
