@@ -35,7 +35,18 @@ export default function UsernameScreen() {
   const [availabilityMessage, setAvailabilityMessage] = useState("");
   const [isAvailable, setIsAvailable] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [hasNavigated, setHasNavigated] = useState(false);
   const { updateUserProfile, user } = useAuth();
+
+  // Skip this page if user already has a cron_id (only check on mount)
+  useEffect(() => {
+    if (user?.cron_id && !hasNavigated) {
+      console.log('User already has cron_id:', user.cron_id);
+      setHasNavigated(true);
+      // User already has a username, skip to next step
+      router.replace("/(onboarding)/setting-up");
+    }
+  }, []); // Empty dependency array - only run on mount
 
   const validateUsername = (text: string): string | null => {
     if (text.length < 3) {
@@ -140,6 +151,7 @@ export default function UsernameScreen() {
     }
 
     setIsLoading(true);
+    setHasNavigated(true); // Prevent double navigation
 
     try {
       // Register the cron ID with the backend
@@ -161,10 +173,12 @@ export default function UsernameScreen() {
       } else {
         setError("Failed to register username. Please try again.");
         setIsLoading(false);
+        setHasNavigated(false); // Reset on error
       }
     } catch (err) {
       console.error("Error registering username:", err);
       setIsLoading(false);
+      setHasNavigated(false); // Reset on error
       if (err instanceof ApiError) {
         setError(err.message);
       } else {
