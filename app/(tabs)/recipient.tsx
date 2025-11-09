@@ -97,18 +97,18 @@ export default function RecipientScreen() {
     console.log("Contact phone:", contactPhone);
     console.log("Type:", type);
     console.log("Wallet address:", walletAddress);
-    
+
     // For wallet/sol payments, load by wallet address
     if ((type === "walletAddress" || type === "solName") && walletAddress) {
       setTransactions([]);
       setIsLoading(true);
-      
+
       try {
         const walletTransactions = await getTransactionsByWalletAddress(
           walletAddress as string
         );
         setTransactions(walletTransactions);
-        
+
         // Scroll to bottom after transactions are loaded
         setTimeout(() => {
           scrollViewRef.current?.scrollToEnd({ animated: false });
@@ -120,7 +120,7 @@ export default function RecipientScreen() {
       }
       return;
     }
-    
+
     // For regular contacts, use phone-based loading
     if (!user?.user_id || !contactPhone) {
       setIsLoading(false);
@@ -133,7 +133,7 @@ export default function RecipientScreen() {
 
     try {
       const userTransactions = await getTransactionsBetweenUsers(
-        user.user_id,
+        user.primary_address,
         contactPhone as string
       );
       setTransactions(userTransactions);
