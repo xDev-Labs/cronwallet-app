@@ -22,7 +22,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function PaymentSuccessScreen() {
   const {
     contactId,
-    amount,
     contactName,
     contactPhone,
     contactAvatarUrl,
@@ -122,7 +121,7 @@ export default function PaymentSuccessScreen() {
           transaction_hash: response.data.signature,
           sender_addr: user?.primary_address as string,
           receiver_addr: toAddress as string,
-          amount: Number(amount),
+          amount: Number(coinAmount),
           token: [
             {
               amount: coinAmount as string,
@@ -150,7 +149,7 @@ export default function PaymentSuccessScreen() {
       );
       setIsProcessing(false);
     }
-  }, [toAddress, coinAmount, coinAddress, contactId, amount, contactPhone]);
+  }, [toAddress, coinAmount, coinAddress, contactId, contactPhone]);
 
   useFocusEffect(
     useCallback(() => {
@@ -219,7 +218,7 @@ export default function PaymentSuccessScreen() {
     };
   }, [isProcessing, transactionError]);
 
-  if (!contactName || !amount) {
+  if (!contactName || !coinAmount) {
     return null;
   }
 
@@ -233,7 +232,6 @@ export default function PaymentSuccessScreen() {
         contactPhone,
         contactAvatarUrl,
         contactCronId,
-        amount,
         coinAmount,
         coinName,
         coinAddress,
@@ -383,7 +381,7 @@ export default function PaymentSuccessScreen() {
                 Amount Sent
               </Text>
               <Text className="text-foreground-dark text-4xl font-bold">
-                {amount} {coinSymbol}
+                {coinAmount} {coinSymbol}
               </Text>
             </View>
           </View>

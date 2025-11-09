@@ -1,24 +1,18 @@
 import { CryptoIcon } from '@/components/CryptoIcon';
 import { Token } from '@/lib/types/user.types';
-import { useState } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 
 interface CoinSelectionItemProps {
     coin: Token;
-    amount: string;
-    currency: string;
     onPress: () => void;
     isSelected: boolean;
 }
 
 export function CoinSelectionItem({
     coin,
-    amount,
-    currency,
     onPress,
 }: CoinSelectionItemProps) {
-    const [rate, setRate] = useState<string>('0.00');
-    const [isLoading, setIsLoading] = useState(false);
+
 
     return (
         <TouchableOpacity
