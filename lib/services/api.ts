@@ -310,14 +310,9 @@ class ApiService {
       };
     }>
   > {
-    let url = `${API_CONFIG.ENDPOINTS.TRANSACTION.GET_BY_USER_ID}/${userId}?page=${page}&limit=${limit}`;
-
-    if (receiver) {
-      url += `&receiver=${encodeURIComponent(receiver)}`;
-    }
-
-    return this.makeRequest(url, {
-      method: "GET",
+    return this.makeRequest(`${API_CONFIG.ENDPOINTS.TRANSACTION.GET_BY_USER_ID}/${userId}`, {
+      method: "POST",
+      body: JSON.stringify({ page, limit, receiver }),
     });
   }
 
