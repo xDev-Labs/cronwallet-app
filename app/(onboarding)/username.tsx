@@ -82,7 +82,7 @@ export default function UsernameScreen() {
       const timeoutId = setTimeout(async () => {
         // First validate the username
         const validationError = validateUsername(username);
-        
+
         if (validationError) {
           // If validation fails, show error and don't check availability
           setError(validationError);
@@ -218,7 +218,7 @@ export default function UsernameScreen() {
               </Text>
 
               <Input
-                className="font-sans rounded-lg border-[#ECECEC] border bg-transparent text-foreground-dark"
+                className="h-14  font-sans rounded-lg border-[#ECECEC] border bg-transparent text-foreground-dark"
                 placeholderTextColor="#A0A0A0"
                 value={username}
                 onChangeText={handleUsernameChange}

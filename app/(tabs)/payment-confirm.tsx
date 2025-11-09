@@ -18,7 +18,6 @@ export default function PaymentConfirmScreen() {
         contactPhone,
         contactAvatarUrl,
         contactCronId,
-        amount,
         coinAmount,
         coinName,
         coinAddress,
@@ -73,7 +72,6 @@ export default function PaymentConfirmScreen() {
                     contactPhone,
                     contactAvatarUrl,
                     contactCronId,
-                    amount,
                     coinAmount,
                     coinName,
                     coinAddress,
@@ -128,7 +126,7 @@ export default function PaymentConfirmScreen() {
 
     useEffect(() => {
         sliderRef.current?.reset();
-    }, [contactId, amount]);
+    }, [contactId, coinAmount]);
     return (
         <SafeAreaView className="flex-1 bg-white">
             {/* Header */}
@@ -241,7 +239,7 @@ export default function PaymentConfirmScreen() {
             {/* Slide to Confirm Button */}
             <View className="px-4 pb-4">
                 <SlideToConfirm
-                    key={`${contactId}-${amount}-${coinAmount}`}
+                    key={`${contactId}-${coinAmount}`}
                     ref={sliderRef}
                     text={sliderText}
                     disabled={status === 'processing'}

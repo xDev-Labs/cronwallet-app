@@ -2,7 +2,6 @@ import { CoinSelectionItem } from '@/components/CoinSelectionItem';
 import { CryptoIcon } from '@/components/CryptoIcon';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { TOKEN_API_URL } from '@/lib/config/environment';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { apiService } from '@/lib/services/api';
 import { Token } from '@/lib/types/user.types';
@@ -32,23 +31,13 @@ export default function PaymentInitiateScreen() {
     const [selectedCoin, setSelectedCoin] = useState<Token | null>(null);
     const slideAnim = useRef(new Animated.Value(0)).current;
 
-    const [isCurrencyModalVisible, setIsCurrencyModalVisible] = useState(false);
-    const [selectedCurrency, setSelectedCurrency] = useState({ name: 'USD', code: 'USD', flag: 'us' });
-    const currencySlideAnim = useRef(new Animated.Value(0)).current;
     const amountInputRef = useRef<TextInput>(null);
 
-    const [amount, setAmount] = useState('');
-    const [coinAmount, setCoinAmount] = useState(0.00);
-    const [isLoading, setIsLoading] = useState(false);
+    const [coinAmount, setCoinAmount] = useState('');
     const [userTokens, setUserTokens] = useState<Token[]>([]);
     const [isLoadingTokens, setIsLoadingTokens] = useState(true);
     const [hasInsufficientBalance, setHasInsufficientBalance] = useState(false);
-
-    const currencies = [
-        { name: 'US Dollar', code: 'USD', flag: 'us' },
-        { name: 'Indian Rupee', code: 'INR', flag: 'in' },
-        { name: 'UAE Dirham', code: 'AED', flag: 'ae' }
-    ];
+    const [isTransferDisabled, setIsTransferDisabled] = useState(true);
 
     // Fetch user tokens on mount
     useEffect(() => {
@@ -104,24 +93,6 @@ export default function PaymentInitiateScreen() {
         closeModal();
     };
 
-    const openCurrencyModal = () => {
-        setIsCurrencyModalVisible(true);
-        Animated.timing(currencySlideAnim, {
-            toValue: 1,
-            duration: 300,
-            useNativeDriver: true,
-        }).start();
-    };
-
-    const closeCurrencyModal = () => {
-        Animated.timing(currencySlideAnim, {
-            toValue: 0,
-            duration: 300,
-            useNativeDriver: true,
-        }).start(() => {
-            setIsCurrencyModalVisible(false);
-        });
-    };
 
     const renderAvatar = () => {
         if (contactAvatarUrl && typeof contactAvatarUrl === 'string' && contactAvatarUrl.trim()) {
@@ -148,63 +119,21 @@ export default function PaymentInitiateScreen() {
         );
     };
 
-    const convertAmount = async (inputAmount: string, currency: string, token: Token | null) => {
-        if (!inputAmount || parseFloat(inputAmount) === 0 || !token) {
-            setCoinAmount(0.00);
+    // Check balance when coinAmount or selectedCoin changes
+    useEffect(() => {
+        if (!selectedCoin || !coinAmount) {
             setHasInsufficientBalance(false);
             return;
         }
 
-        setIsLoading(true);
-        try {
-            let usdAmount = inputAmount;
-
-            // Step 1: Convert to USD if currency is not USD
-            if (currency.toLowerCase() !== 'usd') {
-                const currencyResponse = await fetch(
-                    `${TOKEN_API_URL}/currency?from=${currency.toLowerCase()}&to=usd&amount=${inputAmount}`
-                );
-                const currencyData = await currencyResponse.json();
-                usdAmount = currencyData.convertedAmount || currencyData.result || inputAmount;
-            }
-
-            // Step 2: Convert USD to selected token using USDC
-            const tokenResponse = await fetch(
-                `${TOKEN_API_URL}/token?from=usdc&to=${token.symbol.toLowerCase()}&amount=${usdAmount}`
-            );
-            const tokenData = await tokenResponse.json();
-            const finalAmount = parseFloat(tokenData.convertedAmount || tokenData.result || '0.00');
-
-            setCoinAmount(finalAmount);
-
-            // Check if user has sufficient balance
-            if (finalAmount > token.balance) {
-                setHasInsufficientBalance(true);
-            } else {
-                setHasInsufficientBalance(false);
-            }
-        } catch (error) {
-            console.error('Conversion error:', error);
-            setCoinAmount(0.00);
+        const numericAmount = parseFloat(coinAmount);
+        if (numericAmount > selectedCoin.balance) {
+            setHasInsufficientBalance(true);
+        } else {
             setHasInsufficientBalance(false);
-        } finally {
-            setIsLoading(false);
         }
-    };
+    }, [coinAmount, selectedCoin]);
 
-    // Debounced conversion effect
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            if (amount && selectedCoin) {
-                convertAmount(amount, selectedCurrency.code, selectedCoin);
-            } else {
-                setCoinAmount(0.00);
-                setHasInsufficientBalance(false);
-            }
-        }, 500);
-
-        return () => clearTimeout(timer);
-    }, [amount, selectedCurrency.code, selectedCoin]);
 
     // Auto-focus input when screen loads
     useEffect(() => {
@@ -215,8 +144,12 @@ export default function PaymentInitiateScreen() {
         return () => clearTimeout(timer);
     }, []);
 
-    const numericAmount = parseFloat(amount);
-    const isTransferDisabled = !amount || Number.isNaN(numericAmount) || numericAmount <= 0 || isLoading || hasInsufficientBalance || !selectedCoin;
+    // Update isTransferDisabled when dependencies change
+    useEffect(() => {
+        const numericAmount = parseFloat(coinAmount);
+        const disabled = !coinAmount || Number.isNaN(numericAmount) || numericAmount <= 0 || hasInsufficientBalance || !selectedCoin;
+        setIsTransferDisabled(disabled);
+    }, [coinAmount, hasInsufficientBalance, selectedCoin]);
 
     const handlePayPress = () => {
         if (isTransferDisabled) {
@@ -228,10 +161,8 @@ export default function PaymentInitiateScreen() {
         console.log("contactPhone", contactPhone);
         console.log("contactAvatarUrl", contactAvatarUrl);
         console.log("contactCronId", contactCronId);
-        console.log("amount", amount);
         console.log("coinAmount", coinAmount);
         console.log("selectedCoin", selectedCoin);
-        console.log("selectedCurrency", selectedCurrency);
 
         router.push({
             pathname: './payment-confirm' as any,
@@ -241,20 +172,16 @@ export default function PaymentInitiateScreen() {
                 contactPhone,
                 contactAvatarUrl,
                 contactCronId,
-                amount: amount || '0.00',
                 coinAmount: coinAmount,
                 coinDecimals: selectedCoin!.decimals,
                 coinName: selectedCoin!.name,
                 coinSymbol: selectedCoin!.symbol,
                 coinAddress: selectedCoin!.mintAddr,
-                currencyCode: selectedCurrency.code,
-                currencyFlag: selectedCurrency.flag,
                 type,
                 walletAddress,
             },
         });
-        setAmount('');
-        setCoinAmount(0.00);
+        setCoinAmount('');
     };
 
     // Mask sensitive data based on payment type
@@ -335,9 +262,9 @@ export default function PaymentInitiateScreen() {
                                 <Input
                                     ref={amountInputRef}
                                     className="border-0 h-20 text-[#4A3DFF] text-6xl font-bold bg-white text-center"
-                                    placeholder="0"
-                                    value={amount}
-                                    onChangeText={setAmount}
+                                    placeholder="0.00"
+                                    value={coinAmount}
+                                    onChangeText={setCoinAmount}
                                     keyboardType="decimal-pad"
                                 />
                                 <View className="flex-row items-center mt-4">
@@ -424,8 +351,6 @@ export default function PaymentInitiateScreen() {
                                     <CoinSelectionItem
                                         key={token.mintAddr}
                                         coin={token}
-                                        amount={amount}
-                                        currency={selectedCurrency.code}
                                         onPress={() => selectCoin(token)}
                                         isSelected={selectedCoin?.mintAddr === token.mintAddr}
                                     />
