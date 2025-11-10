@@ -1,6 +1,6 @@
 import { CryptoIcon } from '@/components/CryptoIcon';
 import { Logo } from '@/components/icons/Logo';
-import { SlideToConfirm, SlideToConfirmHandle } from '@/components/SlideToConfirm';
+import { Button } from '@/components/ui/button';
 import { Text as UIText } from '@/components/ui/text';
 import { apiService } from '@/lib/services/api';
 import { normalizePhoneNumber } from '@/lib/utils';
@@ -13,7 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function PaymentConfirmScreen() {
     const params = useLocalSearchParams();
-    
+
     // Safely extract and validate params
     const contactId = Array.isArray(params.contactId) ? params.contactId[0] : params.contactId;
     const contactName = Array.isArray(params.contactName) ? params.contactName[0] : params.contactName;
@@ -25,18 +25,14 @@ export default function PaymentConfirmScreen() {
     const coinAddress = Array.isArray(params.coinAddress) ? params.coinAddress[0] : params.coinAddress;
     const coinDecimals = Array.isArray(params.coinDecimals) ? params.coinDecimals[0] : params.coinDecimals;
     const coinSymbol = Array.isArray(params.coinSymbol) ? params.coinSymbol[0] : params.coinSymbol;
-    const currencyCode = Array.isArray(params.currencyCode) ? params.currencyCode[0] : params.currencyCode;
-    const currencyFlag = Array.isArray(params.currencyFlag) ? params.currencyFlag[0] : params.currencyFlag;
     const type = Array.isArray(params.type) ? params.type[0] : params.type;
     const walletAddress = Array.isArray(params.walletAddress) ? params.walletAddress[0] : params.walletAddress;
-    
-    const sliderRef = useRef<SlideToConfirmHandle>(null);
+
     const isMountedRef = useRef(true);
     const isProcessingRef = useRef(false);
     const [status, setStatus] = useState<'idle' | 'processing' | 'failed'>('idle');
-    const sliderText = status === 'processing' ? 'PROCESSING...' : 'SLIDE TO CONFIRM';
 
-    const handleSlideToConfirm = async () => {
+    const handleConfirmPayment = async () => {
         // Prevent concurrent executions
         if (isProcessingRef.current || status === 'processing') {
             return;
@@ -75,7 +71,7 @@ export default function PaymentConfirmScreen() {
             } else {
                 // For regular contacts, validate recipient exists
                 const normalizedPhone = normalizePhoneNumber(contactPhone);
-                
+
                 try {
                     const recipientData = await apiService.getUserByPhoneNumber(normalizedPhone);
 
@@ -101,6 +97,8 @@ export default function PaymentConfirmScreen() {
                 throw new Error('Invalid recipient address');
             }
 
+
+
             // Navigate to payment success screen with validated params
             if (isMountedRef.current) {
                 router.push({
@@ -116,8 +114,6 @@ export default function PaymentConfirmScreen() {
                         coinAddress: coinAddress,
                         coinDecimals: coinDecimals || '',
                         coinSymbol: coinSymbol || '',
-                        currencyCode: currencyCode || '',
-                        currencyFlag: currencyFlag || '',
                         toAddress: toAddress,
                         type: type || '',
                         walletAddress: walletAddress || '',
@@ -126,23 +122,16 @@ export default function PaymentConfirmScreen() {
             }
         } catch (error) {
             console.error('Payment confirmation error:', error);
-            
+
             if (isMountedRef.current) {
                 setStatus('failed');
-                
+
                 // Show user-friendly error message
-                const errorMessage = error instanceof Error 
-                    ? error.message 
+                const errorMessage = error instanceof Error
+                    ? error.message
                     : 'Payment confirmation failed. Please try again.';
-                
+
                 Alert.alert('Payment Error', errorMessage);
-                
-                // Reset slider after a delay to show error state
-                setTimeout(() => {
-                    if (isMountedRef.current && sliderRef.current) {
-                        sliderRef.current.reset();
-                    }
-                }, 500);
             }
         } finally {
             isProcessingRef.current = false;
@@ -174,14 +163,13 @@ export default function PaymentConfirmScreen() {
         );
     };
 
-    // Reset status and slider when screen gains focus
+    // Reset status when screen gains focus
     useFocusEffect(
         useCallback(() => {
             isMountedRef.current = true;
             isProcessingRef.current = false;
             setStatus('idle');
-            sliderRef.current?.reset();
-            
+
             return () => {
                 isMountedRef.current = false;
             };
@@ -189,11 +177,11 @@ export default function PaymentConfirmScreen() {
     );
 
     useEffect(() => {
-        if (isMountedRef.current && sliderRef.current) {
-            sliderRef.current.reset();
+        if (isMountedRef.current) {
+            setStatus('idle');
         }
     }, [contactId, coinAmount]);
-    
+
     // Cleanup on unmount
     useEffect(() => {
         return () => {
@@ -306,15 +294,17 @@ export default function PaymentConfirmScreen() {
                 </View>
             </View>
 
-            {/* Slide to Confirm Button */}
+            {/* Confirm Payment Button */}
             <View className="px-4 pb-4">
-                <SlideToConfirm
-                    key={`${contactId}-${coinAmount}`}
-                    ref={sliderRef}
-                    text={sliderText}
+                <Button
+                    onPress={handleConfirmPayment}
                     disabled={status === 'processing'}
-                    onConfirm={handleSlideToConfirm}
-                />
+                    className="bg-primary rounded-xl p-4"
+                >
+                    <UIText className="text-white font-semibold text-base">
+                        {status === 'processing' ? 'Processing...' : 'Confirm Payment'}
+                    </UIText>
+                </Button>
             </View>
         </SafeAreaView>
     );
