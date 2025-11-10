@@ -13,7 +13,12 @@ export function cn(...inputs: ClassValue[]) {
  * normalizePhoneNumber("+1 (555) 123-4567") // "+15551234567"
  * normalizePhoneNumber("555-123-4567") // "5551234567"
  */
-export function normalizePhoneNumber(phone: string): string {
+export function normalizePhoneNumber(phone: string | null | undefined): string {
+  // Handle null, undefined, or non-string values
+  if (!phone || typeof phone !== 'string') {
+    return '';
+  }
+  
   // First, check if the phone starts with +
   const hasPlus = phone.startsWith('+');
 

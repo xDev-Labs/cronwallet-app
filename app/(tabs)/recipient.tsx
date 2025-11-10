@@ -463,7 +463,7 @@ export default function RecipientScreen() {
                         <View className="border-b-[3px] border-[#4A3DFF] p-5">
                           <View className="flex-row items-end gap-2">
                             <Text className="text-3xl font-bold text-black">
-                              {formatAmount(transaction.amount)}
+                              {transaction.token[0].amount} {transaction.token[0].token_address === "DMC3nUVXBLNrB8f97wLqwkNw9DD7EXgqhPgev8gVTv7g" ? "USDC" : "SOL"}
                             </Text>
                           </View>
                           <View className="flex-row items-center gap-2">
