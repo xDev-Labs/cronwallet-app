@@ -143,7 +143,7 @@ export default function TransactionDetailsScreen() {
       transaction?.token &&
       transaction.token.length > 0 &&
       transaction.token[0].token_address ===
-        "DMC3nUVXBLNrB8f97wLqwkNw9DD7EXgqhPgev8gVTv7g"
+      "DMC3nUVXBLNrB8f97wLqwkNw9DD7EXgqhPgev8gVTv7g"
     ) {
       // Assuming ETH for now, could be made dynamic based on token_address
       return "USDC";
@@ -206,9 +206,6 @@ export default function TransactionDetailsScreen() {
             </Text>
             <Text className="text-center text-4xl font-bold text-foreground-dark mb-3">
               {isSent ? "-" : "+"}
-              {formatAmount(transaction.amount)}
-            </Text>
-            <Text className="text-center text-sm text-foreground-tertiary mb-6">
               {getCryptoAmount()} {getCryptoSymbol()}
             </Text>
 
@@ -292,15 +289,6 @@ export default function TransactionDetailsScreen() {
               </Pressable>
             </View>
 
-            {/* Paid with */}
-            <View className="flex-row justify-between items-center py-4">
-              <Text className="text-sm text-foreground-tertiary font-medium">
-                Paid with
-              </Text>
-              <Text className="text-base text-foreground-dark font-semibold">
-                {getCryptoAmount()} {getCryptoSymbol()}
-              </Text>
-            </View>
           </View>
         </View>
       </ScrollView>

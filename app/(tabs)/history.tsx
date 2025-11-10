@@ -145,7 +145,7 @@ export default function HistoryScreen() {
                 <Text
                   className={`text-xl font-bold ml-1 ${isSent ? "text-red-600" : "text-green-600"}`}
                 >
-                  {formatAmount(item.amount)}
+                  {item.token[0].amount} ${item.token[0].token_address === "DMC3nUVXBLNrB8f97wLqwkNw9DD7EXgqhPgev8gVTv7g" ? "USDC" : "SOL"}
                 </Text>
               </View>
               <Text className="text-sm text-foreground-tertiary mb-3">
