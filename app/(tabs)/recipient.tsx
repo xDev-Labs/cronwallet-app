@@ -345,11 +345,11 @@ export default function RecipientScreen() {
           </View>
         </View>
 
-        <View className="flex-row gap-2">
+        {/* <View className="flex-row gap-2">
           <TouchableOpacity className="p-1">
             <DotsVertical size={24} color="#000" />
           </TouchableOpacity>
-        </View>
+        </View> */}
       </View>
 
       <ScrollView
