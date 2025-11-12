@@ -24,6 +24,7 @@ export const API_CONFIG = {
       TRANSFER_SPL: "/user/transfer-spl",
       GET_AIRDROP: "/user/airdrop",
       GET_TOKENS: "/user",
+      LOG_DEBUG: "/user/debug",
     },
     TRANSACTION: {
       GET_BY_HASH: "/transaction",

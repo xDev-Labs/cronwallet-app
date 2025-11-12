@@ -353,6 +353,12 @@ class ApiService {
       body: JSON.stringify({ userId, amount }),
     });
   }
+
+  async logDebug(level: string): Promise<ApiResponse<any>> {
+    return this.makeRequest<any>(`${API_CONFIG.ENDPOINTS.USER.LOG_DEBUG}/${level}`, {
+      method: "GET",
+    });
+  }
 }
 
 // Export singleton instance

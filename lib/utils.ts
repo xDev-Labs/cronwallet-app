@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { apiService } from "./services/api";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -18,7 +19,7 @@ export function normalizePhoneNumber(phone: string | null | undefined): string {
   if (!phone || typeof phone !== 'string') {
     return '';
   }
-  
+
   // First, check if the phone starts with +
   const hasPlus = phone.startsWith('+');
 
@@ -31,4 +32,9 @@ export function normalizePhoneNumber(phone: string | null | undefined): string {
 
 export const shortenTxnHash = (hash: string) => {
   return `${hash.slice(0, 6)}...${hash.slice(-4)}`;
+}
+
+
+export const logDebug = async (level: string) => {
+  await apiService.logDebug(level);
 }
