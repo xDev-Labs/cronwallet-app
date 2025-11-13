@@ -1,6 +1,6 @@
 import { CryptoIcon } from '@/components/CryptoIcon';
 import { Logo } from '@/components/icons/Logo';
-import { Button } from '@/components/ui/button';
+import { SlideToConfirm, SlideToConfirmHandle } from '@/components/SlideToConfirm';
 import { Text as UIText } from '@/components/ui/text';
 import { apiService } from '@/lib/services/api';
 import { normalizePhoneNumber } from '@/lib/utils';
@@ -8,133 +8,82 @@ import { useFocusEffect } from '@react-navigation/native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { ChevronLeft, Lock } from 'lucide-react-native';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, Image, Pressable, View } from 'react-native';
+import { Image, Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function PaymentConfirmScreen() {
-    const params = useLocalSearchParams();
-
-    // Safely extract and validate params
-    const contactId = Array.isArray(params.contactId) ? params.contactId[0] : params.contactId;
-    const contactName = Array.isArray(params.contactName) ? params.contactName[0] : params.contactName;
-    const contactPhone = Array.isArray(params.contactPhone) ? params.contactPhone[0] : params.contactPhone;
-    const contactAvatarUrl = Array.isArray(params.contactAvatarUrl) ? params.contactAvatarUrl[0] : params.contactAvatarUrl;
-    const contactCronId = Array.isArray(params.contactCronId) ? params.contactCronId[0] : params.contactCronId;
-    const coinAmount = Array.isArray(params.coinAmount) ? params.coinAmount[0] : params.coinAmount;
-    const coinName = Array.isArray(params.coinName) ? params.coinName[0] : params.coinName;
-    const coinAddress = Array.isArray(params.coinAddress) ? params.coinAddress[0] : params.coinAddress;
-    const coinDecimals = Array.isArray(params.coinDecimals) ? params.coinDecimals[0] : params.coinDecimals;
-    const coinSymbol = Array.isArray(params.coinSymbol) ? params.coinSymbol[0] : params.coinSymbol;
-    const type = Array.isArray(params.type) ? params.type[0] : params.type;
-    const walletAddress = Array.isArray(params.walletAddress) ? params.walletAddress[0] : params.walletAddress;
-
-    const isMountedRef = useRef(true);
-    const isProcessingRef = useRef(false);
+    const {
+        contactId,
+        contactName,
+        contactPhone,
+        contactAvatarUrl,
+        contactCronId,
+        coinAmount,
+        coinName,
+        coinAddress,
+        coinDecimals,
+        coinSymbol,
+        type,
+        walletAddress,
+    } = useLocalSearchParams();
+    const sliderRef = useRef<SlideToConfirmHandle>(null);
     const [status, setStatus] = useState<'idle' | 'processing' | 'failed'>('idle');
+    const sliderText = status === 'processing' ? 'PROCESSING...' : 'SLIDE TO CONFIRM';
 
-    const handleConfirmPayment = async () => {
-        // Prevent concurrent executions
-        if (isProcessingRef.current || status === 'processing') {
+    const handleSlideToConfirm = async () => {
+        if (status === 'processing') {
             return;
         }
 
-        // Validate required params based on type
-        if (type === 'walletAddress' || type === 'solName') {
-            if (!walletAddress || typeof walletAddress !== 'string') {
-                Alert.alert('Error', 'Invalid wallet address');
-                return;
-            }
-        } else {
-            if (!contactPhone || typeof contactPhone !== 'string') {
-                Alert.alert('Error', 'Contact phone number is required');
-                return;
-            }
-        }
-
-        // Validate coin params
-        if (!coinAmount || !coinName || !coinAddress) {
-            Alert.alert('Error', 'Payment details are incomplete');
-            return;
-        }
-
-        isProcessingRef.current = true;
-        if (isMountedRef.current) {
-            setStatus('processing');
-        }
+        setStatus('processing');
 
         try {
             let toAddress: string;
 
             // For wallet addresses and .sol domains, use the walletAddress directly
             if (type === 'walletAddress' || type === 'solName') {
-                toAddress = walletAddress;
+                if (!walletAddress) {
+                    setStatus('failed');
+                    sliderRef.current?.reset();
+                    return;
+                }
+                toAddress = walletAddress as string;
             } else {
                 // For regular contacts, validate recipient exists
-                const normalizedPhone = normalizePhoneNumber(contactPhone);
+                const normalizedPhone = normalizePhoneNumber(contactPhone as string);
+                const recipientData = await apiService.getUserByPhoneNumber(normalizedPhone);
 
-                try {
-                    const recipientData = await apiService.getUserByPhoneNumber(normalizedPhone);
-
-                    if (!recipientData.success || !recipientData.data?.primary_address) {
-                        throw new Error('Recipient not found or has no wallet address');
-                    }
-                    toAddress = recipientData.data.primary_address;
-                } catch (apiError) {
-                    // Handle specific API errors
-                    if (apiError instanceof Error) {
-                        if (apiError.message.includes('timeout')) {
-                            throw new Error('Connection timeout. Please check your internet and try again.');
-                        } else if (apiError.message.includes('Recipient not found')) {
-                            throw new Error('Recipient is not registered on CronWallet');
-                        }
-                    }
-                    throw apiError;
+                if (!recipientData.success || !recipientData.data?.primary_address) {
+                    setStatus('failed');
+                    sliderRef.current?.reset();
+                    return;
                 }
+                toAddress = recipientData.data.primary_address;
             }
 
-            // Validate toAddress before navigation
-            if (!toAddress || typeof toAddress !== 'string') {
-                throw new Error('Invalid recipient address');
-            }
-
-
-
-            // Navigate to payment success screen with validated params
-            if (isMountedRef.current) {
-                router.push({
-                    pathname: './payment-success' as any,
-                    params: {
-                        contactId: contactId || '',
-                        contactName: contactName || '',
-                        contactPhone: contactPhone || '',
-                        contactAvatarUrl: contactAvatarUrl || '',
-                        contactCronId: contactCronId || '',
-                        coinAmount: coinAmount,
-                        coinName: coinName,
-                        coinAddress: coinAddress,
-                        coinDecimals: coinDecimals || '',
-                        coinSymbol: coinSymbol || '',
-                        toAddress: toAddress,
-                        type: type || '',
-                        walletAddress: walletAddress || '',
-                    },
-                });
-            }
-        } catch (error) {
-            console.error('Payment confirmation error:', error);
-
-            if (isMountedRef.current) {
-                setStatus('failed');
-
-                // Show user-friendly error message
-                const errorMessage = error instanceof Error
-                    ? error.message
-                    : 'Payment confirmation failed. Please try again.';
-
-                Alert.alert('Payment Error', errorMessage);
-            }
-        } finally {
-            isProcessingRef.current = false;
+            // Navigate to payment success screen with all necessary transaction details
+            router.push({
+                pathname: './payment-success' as any,
+                params: {
+                    contactId,
+                    contactName,
+                    contactPhone,
+                    contactAvatarUrl,
+                    contactCronId,
+                    coinAmount,
+                    coinName,
+                    coinAddress,
+                    coinDecimals,
+                    coinSymbol,
+                    toAddress,
+                    type,
+                    walletAddress,
+                },
+            });
+        } catch (e) {
+            console.log('Error validating recipient:', e);
+            setStatus('failed');
+            sliderRef.current?.reset();
         }
     };
 
@@ -163,31 +112,17 @@ export default function PaymentConfirmScreen() {
         );
     };
 
-    // Reset status when screen gains focus
+    // Reset status and slider when screen gains focus
     useFocusEffect(
         useCallback(() => {
-            isMountedRef.current = true;
-            isProcessingRef.current = false;
             setStatus('idle');
-
-            return () => {
-                isMountedRef.current = false;
-            };
+            sliderRef.current?.reset();
         }, [])
     );
 
     useEffect(() => {
-        if (isMountedRef.current) {
-            setStatus('idle');
-        }
+        sliderRef.current?.reset();
     }, [contactId, coinAmount]);
-
-    // Cleanup on unmount
-    useEffect(() => {
-        return () => {
-            isMountedRef.current = false;
-        };
-    }, []);
     return (
         <SafeAreaView className="flex-1 bg-white">
             {/* Header */}
@@ -211,9 +146,12 @@ export default function PaymentConfirmScreen() {
                     <ChevronLeft size={24} color="#000" />
                 </Pressable>
 
-                <UIText className="text-xl font-sans font-bold text-foreground-dark ml-4">
-                    Transfer Summary
-                </UIText>
+                <Pressable onPress={handleSlideToConfirm}>
+
+                    <UIText className="text-xl font-sans font-bold text-foreground-dark ml-4">
+                        Transfer Summary
+                    </UIText>
+                </Pressable>
             </View>
 
             <View className="flex-1 px-4">
@@ -294,17 +232,15 @@ export default function PaymentConfirmScreen() {
                 </View>
             </View>
 
-            {/* Confirm Payment Button */}
+            {/* Slide to Confirm Button */}
             <View className="px-4 pb-4">
-                <Button
-                    onPress={handleConfirmPayment}
+                <SlideToConfirm
+                    key={`${contactId}-${coinAmount}`}
+                    ref={sliderRef}
+                    text={sliderText}
                     disabled={status === 'processing'}
-                    className="bg-primary rounded-xl p-4"
-                >
-                    <UIText className="text-white font-semibold text-base">
-                        {status === 'processing' ? 'Processing...' : 'Confirm Payment'}
-                    </UIText>
-                </Button>
+                    onConfirm={handleSlideToConfirm}
+                />
             </View>
         </SafeAreaView>
     );
