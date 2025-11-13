@@ -52,12 +52,12 @@ export const transferSpl = async (amount: number, smartAccountAddress: string, t
     // Discriminator for pay_with_spl instruction
     const discriminator = new Uint8Array([181, 68, 253, 39, 76, 203, 111, 69]);
     console.log('🔑 Discriminator:', Array.from(discriminator));
+    let amountToSend = Math.floor(amount);
 
     // Encode amount as u64 (little-endian)
     const amountBuffer = new ArrayBuffer(8);
     const amountView = new DataView(amountBuffer);
-    amountView.setBigUint64(0, BigInt(amount), true); // true for little-endian
-    console.log('💰 Amount encoded as u64:', BigInt(amount).toString());
+    amountView.setBigUint64(0, BigInt(amountToSend), true); // true for little-endian
 
     // Combine discriminator and amount
     const dataArray = new Uint8Array(16); // 8 bytes discriminator + 8 bytes amount
