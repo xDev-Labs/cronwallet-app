@@ -1,3 +1,6 @@
+import { Buffer } from 'buffer';
+global.Buffer = Buffer;
+
 import { CronLogo } from "@/components/common/CronLogo";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { storage } from "@/lib/storage/storage";
