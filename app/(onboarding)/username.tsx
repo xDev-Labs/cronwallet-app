@@ -69,7 +69,7 @@ export default function UsernameScreen() {
 
   const handleUsernameChange = (text: string) => {
     // Remove spaces and special characters except underscore
-    const cleaned = text.toLowerCase().replace(/[^a-z0-9_]/g, "");
+    const cleaned = text.replace(/[^a-z0-9_]/g, "");
     setUsername(cleaned);
     setError("");
     setAvailabilityMessage("");
@@ -221,6 +221,8 @@ export default function UsernameScreen() {
                 className="h-14  font-sans rounded-lg border-[#ECECEC] border bg-transparent text-foreground-dark"
                 placeholderTextColor="#A0A0A0"
                 value={username}
+                autoCapitalize="none"
+                autoCorrect={false}
                 onChangeText={handleUsernameChange}
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setIsFocused(false)}
