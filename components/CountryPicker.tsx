@@ -1,8 +1,8 @@
+import { ChevronDown } from '@/components/icons/ChevronDown';
+import { Text } from '@/components/ui/text';
+import { countries, type Country } from '@/lib/constants/countries';
 import React, { useState } from 'react';
 import { FlatList, Modal, Pressable, TextInput, View } from 'react-native';
-import { Text } from '@/components/ui/text';
-import { ChevronDown } from '@/components/icons/ChevronDown';
-import { countries, type Country } from '@/lib/constants/countries';
 
 interface CountryPickerProps {
   selectedCountry: Country;
@@ -32,11 +32,10 @@ export const CountryPicker: React.FC<CountryPickerProps> = ({
     <>
       <Pressable
         className="flex-row items-center px-2"
-        activeOpacity={0.7}
         onPress={() => setIsVisible(true)}
       >
         <Text className="text-xl mr-1.5">{selectedCountry.flag}</Text>
-        <Text className="text-base font-semibold text-foreground-dark mr-1">
+        <Text className="text-base font-base text-foreground-dark mr-1 font-sans">
           {selectedCountry.dialCode}
         </Text>
         <ChevronDown size={18} color="#555555" />

@@ -1,5 +1,4 @@
 import { CountryPicker } from "@/components/CountryPicker";
-import { OnBoardingPages } from "@/components/OnBoardingPages";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
@@ -67,7 +66,7 @@ export default function PhoneAuthScreen() {
     return Math.max(...lengths);
   };
 
-  const generatePlaceHolder = (length: number) : string => {
+  const generatePlaceHolder = (length: number): string => {
     if (length <= 4) return "0".repeat(length);
 
     let groupSize = 3;
@@ -127,26 +126,25 @@ export default function PhoneAuthScreen() {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View className="flex-1 justify-between bg-background-light">
+          <View className="flex-1 bg-background-light">
 
             {/* Content Area */}
-            <View className="flex-1 px-6 justify-center">
-              <OnBoardingPages selected="phone" />
-              <Text variant="h4" className="text-foreground-dark">
-                What is your phone number?
+            <View className="flex-1 px-6 mt-20">
+              <Text variant="h1" className="font-sans font-semibold text-foreground-dark">
+                Connect your phone
               </Text>
               <Text
                 variant="muted"
-                className="text-[#C0C0C0] mb-8 font-sans text-sm"
+                className="text-[#979797] mb-4 font-sans text-lg"
               >
-                Link your number and you’re ready to send & receive
+                Enter you phone number to continue
               </Text>
 
               {/* Phone Input Field Container */}
               <View
-                className={`flex-row items-center h-14 rounded-lg border-2 px-2.5 ${isFocused
+                className={`flex-row items-center h-14 rounded-xl border px-2.5 ${isFocused
                   ? "border-border-focus bg-background-light"
-                  : "border-border-light bg-gray-100"
+                  : "border-border-light"
                   }`}
               >
                 {/* Country Code Selector */}
@@ -160,7 +158,7 @@ export default function PhoneAuthScreen() {
 
                 {/* Phone Number Input */}
                 <Input
-                  className="font-sans border-0 flex-1 -mt-2 bg-transparent px-2 text-foreground-dark"
+                  className="font-sans border-0 flex-1 -mt-2 bg-transparent px-2 text-foreground-dark "
                   placeholder={placeHolder}
                   placeholderTextColor="#A0A0A0"
                   keyboardType="phone-pad"
@@ -179,11 +177,13 @@ export default function PhoneAuthScreen() {
             >
               <Button
                 onPress={handleNext}
-                disabled={!isButtonEnabled}
                 loading={isLoading}
-                className="shadow-lg shadow-primary/20 font-medium mb-4"
+                disabled={!isButtonEnabled}
+                className="shadow-lg font-bold rounded-full shadow-primary/20 mb-4"
               >
-                Request OTP
+                <Text className="text-white text-lg font-bold font-sans">
+                  Get OTP
+                </Text>
               </Button>
             </View>
           </View>
