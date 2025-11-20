@@ -77,7 +77,7 @@ export default function SplashScreen() {
           }
         } else {
           // No user - start authentication flow
-          router.replace("/(auth)/phone-auth");
+          router.replace("/(auth)/get-started");
         }
       }, 2500);
 

@@ -2,7 +2,7 @@ import { Text } from "@/components/ui/text";
 import { WalletSelectionModal } from "@/components/WalletSelectionModal";
 import { WelcomeRewardModal } from "@/components/WelcomeRewardModal";
 import { useAuth } from "@/lib/contexts/AuthContext";
-import { storage } from "@/lib/storage/storage";
+import { clearAllStorage, storage } from "@/lib/storage/storage";
 import { router } from "expo-router";
 import { History, QrCode, Send, Wallet } from "lucide-react-native";
 import { useEffect, useState } from "react";
@@ -133,11 +133,11 @@ export default function HomeScreen() {
                   resizeMode="cover"
                 />
               </Pressable>
-              <View>
+              <Pressable onPress={async () => await clearAllStorage()}>
                 <Text className="text-white text-lg font-semibold">
                   {user?.cron_id}
                 </Text>
-              </View>
+              </Pressable>
             </View>
 
             {/* Right Side: QR + Copy */}
