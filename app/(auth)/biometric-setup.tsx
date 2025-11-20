@@ -1,4 +1,3 @@
-import { OnBoardingPages } from "@/components/OnBoardingPages";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { useAuth } from "@/lib/contexts/AuthContext";
@@ -10,13 +9,12 @@ import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   Alert,
+  Dimensions,
   Image,
   Keyboard,
-  Platform,
   TouchableWithoutFeedback,
   View
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 global.Buffer = global.Buffer || require("buffer").Buffer;
 
@@ -34,6 +32,8 @@ export default function BiometricSetupScreen() {
   const router = useRouter();
   const { user, updateUserProfile } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const screenHeight = Dimensions.get('window').height;
+
   const [biometricType, setBiometricType] = useState<
     "faceId" | "fingerprint" | "none"
   >("none");
@@ -150,42 +150,36 @@ export default function BiometricSetupScreen() {
   };
 
   return (
-    <SafeAreaView
-      edges={["top", "bottom"]}
-      className="flex-1 bg-background-light"
+    <View
+      className="flex-1 bg-white"
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View className="flex-1 justify-between bg-background-light">
+        <View className="flex-1 justify-between bg-white">
 
-          {/* Content Area */}
-          <View className="flex-1 px-6 justify-center">
-            <OnBoardingPages selected="biometric" />
-            <Text variant="h4" className="text-foreground-dark">
-              Secure your wallet
-            </Text>
-            <Text
-              variant="muted"
-              className="text-[#C0C0C0] mb-8 font-sans text-sm"
-            >
-              Your Device Key is safely stored on your phone and protected by your biometrics.
-            </Text>
-          </View>
+          <Image
+            source={require("@/assets/images/onboarding-bg.png")}
+            style={{ height: screenHeight * 0.5, }}
+            className="w-full rotate-180"
+            resizeMode="cover"
+          />
+
 
           <View
-            className={`px-6 pt-2.5 ${Platform.OS === "ios" ? "pb-7.5" : "pb-5"}`}
+            className="px-5 py-16 flex justify-end gap-4 h-1/2"
           >
-            <Button
-              onPress={handleEnableBiometric}
-              loading={isLoading}
-              className="shadow-lg shadow-primary/20 font-medium mb-4"
-            >
-              Create Device Key
+            <Image source={require("../../assets/images/face-id-icon.png")} className="w-10 h-10 z-10" />
+            <Text className="text-black text-4xl font-bold font-sans">Save Passkey</Text>
+            <Text className="text-[#979797] text-base font-sans leading-6 mb-16">Passkeys are a secure alternative to {'\n'}passwords saved on your device</Text>
+            <Button className="w-full bg-primary rounded-full" onPress={handleEnableBiometric}>
+              <Text className="text-white text-lg font-semibold">Setup Passkey</Text>
             </Button>
           </View>
 
 
+
+
         </View>
       </TouchableWithoutFeedback>
-    </SafeAreaView>
+    </View>
   );
 }

@@ -6,10 +6,8 @@ export default function GetStartedScreen() {
     const screenHeight = Dimensions.get('window').height;
 
     return (
-        <View className="flex-1 justify-end">
-            <View className="h-1/2">
-                <Text>Get Started</Text>
-            </View>
+        <View className="flex-1 justify-end bg-white">
+            <View className="h-1/2" />
             <ImageBackground
                 source={require("@/assets/images/onboarding-bg.png")}
                 style={{ height: screenHeight / 2 }}
