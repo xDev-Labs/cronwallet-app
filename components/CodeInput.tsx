@@ -58,11 +58,11 @@ export default function CodeInput({ length, onComplete, error, value, onChange }
 
             setCode(newCode);
             onChange?.(newCode.join(''));
-            
+
             // Focus the next empty input or the last filled input
             const nextEmptyIndex = newCode.findIndex((digit, i) => i > index && digit === '');
             const targetIndex = nextEmptyIndex !== -1 ? nextEmptyIndex : Math.min(index + digitsToPaste.length, length - 1);
-            
+
             setTimeout(() => {
                 inputRefs.current[targetIndex]?.focus();
             }, 0);
@@ -93,13 +93,13 @@ export default function CodeInput({ length, onComplete, error, value, onChange }
     };
 
     return (
-        <View className="flex-row justify-center gap-4">
+        <View className="flex-row gap-4">
             {Array.from({ length }).map((_, index) => (
                 <TextInput
                     key={index}
                     ref={(ref) => { inputRefs.current[index] = ref; }}
                     className={cn(
-                        'w-12 h-[48px] border-2 rounded-xl text-2xl font-bold text-center bg-white',
+                        'w-12 h-[48px] border rounded-xl text-2xl text-center bg-white font-sans',
                         focusedIndex === index
                             ? 'border-primary'
                             : code[index]

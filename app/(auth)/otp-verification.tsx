@@ -1,5 +1,4 @@
 import CodeInput from "@/components/CodeInput";
-import { OnBoardingPages } from "@/components/OnBoardingPages";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { useAuth } from "@/lib/contexts/AuthContext";
@@ -314,25 +313,21 @@ export default function OTPVerificationScreen() {
 
 
             {/* Content Area */}
-            <View className="flex-1 px-6 justify-center">
+            <View className="flex-1 px-6 mt-20">
               <View className="mt-5">
                 {/* Header */}
-                <OnBoardingPages selected="phone" />
-                <Text variant="h3" className="text-foreground-dark">
-                  OTP Verification
+                <Text variant="h1" className="font-sans font-semibold text-foreground-dark">
+                  Verification code
                 </Text>
                 <Text
-                  variant="caption"
-                  className="text-foreground-tertiary mb-8 font-sans"
+                  variant="muted"
+                  className="text-[#979797] mb-4 font-sans text-lg"
                 >
-                  We&apos;ve sent you a 6 digit code on{" "}
-                  <Text className="text-foreground-dark font-medium">
-                    {countryCode} {phoneNumber}
-                  </Text>
+                  We&apos;ve sent you a verification code
                 </Text>
 
                 {/* OTP Input */}
-                <View className="items-center mb-8">
+                <View className="mb-8">
                   <CodeInput
                     length={6}
                     value={otp}
@@ -347,9 +342,9 @@ export default function OTPVerificationScreen() {
                 </View>
 
                 {/* Timer and Resend */}
-                <View className="flex-row items-center justify-center mt-6">
+                <View className="flex-row">
                   <Text className="text-sm text-foreground-tertiary font-sans">
-                    {formatTime(countdown)}
+                    Resend in {formatTime(countdown)}
                   </Text>
                   <Text className="text-sm text-foreground-tertiary font-sans mx-2">
                     |
@@ -373,9 +368,9 @@ export default function OTPVerificationScreen() {
                 onPress={handleVerify}
                 disabled={!isVerifyEnabled}
                 loading={isVerifying}
-                className="shadow-lg shadow-primary/20 font-medium mb-4"
+                className="shadow-lg shadow-primary/20 font-medium mb-4 rounded-full"
               >
-                Verify OTP
+                Confirm
               </Button>
             </View>
 
