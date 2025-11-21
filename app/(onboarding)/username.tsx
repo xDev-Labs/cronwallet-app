@@ -1,4 +1,3 @@
-import { OnBoardingPages } from "@/components/OnBoardingPages";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
@@ -8,6 +7,7 @@ import { mapBackendUserToUser } from "@/lib/utils/userMapping";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   Image,
   Keyboard,
   KeyboardAvoidingView,
@@ -17,20 +17,9 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const CronLogo = () => (
-  <View className="flex-1 w-full items-center justify-center">
-    <Image
-      source={require("@/assets/images/cron-black-logo.png")}
-      className="w-[100px] h-8"
-      resizeMode="contain"
-    />
-  </View>
-);
-
 export default function UsernameScreen() {
   const [username, setUsername] = useState("");
   const [error, setError] = useState("");
-  const [isFocused, setIsFocused] = useState(false);
   const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
   const [availabilityMessage, setAvailabilityMessage] = useState("");
   const [isAvailable, setIsAvailable] = useState(false);
@@ -203,52 +192,76 @@ export default function UsernameScreen() {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View className="flex-1 justify-between bg-background-light">
+          <View className=" flex justify-between h-full bg-background-light">
             {/* Content Area */}
-            <View className="flex-1 px-6 justify-center">
-              <OnBoardingPages selected="username" />
-              <Text variant="h4" className="text-foreground-dark">
-                Claim your username
+            <View className="px-6 mt-20">
+              <Text variant="h1" className="font-sans font-semibold text-black">
+                Be Unique
               </Text>
               <Text
                 variant="muted"
-                className="text-[#C0C0C0] mb-8 font-sans text-sm"
+                className="text-[#979797] mb-4 font-sans text-lg"
               >
-                This cannot be changed later.
+                Choose a CRON ID for your wallet
               </Text>
 
-              <Input
-                className="h-14  font-sans rounded-lg border-[#ECECEC] border bg-transparent text-foreground-dark"
-                placeholderTextColor="#A0A0A0"
-                value={username}
-                autoCapitalize="none"
-                autoCorrect={false}
-                onChangeText={handleUsernameChange}
-                onFocus={() => setIsFocused(true)}
-                onBlur={() => setIsFocused(false)}
-              />
+              <View className="relative">
+                <Input
+                  className="h-14 font-sans rounded-xl border-[#ECECEC] border bg-transparent text-foreground-dark pr-32"
+                  placeholderTextColor="#A0A0A0"
+                  value={username}
+                  onChangeText={handleUsernameChange}
+                />
 
-              {/* Validation Error and Availability Status */}
-              {username.length >= 3 && (
-                <View className="mt-2">
-                  {error ? (
-                    <Text className="text-error text-sm font-sans">
-                      {error}
-                    </Text>
-                  ) : isCheckingAvailability ? (
-                    <Text className="text-foreground-tertiary text-sm font-sans">
-                      Checking availability...
-                    </Text>
-                  ) : availabilityMessage ? (
-                    <Text
-                      className={`text-sm font-sans ${isAvailable ? "text-green-600" : "text-error"
-                        }`}
-                    >
-                      {availabilityMessage}
-                    </Text>
-                  ) : null}
-                </View>
-              )}
+                {/* Status indicator inside input */}
+                {username.length >= 3 && (
+                  <View className="absolute right-3 top-0 h-14 justify-center">
+                    {error ? (
+                      <Text className="text-error text-xs font-sans">
+                        {error}
+                      </Text>
+                    ) : isCheckingAvailability ? (
+                      <View className="flex-row items-center gap-3">
+                        <ActivityIndicator size="small" color="#FFA500" style={{ width: 12, height: 12 }} />
+                        <Text className="text-yellow-500 text-sm font-sans">
+                          Let's see
+                        </Text>
+                      </View>
+                    ) : availabilityMessage ? (
+                      <View className="flex-row items-center gap-2">
+                        {isAvailable ? (
+                          <>
+                            <Image
+                              source={require("@/assets/icons/success.png")}
+                              className="w-3 h-3"
+                            />
+                            <Text className="text-green-600 text-sm font-sans">
+                              Woohoo
+                            </Text>
+                          </>
+                        ) : (
+                          <>
+                            <Image
+                              source={require("@/assets/icons/warning.png")}
+                              className="w-3 h-3"
+                            />
+                            <Text className="text-error text-sm font-sans">
+                              Bleh, it exists
+                            </Text>
+                          </>
+                        )}
+                      </View>
+                    ) : null}
+                  </View>
+                )}
+              </View>
+
+              <Text
+                variant="muted"
+                className="text-[#979797] mb-4 font-sans text-sm mt-2"
+              >
+                Your CRON ID needs to be unique, and will be visible to your contacts
+              </Text>
             </View>
 
             {/* Continue Button Container */}
@@ -259,7 +272,7 @@ export default function UsernameScreen() {
                 onPress={handleContinue}
                 disabled={!isButtonEnabled}
                 loading={isLoading}
-                className="shadow-lg shadow-primary/20 font-medium mb-4"
+                className="shadow-lg shadow-primary/20 font-medium mb-4 rounded-full"
               >
                 Claim Username
               </Button>
