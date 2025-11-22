@@ -42,9 +42,9 @@ export default function HomeScreen() {
 
       <View className="w-full h-10 mt-24 flex-row items-center justify-between px-8">
         <Image source={require("../../../assets/icons/logo-3d.png")} className="w-10 h-10" />
-        <View className="w-12 h-12 bg-[#FFFFFF9C] rounded-xl items-center justify-center p-2">
+        <Pressable className="w-12 h-12 bg-[#FFFFFF9C] rounded-xl items-center justify-center p-2" onPress={() => router.push("./profile")}>
           <Image source={require("../../../assets/icons/user.png")} className="w-6 h-6" />
-        </View>
+        </Pressable>
       </View>
 
       <View className="w-full h-fit mt-20 flex-row items-start justify-between px-8 ">
