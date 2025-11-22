@@ -2,7 +2,7 @@ import { Text } from "@/components/ui/text";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { apiService } from "@/lib/services/api";
 import type { Transaction } from "@/lib/types/transaction.types";
-import { shortenTxnHash } from "@/lib/utils";
+import { hapticFeedback, shortenTxnHash } from "@/lib/utils";
 import { mapBackendTransactionToTransaction } from "@/lib/utils/transactionMapping";
 import { router } from "expo-router";
 import { ChevronLeft, Clock, RefreshCw } from "lucide-react-native";
@@ -70,6 +70,7 @@ export default function HistoryScreen() {
   };
 
   const handleRefresh = async () => {
+    hapticFeedback();
     await loadTransactions(1, true);
   };
 
@@ -105,6 +106,7 @@ export default function HistoryScreen() {
   };
 
   const handleTransactionPress = (item: Transaction) => {
+    hapticFeedback();
     router.push({
       pathname: "./transaction-details",
       params: {
@@ -114,6 +116,11 @@ export default function HistoryScreen() {
       },
     });
   };
+
+  const handleBackPress = () => {
+    hapticFeedback();
+    router.back();
+  }
 
   const renderTransaction = ({ item }: { item: Transaction }) => {
     const direction = getTransactionDirection(item);
@@ -169,7 +176,7 @@ export default function HistoryScreen() {
         <View className="px-4 pt-4">
           <View className="flex-row justify-between items-center mb-4">
             <Pressable
-              onPress={() => router.back()}
+              onPress={handleBackPress}
               className="p-2 -ml-2 active:opacity-70"
             >
               <ChevronLeft size={24} color="#000" />
@@ -199,7 +206,7 @@ export default function HistoryScreen() {
         <View className="px-4 pt-4">
           <View className="flex-row justify-between items-center mb-4">
             <Pressable
-              onPress={() => router.back()}
+              onPress={handleBackPress}
               className="p-2 -ml-2 active:opacity-70"
             >
               <ChevronLeft size={24} color="#000" />
@@ -253,7 +260,7 @@ export default function HistoryScreen() {
       <View className="px-4 pt-4">
         <View className="flex-row justify-between items-center mb-4">
           <Pressable
-            onPress={() => router.back()}
+            onPress={handleBackPress}
             className="p-2 -ml-2 active:opacity-70"
           >
             <ChevronLeft size={24} color="#000" />

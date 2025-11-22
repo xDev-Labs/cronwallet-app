@@ -2,7 +2,7 @@ import { Text } from "@/components/ui/text";
 import { apiService } from "@/lib/services/api";
 import { resolveSolDomain } from "@/lib/solana/sns";
 import { Contact } from "@/lib/types";
-import { normalizePhoneNumber } from "@/lib/utils";
+import { hapticFeedback, normalizePhoneNumber } from "@/lib/utils";
 import * as Contacts from "expo-contacts";
 import { router, Stack } from "expo-router";
 import { ChevronLeft, User } from "lucide-react-native";
@@ -335,6 +335,7 @@ export default function PayAnyoneScreen() {
   }, [paymentOption]);
 
   const handleContactPress = (contact: Contact) => {
+    hapticFeedback();
     router.push({
       pathname: "./recipient",
       params: {
@@ -458,6 +459,11 @@ export default function PayAnyoneScreen() {
     );
   }
 
+  const handleBackPress = () => {
+    hapticFeedback();
+    router.back();
+  }
+
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
@@ -467,7 +473,7 @@ export default function PayAnyoneScreen() {
           behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
           <View className="flex-1 justify-between bg-background-light">
-            <Pressable onPress={() => router.back()} className="px-4 py-3">
+            <Pressable onPress={handleBackPress} className="px-4 py-3">
               <ChevronLeft size={24} color="#000" />
             </Pressable>
 

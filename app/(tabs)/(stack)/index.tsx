@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { whiteInset } from "@/lib/constants/theme";
 import { useAuth } from "@/lib/contexts/AuthContext";
+import { hapticFeedback } from "@/lib/utils";
 import { router } from "expo-router";
 import { useState } from "react";
 import { Image, Pressable, View } from "react-native";
@@ -35,6 +36,21 @@ export default function HomeScreen() {
     },
   ];
 
+  const handleActionCardPress = (url: string) => {
+    hapticFeedback();
+    router.push(url as any);
+  }
+
+  const handleProfilePress = () => {
+    hapticFeedback();
+    router.push("./profile");
+  }
+
+  const handleClaimModalPress = () => {
+    hapticFeedback();
+    setShowClaimModal(true);
+  }
+
   return (
     <View className="flex-1 bg-white">
 
@@ -45,15 +61,15 @@ export default function HomeScreen() {
 
       <View className="w-full h-10 mt-24 flex-row items-center justify-between px-8">
         <Image source={require("../../../assets/icons/logo-3d.png")} className="w-10 h-10" />
-        <Pressable className="w-12 h-12 bg-[#FFFFFF9C] rounded-xl items-center justify-center p-2" onPress={() => router.push("./profile")}>
+        <Pressable className="w-12 h-12 bg-[#FFFFFF9C] rounded-xl items-center justify-center p-2" onPress={handleProfilePress}>
           <Image source={require("../../../assets/icons/user.png")} className="w-6 h-6" />
         </Pressable>
       </View>
 
       <View className="w-full h-fit mt-20 flex-row items-start justify-between px-8 ">
         {ACTION_CARDS.map((card, index) => (
-          <Pressable key={index} className="flex items-center" onPress={() => router.push(card.url as any)}>
-            <View className="w-20 h-20 bg-[#F3F2FF] rounded-xl items-center justify-center p-2" pointerEvents="none">
+          <Pressable key={index} className="flex items-center" onPress={() => handleActionCardPress(card.url)}>
+            <View className="w-20 h-20 bg-[#F3F2FF] rounded-xl items-center justify-center p-2" >
               <Image source={card.icon} className="w-12 h-12" />
             </View>
             <Text className="text-sm font-sans text-black mt-1 text-center">{card.title}</Text>
@@ -91,7 +107,7 @@ export default function HomeScreen() {
               <Button
                 className="w-fit h-fit rounded-full flex justify-center items-center gap-2 px- py-3 z-10"
                 style={whiteInset}
-                onPress={() => setShowClaimModal(true)}
+                onPress={handleClaimModalPress}
               >
                 <Text className=" font-sans text-white ">Claim Now</Text>
               </Button>
