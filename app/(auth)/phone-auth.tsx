@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { countries, type Country } from "@/lib/constants/countries";
+import { whiteInset } from "@/lib/constants/theme";
 import auth from "@react-native-firebase/auth";
 import { router } from "expo-router";
 import React, { useState } from "react";
@@ -180,6 +181,7 @@ export default function PhoneAuthScreen() {
                 loading={isLoading}
                 disabled={!isButtonEnabled}
                 className="shadow-lg font-bold rounded-full shadow-primary/20 mb-4"
+                style={whiteInset}
               >
                 <Text className="text-white text-lg font-bold font-sans">
                   Get OTP
