@@ -44,7 +44,7 @@ export default function TransactionDetailsScreen() {
       });
     } else if (params.fromHistory === "true") {
       // If coming from history page, navigate back to history
-      router.push("/(tabs)/history");
+      router.push("./history");
     } else {
       router.back();
     }

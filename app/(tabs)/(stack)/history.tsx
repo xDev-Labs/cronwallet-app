@@ -106,7 +106,7 @@ export default function HistoryScreen() {
 
   const handleTransactionPress = (item: Transaction) => {
     router.push({
-      pathname: "/(tabs)/transaction-details",
+      pathname: "./transaction-details",
       params: {
         transactionData: JSON.stringify(item),
         userId: user?.user_id,

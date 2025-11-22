@@ -284,7 +284,7 @@ export default function RecipientScreen() {
 
     const name = typeof contactName === "string" ? contactName : "Unknown";
     return (
-      <Image source={require("../../assets/images/user.png")} className="w-12 h-12 rounded-full" />
+      <Image source={require("../../../assets/images/user.png")} className="w-12 h-12 rounded-full" />
     );
   };
 
@@ -295,7 +295,7 @@ export default function RecipientScreen() {
         <View className="flex-row items-center px-4 py-3">
           <TouchableOpacity
             className="p-2"
-            onPress={() => router.push("/(tabs)/pay-anyone")}
+            onPress={() => router.push("./pay-anyone")}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
             <ChevronLeft size={28} color="#000" pointerEvents="none" />
@@ -316,7 +316,7 @@ export default function RecipientScreen() {
       <View className="flex-row items-center px-4 py-3 justify-between">
         <TouchableOpacity
           className="p-2"
-          onPress={() => router.push("/(tabs)/pay-anyone")}
+          onPress={() => router.push("./pay-anyone")}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
           <ChevronLeft size={28} color="#000" pointerEvents="none" />
@@ -331,7 +331,7 @@ export default function RecipientScreen() {
                 <Text className="text-black text-lg font-semibold">
                   {maskDisplayName(contactName)}
                 </Text>
-                <Image source={require("../../assets/images/logo-white.png")} className="w-5 h-5" />
+                <Image source={require("../../../assets/images/logo-white.png")} className="w-5 h-5" />
               </View>
               {type !== "walletAddress" && type !== "solName" && (
                 <Text className="text-foreground-secondary text-sm mt-0.5">
@@ -366,7 +366,7 @@ export default function RecipientScreen() {
               {/* Only show Cron ID for regular contacts */}
               {type !== "walletAddress" && type !== "solName" && (recipientData?.cron_id || contactCronId) && (
                 <View className="flex-row items-center mt-1">
-                  <Image source={require("../../assets/images/logo-white.png")} className="w-5 h-5 mr-2" />
+                  <Image source={require("../../../assets/images/logo-white.png")} className="w-5 h-5 mr-2" />
                   <Text className="text-black text-base font-sans">
                     Cron ID : {recipientData?.cron_id || contactCronId}
                   </Text>
@@ -413,7 +413,7 @@ export default function RecipientScreen() {
               {/* Only show Cron ID for regular contacts */}
               {type !== "walletAddress" && type !== "solName" && (recipientData?.cron_id || contactCronId) && (
                 <View className="flex-row items-center mt-1">
-                  <Image source={require("../../assets/images/logo-white.png")} className="w-5 h-5 mr-2" />
+                  <Image source={require("../../../assets/images/logo-white.png")} className="w-5 h-5 mr-2" />
                   <Text className="text-black text-base font-sans">
                     Cron ID : {recipientData?.cron_id || contactCronId}
                   </Text>
@@ -477,7 +477,7 @@ export default function RecipientScreen() {
                         <TouchableOpacity
                           onPress={() => {
                             router.push({
-                              pathname: "/(tabs)/transaction-details",
+                              pathname: "./transaction-details",
                               params: {
                                 transactionData: JSON.stringify(transaction),
                                 fromRecipient: "true",
@@ -499,7 +499,7 @@ export default function RecipientScreen() {
                               </Text>
                             </View>
                             <View className="flex-row items-center gap-2 mt-2">
-                              <Image source={require("../../assets/icons/success.png")} className="w-4 h-4" />
+                              <Image source={require("../../../assets/icons/success.png")} className="w-4 h-4" />
                               <Text className="text-sm flex-1 text-black font-sans">
                                 {transactionType === "received"
                                   ? "Received"
@@ -566,7 +566,7 @@ export default function RecipientScreen() {
                 className="w-full"
                 onPress={() => {
                   setShowNotCronUserModal(false);
-                  router.push("/(tabs)/pay-anyone");
+                  router.push("./pay-anyone");
                 }}
               >
                 OK

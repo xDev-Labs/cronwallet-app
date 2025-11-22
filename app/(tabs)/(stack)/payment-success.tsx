@@ -223,7 +223,7 @@ export default function PaymentSuccessScreen() {
   const handleRetry = () => {
     // Navigate back to payment-confirm to retry
     router.push({
-      pathname: "/(tabs)/payment-confirm" as any,
+      pathname: "./payment-confirm" as any,
       params: {
         contactId,
         contactName,
@@ -246,7 +246,7 @@ export default function PaymentSuccessScreen() {
     // Use replace to ensure this screen is removed from the stack
     // This helps ensure proper cleanup and re-initialization on next visit
     router.replace({
-      pathname: "./recipient" as any,
+      pathname: "../recipient" as any,
       params: {
         contactId,
         contactName,
