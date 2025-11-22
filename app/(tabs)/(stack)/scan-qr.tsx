@@ -120,7 +120,7 @@ export default function ScanQRScreen() {
 
         // Navigate to recipient page with user details
         router.push({
-          pathname: "/(tabs)/payment-initiate",
+          pathname: "./payment-initiate",
           params: {
             contactId: recipient.user_id,
             contactName: recipient.cron_id,

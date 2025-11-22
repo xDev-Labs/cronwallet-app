@@ -11,24 +11,24 @@ export default function HomeScreen() {
 
   const ACTION_CARDS = [
     {
-      icon: require("../../assets/icons/scan.png"),
+      icon: require("../../../assets/icons/scan.png"),
       title: `Scan any${'\n'}QR code`,
-      url: "/scan-qr"
+      url: "./scan-qr"
     },
     {
-      icon: require("../../assets/icons/profile.png"),
+      icon: require("../../../assets/icons/profile.png"),
       title: `Pay${'\n'}anyone`,
-      url: "/pay-anyone"
+      url: "./pay-anyone"
     },
     {
-      icon: require("../../assets/icons/history.png"),
+      icon: require("../../../assets/icons/history.png"),
       title: `Transfer${'\n'}History`,
-      url: "/history"
+      url: "./history"
     },
     {
-      icon: require("../../assets/icons/wallet.png"),
+      icon: require("../../../assets/icons/wallet.png"),
       title: "Balance",
-      url: "/balance"
+      url: "./balance"
     },
   ];
 
@@ -36,14 +36,14 @@ export default function HomeScreen() {
     <View className="flex-1 bg-white">
 
       <Image
-        source={require("../../assets/images/home-bg.png")}
+        source={require("../../../assets/images/home-bg.png")}
         className="w-full h-1/3 absolute top-0 left-0"
       />
 
       <View className="w-full h-10 mt-24 flex-row items-center justify-between px-8">
-        <Image source={require("../../assets/icons/logo-3d.png")} className="w-10 h-10" />
+        <Image source={require("../../../assets/icons/logo-3d.png")} className="w-10 h-10" />
         <View className="w-12 h-12 bg-[#FFFFFF9C] rounded-xl items-center justify-center p-2">
-          <Image source={require("../../assets/icons/user.png")} className="w-6 h-6" />
+          <Image source={require("../../../assets/icons/user.png")} className="w-6 h-6" />
         </View>
       </View>
 
@@ -61,7 +61,7 @@ export default function HomeScreen() {
       <View className="w-full h-fit px-8 mt-10">
         <View className="w-full h-fit flex-row items-center gap-4 p-2 border border-[#E2E2E2] rounded-full">
           <View className="bg-[#EBF3FF] w-fit p-3 rounded-full">
-            <Image source={require("../../assets/icons/logo-transparent.png")} className="w-4 h-4" />
+            <Image source={require("../../../assets/icons/logo-transparent.png")} className="w-4 h-4" />
           </View>
           <View className="">
             <Text className="text-sm font-sans text-black">CRON ID</Text>
@@ -77,7 +77,7 @@ export default function HomeScreen() {
       <View className="w-full h-fit px-8 mt-4">
         <View className="w-full h-fit bg-[#F8F9FD] rounded-xl p-4 pb-12 flex items-start overflow-hidden">
           <View className="bg-[#EDEBFF] w-fit p-3 rounded-full">
-            <Image source={require("../../assets/icons/prize.png")} className="w-4 h-4" />
+            <Image source={require("../../../assets/icons/prize.png")} className="w-4 h-4" />
           </View>
           <View className="w-full flex-row">
             <View className="mt-2 w-1/2">
@@ -90,13 +90,13 @@ export default function HomeScreen() {
               </Button>
             </View>
           </View>
-          <Image source={require("../../assets/images/gift.png")} className="w-36 h-36 absolute bottom-0 right-0" />
+          <Image source={require("../../../assets/images/gift.png")} className="w-36 h-36 absolute bottom-0 right-0" />
         </View>
       </View>
 
       <View className="absolute bottom-20 w-full h-fit px-8 mt-8 flex items-center justify-center">
         <Button className="w-fit rounded-full flex justify-center items-center gap-2 px-8 " style={whiteInset}>
-          <Image source={require("../../assets/icons/add.png")} className="w-6 h-6 " />
+          <Image source={require("../../../assets/icons/add.png")} className="w-6 h-6 " />
           <Text className="text-lg font-sans text-white ">Add Money</Text>
         </Button>
       </View>

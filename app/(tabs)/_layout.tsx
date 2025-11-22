@@ -26,16 +26,9 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
-        name="index"
+        name="(stack)"
         options={{
           title: "Home",
-          tabBarStyle: { display: "none" },
-        }}
-      />
-      <Tabs.Screen
-        name="history"
-        options={{
-          title: "History",
           tabBarStyle: { display: "none" },
         }}
       />
@@ -43,70 +36,6 @@ export default function TabLayout() {
         name="profile"
         options={{
           title: "Profile",
-          tabBarStyle: { display: "none" },
-        }}
-      />
-      {/* Hide other existing screens from tabs */}
-      <Tabs.Screen
-        name="balance"
-        options={{
-          href: null,
-          tabBarStyle: { display: "none" },
-        }}
-      />
-      <Tabs.Screen
-        name="payment-confirm"
-        options={{
-          href: null,
-          tabBarStyle: { display: "none" },
-        }}
-      />
-      <Tabs.Screen
-        name="payment-initiate"
-        options={{
-          href: null,
-          tabBarStyle: { display: "none" },
-        }}
-      />
-      <Tabs.Screen
-        name="payment-success"
-        options={{
-          href: null,
-          tabBarStyle: { display: "none" },
-        }}
-      />
-      <Tabs.Screen
-        name="recipient"
-        options={{
-          href: null,
-          tabBarStyle: { display: "none" },
-        }}
-      />
-      <Tabs.Screen
-        name="pay-anyone"
-        options={{
-          href: null,
-          tabBarStyle: { display: "none" },
-        }}
-      />
-      <Tabs.Screen
-        name="qr-code"
-        options={{
-          href: null,
-          tabBarStyle: { display: "none" },
-        }}
-      />
-      <Tabs.Screen
-        name="scan-qr"
-        options={{
-          href: null,
-          tabBarStyle: { display: "none" },
-        }}
-      />
-      <Tabs.Screen
-        name="transaction-details"
-        options={{
-          href: null,
           tabBarStyle: { display: "none" },
         }}
       />

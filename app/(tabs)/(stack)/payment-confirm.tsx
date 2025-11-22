@@ -129,7 +129,7 @@ export default function PaymentConfirmScreen() {
             <View className="flex-row items-center px-4 py-4">
                 <Pressable
                     onPress={() => router.push({
-                        pathname: '/(tabs)/payment-initiate' as any,
+                        pathname: './payment-initiate' as any,
                         params: {
                             contactId,
                             contactName,

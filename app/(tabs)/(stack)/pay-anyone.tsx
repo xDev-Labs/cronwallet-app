@@ -336,7 +336,7 @@ export default function PayAnyoneScreen() {
 
   const handleContactPress = (contact: Contact) => {
     router.push({
-      pathname: "/(tabs)/recipient",
+      pathname: "./recipient",
       params: {
         contactId: contact.id,
         contactName: contact.name,
@@ -355,7 +355,7 @@ export default function PayAnyoneScreen() {
     const userData = option.userData;
 
     router.push({
-      pathname: "/(tabs)/recipient",
+      pathname: "./recipient",
       params: {
         contactId: userData?.user_id || option.value,
         contactName: userData?.cron_id || option.value,
@@ -389,7 +389,7 @@ export default function PayAnyoneScreen() {
 
     return (
       <Image
-        source={require("../../assets/images/user.png")}
+        source={require("../../../assets/images/user.png")}
         className="w-12 h-12 rounded-full"
       />
     );
@@ -406,7 +406,7 @@ export default function PayAnyoneScreen() {
           <Text className="text-black text-base font-semibold">
             {item.name}
           </Text>
-          <Image source={require("../../assets/images/logo-white.png")} className="w-5 h-5" />
+          <Image source={require("../../../assets/images/logo-white.png")} className="w-5 h-5" />
         </View>
         <Text className="text-foreground-secondary text-sm">{item.phone}</Text>
       </View>
