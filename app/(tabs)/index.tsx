@@ -2,63 +2,35 @@ import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { whiteInset } from "@/lib/constants/theme";
 import { useAuth } from "@/lib/contexts/AuthContext";
-import { storage } from "@/lib/storage/storage";
-import { useEffect, useState } from "react";
-import { Image, View } from "react-native";
+import { router } from "expo-router";
+import { Image, Pressable, View } from "react-native";
 
 
 export default function HomeScreen() {
-  const [isWalletModalVisible, setIsWalletModalVisible] = useState(false);
-  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const { user } = useAuth();
 
   const ACTION_CARDS = [
     {
       icon: require("../../assets/icons/scan.png"),
       title: `Scan any${'\n'}QR code`,
+      url: "/scan-qr"
     },
     {
       icon: require("../../assets/icons/profile.png"),
       title: `Pay${'\n'}anyone`,
+      url: "/pay-anyone"
     },
     {
       icon: require("../../assets/icons/history.png"),
       title: `Transfer${'\n'}History`,
+      url: "/history"
     },
     {
       icon: require("../../assets/icons/wallet.png"),
       title: "Balance",
+      url: "/balance"
     },
   ];
-
-  // Check if welcome modal should be shown
-  useEffect(() => {
-    const checkWelcomeModal = async () => {
-      try {
-        const hasCompletedOnboarding = await storage.hasCompletedOnboarding();
-        const hasSeenModal = await storage.hasSeenWelcomeModal();
-
-        // Show modal only if onboarding is complete AND modal hasn't been shown
-        if (hasCompletedOnboarding && !hasSeenModal) {
-          setShowWelcomeModal(true);
-        }
-      } catch (error) {
-        console.error("Error checking welcome modal status:", error);
-      }
-    };
-
-    checkWelcomeModal();
-  }, []);
-
-  const handleCloseWelcomeModal = async () => {
-    try {
-      await storage.setWelcomeModalShown(true);
-      setShowWelcomeModal(false);
-    } catch (error) {
-      console.error("Error saving welcome modal status:", error);
-      setShowWelcomeModal(false);
-    }
-  };
 
   return (
     <View className="flex-1 bg-white">
@@ -77,12 +49,12 @@ export default function HomeScreen() {
 
       <View className="w-full h-fit mt-20 flex-row items-start justify-between px-8 ">
         {ACTION_CARDS.map((card, index) => (
-          <View key={index} className="flex items-center">
-            <View className="w-20 h-20 bg-[#F3F2FF] rounded-xl items-center justify-center p-2">
+          <Pressable key={index} className="flex items-center" onPress={() => router.push(card.url as any)}>
+            <View className="w-20 h-20 bg-[#F3F2FF] rounded-xl items-center justify-center p-2" pointerEvents="none">
               <Image source={card.icon} className="w-12 h-12" />
             </View>
             <Text className="text-sm font-sans text-black mt-1 text-center">{card.title}</Text>
-          </View>
+          </Pressable>
         ))}
       </View>
 
