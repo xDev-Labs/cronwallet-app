@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { countries, type Country } from "@/lib/constants/countries";
 import { whiteInset } from "@/lib/constants/theme";
+import { hapticFeedback } from "@/lib/utils";
 import auth from "@react-native-firebase/auth";
 import { router } from "expo-router";
 import React, { useState } from "react";
@@ -84,6 +85,7 @@ export default function PhoneAuthScreen() {
 
 
   const handleNext = async () => {
+    hapticFeedback();
     setIsLoading(true);
     try {
       // Construct phone number with country code
@@ -115,6 +117,7 @@ export default function PhoneAuthScreen() {
   };
 
   const isButtonEnabled = isValidPhoneNumber() && !isLoading;
+
 
   return (
     <SafeAreaView

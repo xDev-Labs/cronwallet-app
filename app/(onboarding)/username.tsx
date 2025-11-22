@@ -4,6 +4,7 @@ import { Text } from "@/components/ui/text";
 import { whiteInset } from "@/lib/constants/theme";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { ApiError, apiService } from "@/lib/services/api";
+import { hapticFeedback } from "@/lib/utils";
 import { mapBackendUserToUser } from "@/lib/utils/userMapping";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -124,6 +125,7 @@ export default function UsernameScreen() {
   };
 
   const handleContinue = async () => {
+    hapticFeedback();
     const validationError = validateUsername(username);
     if (validationError) {
       setError(validationError);

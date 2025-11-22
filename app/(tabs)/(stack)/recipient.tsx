@@ -4,7 +4,7 @@ import { whiteInset } from "@/lib/constants/theme";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { apiService } from "@/lib/services/api";
 import type { Transaction } from "@/lib/types/transaction.types";
-import { normalizePhoneNumber } from "@/lib/utils";
+import { hapticFeedback, normalizePhoneNumber } from "@/lib/utils";
 import { getTransactionsBetweenUsers, getTransactionsByWalletAddress } from "@/lib/utils/transactionService";
 import { router, useLocalSearchParams } from "expo-router";
 import { ChevronLeft } from "lucide-react-native";
@@ -224,6 +224,7 @@ export default function RecipientScreen() {
   }, [newTransaction]);
 
   const handlePayPress = () => {
+    hapticFeedback();
     router.push({
       pathname: "/(tabs)/payment-initiate" as any,
       params: {
@@ -311,12 +312,17 @@ export default function RecipientScreen() {
     );
   }
 
+  const handleBackPress = () => {
+    hapticFeedback();
+    router.back();
+  }
+
   return (
     <SafeAreaView edges={["top"]} className="flex-1 bg-white font-sans">
       <View className="flex-row items-center px-4 py-3 justify-between">
         <TouchableOpacity
           className="p-2"
-          onPress={() => router.back()}
+          onPress={handleBackPress}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
           <ChevronLeft size={28} color="#000" pointerEvents="none" />
@@ -476,6 +482,7 @@ export default function RecipientScreen() {
                       >
                         <TouchableOpacity
                           onPress={() => {
+                            hapticFeedback();
                             router.push({
                               pathname: "./transaction-details",
                               params: {

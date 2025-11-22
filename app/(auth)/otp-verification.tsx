@@ -5,7 +5,7 @@ import { whiteInset } from "@/lib/constants/theme";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { ApiError, apiService } from "@/lib/services/api";
 import { storage } from "@/lib/storage/storage";
-import { normalizePhoneNumber } from "@/lib/utils";
+import { hapticFeedback, normalizePhoneNumber } from "@/lib/utils";
 import { fetchAndStoreUserTransactions } from "@/lib/utils/transactionService";
 import { mapBackendUserToUser } from "@/lib/utils/userMapping";
 import auth from "@react-native-firebase/auth";
@@ -124,6 +124,8 @@ export default function OTPVerificationScreen() {
   const handleVerify = async () => {
     if (otp.length !== 6 || isVerifying) return;
 
+    hapticFeedback();
+
     setError(false);
     setIsVerifying(true);
 
@@ -199,7 +201,7 @@ export default function OTPVerificationScreen() {
             }
 
             // Returning user with cron_id - go directly to tabs
-            router.replace("/(tabs)");
+            router.replace("/");
             return;
           }
         }
@@ -252,7 +254,7 @@ export default function OTPVerificationScreen() {
                 }
 
                 // Returning user with cron_id - go directly to tabs
-                router.replace("/(tabs)");
+                router.replace("/");
                 return;
               }
             }

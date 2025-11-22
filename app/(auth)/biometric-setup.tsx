@@ -3,6 +3,7 @@ import { Text } from "@/components/ui/text";
 import { whiteInset } from "@/lib/constants/theme";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { ApiError, apiService } from "@/lib/services/api";
+import { hapticFeedback } from "@/lib/utils";
 import { mapBackendUserToUser } from "@/lib/utils/userMapping";
 
 import * as LocalAuthentication from "expo-local-authentication";
@@ -76,6 +77,8 @@ export default function BiometricSetupScreen() {
   };
 
   const handleEnableBiometric = async () => {
+
+    hapticFeedback();
 
     setIsLoading(true);
 

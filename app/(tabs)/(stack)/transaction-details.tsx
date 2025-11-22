@@ -2,7 +2,7 @@ import { Checks } from "@/components/icons/Checks";
 import { Text } from "@/components/ui/text";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { Transaction } from "@/lib/types";
-import { shortenTxnHash } from "@/lib/utils";
+import { hapticFeedback, shortenTxnHash } from "@/lib/utils";
 import * as Clipboard from "expo-clipboard";
 import { router, useLocalSearchParams } from "expo-router";
 import { ChevronLeft, Copy } from "lucide-react-native";
@@ -29,6 +29,7 @@ export default function TransactionDetailsScreen() {
   }, [params.transactionData]);
 
   const handleBackPress = () => {
+    hapticFeedback();
     router.back();
   };
 

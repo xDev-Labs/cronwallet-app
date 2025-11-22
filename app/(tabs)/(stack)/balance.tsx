@@ -5,7 +5,7 @@ import { TOKEN_API_URL } from "@/lib/config/environment";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { apiService } from "@/lib/services/api";
 import { Token } from "@/lib/types/user.types";
-import { cn } from "@/lib/utils";
+import { cn, hapticFeedback } from "@/lib/utils";
 import * as LocalAuthentication from "expo-local-authentication";
 import { router, useFocusEffect } from "expo-router";
 import {
@@ -178,6 +178,11 @@ export default function BalanceScreen() {
     }
   }, [isAuthenticating]);
 
+  const handleBackPress = () => {
+    hapticFeedback();
+    router.back();
+  }
+
   if (!isAuthenticated || isAuthenticating) {
     return (
       <SafeAreaView className="flex-1 bg-gray-50">
@@ -209,7 +214,7 @@ export default function BalanceScreen() {
       <View className="">
         <View className="flex-row items-center px-4 py-3">
           <Pressable
-            onPress={() => router.back()}
+            onPress={handleBackPress}
             className="p-2 -ml-2 active:opacity-70"
           >
             <ChevronLeft size={24} color="#000" />

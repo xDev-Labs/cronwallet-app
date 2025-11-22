@@ -1,6 +1,7 @@
 import { Text } from "@/components/ui/text";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { apiService } from "@/lib/services/api";
+import { hapticFeedback } from "@/lib/utils";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { router, useFocusEffect } from "expo-router";
 import { ArrowLeft } from "lucide-react-native";
@@ -46,7 +47,13 @@ export default function ScanQRScreen() {
     }, [])
   );
 
+  const handleBackPress = () => {
+    hapticFeedback();
+    router.back();
+  }
+
   const handleBarCodeScanned = async ({ data }: { data: string }) => {
+    hapticFeedback();
     // Immediate check with ref to prevent multiple scans
     if (isHandlingRef.current || !canScan || scanned || isProcessing) return;
 
@@ -119,6 +126,7 @@ export default function ScanQRScreen() {
         isHandlingRef.current = false;
 
         // Navigate to recipient page with user details
+        hapticFeedback();
         router.push({
           pathname: "./payment-initiate",
           params: {
@@ -185,7 +193,7 @@ export default function ScanQRScreen() {
         {/* Header */}
         <View className="flex-row items-center justify-between px-6 py-4">
           <Pressable
-            onPress={() => router.back()}
+            onPress={handleBackPress}
             className="flex-row items-center"
           >
             <ArrowLeft size={24} color="#000000" strokeWidth={2} />
@@ -228,7 +236,7 @@ export default function ScanQRScreen() {
           <SafeAreaView edges={["top"]} className="bg-black">
             <View className="flex-row items-center justify-between px-6 py-4">
               <Pressable
-                onPress={() => router.back()}
+                onPress={handleBackPress}
                 className="active:opacity-70"
               >
                 <ArrowLeft size={24} color="#FFFFFF" strokeWidth={2} />

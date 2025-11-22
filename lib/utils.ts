@@ -1,5 +1,7 @@
 import { clsx, type ClassValue } from "clsx";
+import * as Haptics from 'expo-haptics';
 import { twMerge } from "tailwind-merge";
+
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -18,7 +20,7 @@ export function normalizePhoneNumber(phone: string | null | undefined): string {
   if (!phone || typeof phone !== 'string') {
     return '';
   }
-  
+
   // First, check if the phone starts with +
   const hasPlus = phone.startsWith('+');
 
@@ -31,4 +33,29 @@ export function normalizePhoneNumber(phone: string | null | undefined): string {
 
 export const shortenTxnHash = (hash: string) => {
   return `${hash.slice(0, 6)}...${hash.slice(-4)}`;
+}
+
+
+
+export function hapticFeedback(style?: "light" | "medium" | "heavy" | "soft" | "rigid") {
+  switch (style) {
+    case "light":
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      break;
+    case "medium":
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      break;
+    case "heavy":
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+      break;
+    case "soft":
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Soft);
+      break;
+    case "rigid":
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Rigid);
+      break;
+    default:
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      break;
+  }
 }
