@@ -1,13 +1,16 @@
+import { ClaimRewardModal } from "@/components/ClaimRewardModal";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { whiteInset } from "@/lib/constants/theme";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { router } from "expo-router";
+import { useState } from "react";
 import { Image, Pressable, View } from "react-native";
 
 
 export default function HomeScreen() {
   const { user } = useAuth();
+  const [showClaimModal, setShowClaimModal] = useState(false);
 
   const ACTION_CARDS = [
     {
@@ -37,7 +40,7 @@ export default function HomeScreen() {
 
       <Image
         source={require("../../../assets/images/home-bg.png")}
-        className="w-full h-1/3 absolute top-0 left-0"
+        className="w-full h-1/3 absolute top-0 left-0 "
       />
 
       <View className="w-full h-10 mt-24 flex-row items-center justify-between px-8">
@@ -85,7 +88,11 @@ export default function HomeScreen() {
               <Text className="text-sm font-sans text-black">Before it vanishes 👀</Text>
             </View>
             <View className="w-1/2 flex items-end justify-start">
-              <Button className="w-fit h-fit rounded-full flex justify-center items-center gap-2 px- py-3 " style={whiteInset}>
+              <Button
+                className="w-fit h-fit rounded-full flex justify-center items-center gap-2 px- py-3 z-10"
+                style={whiteInset}
+                onPress={() => setShowClaimModal(true)}
+              >
                 <Text className=" font-sans text-white ">Claim Now</Text>
               </Button>
             </View>
@@ -101,7 +108,10 @@ export default function HomeScreen() {
         </Button>
       </View>
 
-
+      <ClaimRewardModal
+        visible={showClaimModal}
+        onClose={() => setShowClaimModal(false)}
+      />
     </View>
   );
 }
