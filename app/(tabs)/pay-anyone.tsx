@@ -387,17 +387,11 @@ export default function PayAnyoneScreen() {
       );
     }
 
-    const initial = contact.name.charAt(0).toUpperCase();
-    const colors = ["#E91E63", "#9C27B0", "#FF5722", "#2196F3", "#4CAF50"];
-    const colorIndex = contact.name.charCodeAt(0) % colors.length;
-
     return (
-      <View
-        className="w-12 h-12 rounded-full items-center justify-center"
-        style={{ backgroundColor: colors[colorIndex] }}
-      >
-        <Text className="text-white text-xl font-bold">{initial}</Text>
-      </View>
+      <Image
+        source={require("../../assets/images/user.png")}
+        className="w-12 h-12 rounded-full"
+      />
     );
   };
 
@@ -408,7 +402,12 @@ export default function PayAnyoneScreen() {
     >
       {renderAvatar(item)}
       <View className="flex-1 ml-3">
-        <Text className="text-black text-base font-semibold ">{item.name}</Text>
+        <View className="flex-row items-center gap-2">
+          <Text className="text-black text-base font-semibold">
+            {item.name}
+          </Text>
+          <Image source={require("../../assets/images/logo-white.png")} className="w-5 h-5" />
+        </View>
         <Text className="text-foreground-secondary text-sm">{item.phone}</Text>
       </View>
     </Pressable>
@@ -473,13 +472,13 @@ export default function PayAnyoneScreen() {
             </Pressable>
 
             {/* Content Area */}
-            <View className="flex-1 px-6">
+            <View className="flex-1 px-6 mt-4">
               <Text variant="h3" className="text-foreground-dark">
                 Pay anyone {paymentOption?.type}
               </Text>
               <Text
                 variant="caption"
-                className="text-foreground-tertiary mb-8 font-sans"
+                className="text-foreground-tertiary mb-4 font-sans"
               >
                 Pay using phone, Cron ID, .sol name, or wallet address
               </Text>
@@ -491,7 +490,7 @@ export default function PayAnyoneScreen() {
                     value={searchQuery}
                     onChangeText={setSearchQuery}
                     placeholder="Name, phone, Cron ID, .sol, or address"
-                    className="h-14 font-sans rounded-xl border-2 border-gray-200 bg-gray-50 px-4 pr-12 text-base text-black leading-5 py-2"
+                    className="h-14 font-sans rounded-xl border border-gray-200 bg-transparent px-4 pr-12 text-base text-black leading-5 py-2"
                     placeholderTextColor="#8E8E93"
                     multiline={false}
                     numberOfLines={1}
@@ -499,9 +498,6 @@ export default function PayAnyoneScreen() {
                     autoCorrect={false}
                     returnKeyType="done"
                   />
-                  <View className="absolute right-4 top-1/2 -translate-y-1/2">
-                    <User size={20} color="#8E8E93" />
-                  </View>
                 </View>
               </View>
 
