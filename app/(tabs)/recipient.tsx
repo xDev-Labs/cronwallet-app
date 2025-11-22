@@ -1,7 +1,6 @@
-import { Checks } from "@/components/icons/Checks";
-import { DotsVertical } from "@/components/icons/DotsVertical";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
+import { whiteInset } from "@/lib/constants/theme";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { apiService } from "@/lib/services/api";
 import type { Transaction } from "@/lib/types/transaction.types";
@@ -28,6 +27,7 @@ interface RecipientData {
   primary_address: string;
   avatar_url?: string;
 }
+
 
 export default function RecipientScreen() {
   const { user } = useAuth();
@@ -283,17 +283,8 @@ export default function RecipientScreen() {
     }
 
     const name = typeof contactName === "string" ? contactName : "Unknown";
-    const initial = name.charAt(0).toUpperCase();
-    const colors = ["#E91E63", "#9C27B0", "#FF5722", "#2196F3", "#4CAF50"];
-    const colorIndex = name.charCodeAt(0) % colors.length;
-
     return (
-      <View
-        className="w-12 h-12 rounded-full items-center justify-center"
-        style={{ backgroundColor: colors[colorIndex] }}
-      >
-        <Text className="text-white text-xl font-bold">{initial}</Text>
-      </View>
+      <Image source={require("../../assets/images/user.png")} className="w-12 h-12 rounded-full" />
     );
   };
 
@@ -331,19 +322,27 @@ export default function RecipientScreen() {
           <ChevronLeft size={28} color="#000" pointerEvents="none" />
         </TouchableOpacity>
 
-        <View className="flex-row items-center flex-1 ml-3">
-          {renderAvatar()}
-          <View className="ml-3 flex-1">
-            <Text className="text-black text-lg font-semibold">
-              {maskDisplayName(contactName)}
-            </Text>
-            {type !== "walletAddress" && type !== "solName" && (
-              <Text className="text-foreground-secondary text-sm mt-0.5">
-                {maskPhoneNumber(contactPhone)}
-              </Text>
-            )}
+        {
+          transactions.length > 0 &&
+          (<View className="flex-row items-center flex-1 ml-3">
+            {renderAvatar()}
+            <View className="ml-3 flex-1">
+              <View className="flex-row items-center gap-2">
+                <Text className="text-black text-lg font-semibold">
+                  {maskDisplayName(contactName)}
+                </Text>
+                <Image source={require("../../assets/images/logo-white.png")} className="w-5 h-5" />
+              </View>
+              {type !== "walletAddress" && type !== "solName" && (
+                <Text className="text-foreground-secondary text-sm mt-0.5">
+                  {maskPhoneNumber(contactPhone)}
+                </Text>
+              )}
+            </View>
           </View>
-        </View>
+          )
+        }
+
 
         {/* <View className="flex-row gap-2">
           <TouchableOpacity className="p-1">
@@ -352,165 +351,182 @@ export default function RecipientScreen() {
         </View> */}
       </View>
 
-      <ScrollView
-        ref={scrollViewRef}
-        showsVerticalScrollIndicator={false}
-        className="px-4"
-      >
-        {/* Centered Profile Section */}
-        <View className="items-center px-4 py-6">
-          {type !== "walletAddress" && type !== "solName" && renderAvatar()}
-          <Text
-            className={`text-black text-2xl font-semibold ${type !== "walletAddress" && type !== "solName" ? "mt-4" : ""}`}
+
+      {
+        transactions.length == 0 ? (
+          <View className="flex-1 items-center justify-center py-8">
+            <View className="items-center px-4 py-6">
+              {type !== "walletAddress" && type !== "solName" && renderAvatar()}
+              <Text
+                className={`text-black text-2xl font-semibold ${type !== "walletAddress" && type !== "solName" ? "mt-4" : ""}`}
+              >
+                {maskDisplayName(contactName)}
+              </Text>
+
+              {/* Only show Cron ID for regular contacts */}
+              {type !== "walletAddress" && type !== "solName" && (recipientData?.cron_id || contactCronId) && (
+                <View className="flex-row items-center mt-1">
+                  <Image source={require("../../assets/images/logo-white.png")} className="w-5 h-5 mr-2" />
+                  <Text className="text-black text-base font-sans">
+                    Cron ID : {recipientData?.cron_id || contactCronId}
+                  </Text>
+                </View>
+              )}
+
+              {/* Only show phone for non-wallet/sol types */}
+              {type !== "walletAddress" && type !== "solName" && (
+                <Text className="text-black text-base mt-4 font-sans">
+                  {maskPhoneNumber(contactPhone)}
+                </Text>
+              )}
+
+              {/* Show wallet address for wallet/sol payments */}
+              {(type === "walletAddress" || type === "solName") && walletAddress && (
+                <Text className="text-foreground-secondary text-sm font-sans mt-1">
+                  {`${(walletAddress as string).slice(0, 4)}...${(walletAddress as string).slice(-4)}`}
+                </Text>
+              )}
+
+              {/* Only show joined date for regular contacts */}
+              {type !== "walletAddress" && type !== "solName" && (
+                <Text className="text-[#A5A5A5] text-sm mt-1 font-sans">
+                  Joined Dec 2025
+                </Text>
+              )}
+            </View>
+          </View>
+        ) :
+          <ScrollView
+            ref={scrollViewRef}
+            showsVerticalScrollIndicator={false}
+            className={`px-4`}
           >
-            {maskDisplayName(contactName)}
-          </Text>
-
-          {/* Only show Cron ID for regular contacts */}
-          {type !== "walletAddress" && type !== "solName" && (recipientData?.cron_id || contactCronId) && (
-            <View className="flex-row items-center mt-2">
-              <Text className="text-black text-base font-sans">
-                Cron ID : {recipientData?.cron_id || contactCronId}
+            {/* Centered Profile Section */}
+            <View className="items-center px-4 py-6">
+              {type !== "walletAddress" && type !== "solName" && renderAvatar()}
+              <Text
+                className={`text-black text-2xl font-semibold ${type !== "walletAddress" && type !== "solName" ? "mt-4" : ""}`}
+              >
+                {maskDisplayName(contactName)}
               </Text>
+
+              {/* Only show Cron ID for regular contacts */}
+              {type !== "walletAddress" && type !== "solName" && (recipientData?.cron_id || contactCronId) && (
+                <View className="flex-row items-center mt-1">
+                  <Image source={require("../../assets/images/logo-white.png")} className="w-5 h-5 mr-2" />
+                  <Text className="text-black text-base font-sans">
+                    Cron ID : {recipientData?.cron_id || contactCronId}
+                  </Text>
+                </View>
+              )}
+
+              {/* Only show phone for non-wallet/sol types */}
+              {type !== "walletAddress" && type !== "solName" && (
+                <Text className="text-black text-base mt-4 font-sans">
+                  {maskPhoneNumber(contactPhone)}
+                </Text>
+              )}
+
+              {/* Show wallet address for wallet/sol payments */}
+              {(type === "walletAddress" || type === "solName") && walletAddress && (
+                <Text className="text-foreground-secondary text-sm font-sans mt-1">
+                  {`${(walletAddress as string).slice(0, 4)}...${(walletAddress as string).slice(-4)}`}
+                </Text>
+              )}
+
+              {/* Only show joined date for regular contacts */}
+              {type !== "walletAddress" && type !== "solName" && (
+                <Text className="text-[#A5A5A5] text-sm mt-1 font-sans">
+                  Joined Dec 2025
+                </Text>
+              )}
             </View>
-          )}
 
-          {/* Only show phone for non-wallet/sol types */}
-          {type !== "walletAddress" && type !== "solName" && (
-            <Text className="text-black text-base mt-2 font-sans">
-              {maskPhoneNumber(contactPhone)}
-            </Text>
-          )}
+            <View className="px-4">
+              {/* Show loading or transactions for all payment types */}
+              {isLoading ? (
+                <View className="flex-1 items-center justify-center py-8">
+                  <ActivityIndicator size="large" color="#4A3DFF" />
+                  <Text className="text-base text-foreground-tertiary mt-4">
+                    Loading transactions...
+                  </Text>
+                </View>
+              ) : transactions.length === 0 ? "" : (
+                transactions.map((transaction, index) => {
+                  const transactionType = getTransactionType(transaction);
+                  const isNewDate =
+                    index === 0 ||
+                    formatDate(transaction.created_at) !==
+                    formatDate(transactions[index - 1].created_at);
 
-          {/* Show wallet address for wallet/sol payments */}
-          {(type === "walletAddress" || type === "solName") && walletAddress && (
-            <Text className="text-foreground-secondary text-sm mt-2 font-sans">
-              {`${(walletAddress as string).slice(0, 4)}...${(walletAddress as string).slice(-4)}`}
-            </Text>
-          )}
-
-          {/* Only show joined date for regular contacts */}
-          {type !== "walletAddress" && type !== "solName" && contactJoinedDate && (
-            <Text className="text-foreground-secondary text-sm mt-1 font-sans">
-              Joined {contactJoinedDate}
-            </Text>
-          )}
-        </View>
-
-        <View className="mt-6 px-4">
-          {/* Show loading or transactions for all payment types */}
-          {isLoading ? (
-            <View className="flex-1 items-center justify-center py-8">
-              <ActivityIndicator size="large" color="#4A3DFF" />
-              <Text className="text-base text-foreground-tertiary mt-4">
-                Loading transactions...
-              </Text>
-            </View>
-          ) : transactions.length === 0 ? (
-            <View className="flex-1 items-center justify-center py-8">
-              <Text className="text-lg font-semibold text-foreground-dark mb-2">
-                No transactions yet
-              </Text>
-              <Text className="text-base text-foreground-tertiary text-center">
-                Start a conversation with {contactName} by sending a payment
-              </Text>
-            </View>
-          ) : (
-            transactions.map((transaction, index) => {
-              const transactionType = getTransactionType(transaction);
-              const isNewDate =
-                index === 0 ||
-                formatDate(transaction.created_at) !==
-                formatDate(transactions[index - 1].created_at);
-
-              return (
-                <View key={transaction.transaction_hash} className="mb-3">
-                  {isNewDate && (
-                    <View className="flex justify-center items-center my-8">
-                      <View className="w-full h-[1px] bg-gray-200 rounded-full" />
-                      <View className="absolute -top-2.5 bg-white border border-gray-200 rounded-full px-3 py-0.5">
-                        <Text className="text-foreground-secondary text-sm font-sans">
-                          {formatDate(transaction.created_at)}
-                        </Text>
-                      </View>
-                    </View>
-                  )}
-                  <View
-                    className={`flex-row ${transactionType === "sent" ? "justify-end" : "justify-start"}`}
-                  >
-                    <TouchableOpacity
-                      onPress={() => {
-                        router.push({
-                          pathname: "/(tabs)/transaction-details",
-                          params: {
-                            transactionData: JSON.stringify(transaction),
-                            fromRecipient: "true",
-                            contactName,
-                            contactPhone,
-                            contactAvatarUrl,
-                            contactCronId,
-                            contactJoinedDate,
-                            type,
-                          },
-                        });
-                      }}
-                      className={`rounded-2xl w-3/5 overflow-hidden ${transactionType === "sent"
-                        ? "bg-[#4A3DFF0F]"
-                        : "bg-white border border-gray-200"
-                        }`}
-                    >
-                      <View className="border-b-[3px] border-[#12062B]">
-                        <View className="border-b-[3px] border-[#4A3DFF] p-5">
-                          <View className="flex-row items-end gap-2">
-                            <Text className="text-3xl font-bold text-black">
-                              {transaction.token[0].amount} {transaction.token[0].token_address === "DMC3nUVXBLNrB8f97wLqwkNw9DD7EXgqhPgev8gVTv7g" ? "USDC" : "SOL"}
+                  return (
+                    <View key={transaction.transaction_hash} className="mb-3">
+                      {isNewDate && (
+                        <View className="flex justify-center items-center my-8">
+                          <View className="w-full h-[1px] bg-gray-200 rounded-full" />
+                          <View className="absolute -top-2.5 bg-white border border-gray-200 rounded-full px-3 py-0.5">
+                            <Text className="text-foreground-secondary text-sm font-sans">
+                              {formatDate(transaction.created_at)}
                             </Text>
                           </View>
-                          <View className="flex-row items-center gap-2">
-                            <Checks size={16} color="#00CD63" />
-                            <Text className="text-sm flex-1 text-black">
-                              {transactionType === "received"
-                                ? "Received"
-                                : "Paid"}
-                            </Text>
-                          </View>
-                          {/* {transactionType === "sent" && (
-                            <View className="self-start bg-white border border-primary px-3 py-1 rounded-full mt-3">
-                              <Text className="text-primary text-xs">
-                                Pay Again
+                        </View>
+                      )}
+                      <View
+                        className={`flex-row ${transactionType === "sent" ? "justify-end" : "justify-start"}`}
+                      >
+                        <TouchableOpacity
+                          onPress={() => {
+                            router.push({
+                              pathname: "/(tabs)/transaction-details",
+                              params: {
+                                transactionData: JSON.stringify(transaction),
+                                fromRecipient: "true",
+                                contactName,
+                                contactPhone,
+                                contactAvatarUrl,
+                                contactCronId,
+                                contactJoinedDate,
+                                type,
+                              },
+                            });
+                          }}
+                          className={`rounded-b-2xl w-3/5 overflow-hidden border border-[#E2E2E2] ${transactionType === "received" ? "rounded-tr-2xl" : "rounded-tl-2xl"}`}
+                        >
+                          <View className="p-5">
+                            <View className="flex-row items-end gap-2">
+                              <Text className="text-xl font-semibold text-black">
+                                {transaction.token[0].amount} {transaction.token[0].token_address === "DMC3nUVXBLNrB8f97wLqwkNw9DD7EXgqhPgev8gVTv7g" ? "USDC" : "SOL"}
                               </Text>
                             </View>
-                          )} */}
-                          <Text className="text-sm text-right text-foreground-secondary">
-                            {formatTime(transaction.created_at)}
-                          </Text>
-                        </View>
-                      </View>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              );
-            })
-          )}
-        </View>
-      </ScrollView>
+                            <View className="flex-row items-center gap-2 mt-2">
+                              <Image source={require("../../assets/icons/success.png")} className="w-4 h-4" />
+                              <Text className="text-sm flex-1 text-black font-sans">
+                                {transactionType === "received"
+                                  ? "Received"
+                                  : "Paid"} • {formatTime(transaction.created_at)}
+                              </Text>
+                            </View>
 
-      <View
-        className="flex-row justify-center p-4 gap-3 bg-white"
-        style={{
-          shadowColor: "#4A3DFF",
-          shadowOffset: { width: 0, height: -1 },
-          shadowRadius: 13.5,
-          shadowOpacity: 0.078,
-          elevation: 8,
-        }}
-      >
+                          </View>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  );
+                })
+              )}
+            </View>
+          </ScrollView>
+      }
+
+
+      <View className="flex-row justify-center p-4 gap-3 bg-white mb-8">
         <Button
-          className="w-full"
+          className="w-fit rounded-full px-6"
           onPress={handlePayPress}
           disabled={!recipientExists}
+          style={whiteInset}
         >
-          Pay
+          Send
         </Button>
       </View>
 
