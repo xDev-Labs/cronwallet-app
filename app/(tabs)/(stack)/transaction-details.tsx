@@ -29,25 +29,7 @@ export default function TransactionDetailsScreen() {
   }, [params.transactionData]);
 
   const handleBackPress = () => {
-    // If coming from recipient page, navigate back with params
-    if (params.fromRecipient === "true") {
-      router.push({
-        pathname: "/(tabs)/recipient",
-        params: {
-          contactName: params.contactName,
-          contactPhone: params.contactPhone,
-          contactAvatarUrl: params.contactAvatarUrl,
-          contactCronId: params.contactCronId,
-          contactJoinedDate: params.contactJoinedDate,
-          type: params.type,
-        },
-      });
-    } else if (params.fromHistory === "true") {
-      // If coming from history page, navigate back to history
-      router.push("./history");
-    } else {
-      router.back();
-    }
+    router.back();
   };
 
   const handleCopyOrderId = async () => {

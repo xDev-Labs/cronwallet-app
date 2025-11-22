@@ -243,23 +243,30 @@ export default function PaymentSuccessScreen() {
 
   const handleDone = () => {
     console.log("handleDone");
-    // Use replace to ensure this screen is removed from the stack
-    // This helps ensure proper cleanup and re-initialization on next visit
-    router.replace({
-      pathname: "../recipient" as any,
-      params: {
-        contactId,
-        contactName,
-        contactPhone,
-        contactAvatarUrl,
-        contactCronId,
-        type,
-        walletAddress,
-        newTransaction: transactionData
-          ? JSON.stringify(transactionData)
-          : undefined,
-      },
-    });
+    // Navigate to home first to clear the payment flow stack
+    router.replace("./");
+    
+    // Then push pay-anyone and recipient in sequence
+    setTimeout(() => {
+      router.push("./pay-anyone");
+      setTimeout(() => {
+        router.push({
+          pathname: "./recipient" as any,
+          params: {
+            contactId,
+            contactName,
+            contactPhone,
+            contactAvatarUrl,
+            contactCronId,
+            type,
+            walletAddress,
+            newTransaction: transactionData
+              ? JSON.stringify(transactionData)
+              : undefined,
+          },
+        });
+      }, 100);
+    }, 100);
   };
 
   const currentDate = new Date();
