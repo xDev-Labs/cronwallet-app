@@ -8,6 +8,8 @@ import { Platform } from 'react-native';
 const tintColorLight = '#0a7ea4';
 const tintColorDark = '#fff';
 
+export const whiteInset = { boxShadow: "inset 0 0 10px #ffffff" }
+
 export const Colors = {
   light: {
     text: '#11181C',

@@ -1,91 +1,35 @@
+import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
-import { WalletSelectionModal } from "@/components/WalletSelectionModal";
-import { WelcomeRewardModal } from "@/components/WelcomeRewardModal";
+import { whiteInset } from "@/lib/constants/theme";
 import { useAuth } from "@/lib/contexts/AuthContext";
-import { clearAllStorage, storage } from "@/lib/storage/storage";
-import { router } from "expo-router";
-import { History, QrCode, Send, Wallet } from "lucide-react-native";
+import { storage } from "@/lib/storage/storage";
 import { useEffect, useState } from "react";
-import { Image, Pressable, ScrollView, View } from "react-native";
-import LinearGradient from "react-native-linear-gradient";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Image, View } from "react-native";
 
-const CronLogo = () => (
-  <Image
-    source={require("@/assets/images/cron-black-logo.png")}
-    className="w-[100px] h-8"
-    resizeMode="contain"
-  />
-);
-
-const ActionCard = ({
-  icon: Icon,
-  title,
-  onPress,
-  description,
-}: {
-  icon: any;
-  title: string;
-  onPress?: () => void;
-  description?: string;
-}) => {
-  // Convert CSS gradient angle (151.19deg) to React Native coordinates
-  // CSS: 0deg = to top, 90deg = to right, 151.19deg = southeast direction
-  const angle = 151.19;
-  const radians = (angle * Math.PI) / 180;
-  // Convert CSS angle to React Native coordinates (CSS uses clockwise from top, React Native uses unit circle)
-  const x = Math.sin(radians);
-  const y = -Math.cos(radians);
-  // Normalize to 0-1 range, centered at 0.5
-  const startX = Math.max(0, Math.min(1, 0.5 - x / 2));
-  const startY = Math.max(0, Math.min(1, 0.5 - y / 2));
-  const endX = Math.max(0, Math.min(1, 0.5 + x / 2));
-  const endY = Math.max(0, Math.min(1, 0.5 + y / 2));
-
-  return (
-    <Pressable
-      onPress={onPress}
-      className="w-full bg-[#F9F6FF] rounded-2xl p-5 justify-center shadow-md active:opacity-80"
-      style={{
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 3,
-      }}
-    >
-      <View className="w-12 h-12  rounded-full items-center justify-center mb-3">
-        <LinearGradient
-          colors={["#4A3DFF", "#ABA5FF"]}
-          locations={[0.0887, 0.929]}
-          start={{ x: startX, y: startY }}
-          end={{ x: endX, y: endY }}
-          style={{
-            width: "100%",
-            height: "100%",
-            borderRadius: 100,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Icon size={20} color="#ffffff" strokeWidth={2} />
-        </LinearGradient>
-      </View>
-      <Text className="text-lg font-semibold text-foreground-dark">
-        {title}
-      </Text>
-      <Text className="text-sm font-sans text-foreground-secondary">
-        {description}
-      </Text>
-    </Pressable>
-  );
-};
 
 export default function HomeScreen() {
   const [isWalletModalVisible, setIsWalletModalVisible] = useState(false);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const { user } = useAuth();
+
+  const ACTION_CARDS = [
+    {
+      icon: require("../../assets/icons/scan.png"),
+      title: `Scan any${'\n'}QR code`,
+    },
+    {
+      icon: require("../../assets/icons/profile.png"),
+      title: `Pay${'\n'}anyone`,
+    },
+    {
+      icon: require("../../assets/icons/history.png"),
+      title: `Transfer${'\n'}History`,
+    },
+    {
+      icon: require("../../assets/icons/wallet.png"),
+      title: "Balance",
+    },
+  ];
 
   // Check if welcome modal should be shown
   useEffect(() => {
@@ -117,97 +61,75 @@ export default function HomeScreen() {
   };
 
   return (
-    <SafeAreaView edges={["top"]} className="flex-1 bg-white">
-      <View className="px-4 py-6 ">
-        <View className="p-8 bg-[#12062B] rounded-2xl">
-          {/* Top Row: Avatar + User Info | QR + Copy */}
-          <View className="flex-row items-center justify-between">
-            {/* Left Side: Avatar + User Info */}
-            <View className="flex-row items-center">
-              <Pressable onPress={() => router.push("/(tabs)/profile")}>
-                <Image
-                  source={{
-                    uri: "https://visual-lime-chickadee.myfilebase.com/ipfs/QmS4qaqwEuQnDyQAAZ5Ghm6KzAoW2m9YRnQ1ku4Q23JX98",
-                  }}
-                  className="w-12 h-12 rounded-full items-center justify-center mr-4"
-                  resizeMode="cover"
-                />
-              </Pressable>
-              <Pressable onPress={async () => await clearAllStorage()}>
-                <Text className="text-white text-lg font-semibold">
-                  {user?.cron_id}
-                </Text>
-              </Pressable>
-            </View>
+    <View className="flex-1 bg-white">
 
-            {/* Right Side: QR + Copy */}
-            <View className="flex-row items-center">
-              <Pressable
-                className="mr-3"
-                onPress={() => router.push("/qr-code")}
-              >
-                <QrCode size={20} color="#FFFFFF" strokeWidth={2} />
-              </Pressable>
+      <Image
+        source={require("../../assets/images/home-bg.png")}
+        className="w-full h-1/3 absolute top-0 left-0"
+      />
+
+      <View className="w-full h-10 mt-24 flex-row items-center justify-between px-8">
+        <Image source={require("../../assets/icons/logo-3d.png")} className="w-10 h-10" />
+        <View className="w-12 h-12 bg-[#FFFFFF9C] rounded-xl items-center justify-center p-2">
+          <Image source={require("../../assets/icons/user.png")} className="w-6 h-6" />
+        </View>
+      </View>
+
+      <View className="w-full h-fit mt-20 flex-row items-start justify-between px-8 ">
+        {ACTION_CARDS.map((card, index) => (
+          <View key={index} className="flex items-center">
+            <View className="w-20 h-20 bg-[#F3F2FF] rounded-xl items-center justify-center p-2">
+              <Image source={card.icon} className="w-12 h-12" />
             </View>
+            <Text className="text-sm font-sans text-black mt-1 text-center">{card.title}</Text>
+          </View>
+        ))}
+      </View>
+
+      <View className="w-full h-fit px-8 mt-10">
+        <View className="w-full h-fit flex-row items-center gap-4 p-2 border border-[#E2E2E2] rounded-full">
+          <View className="bg-[#EBF3FF] w-fit p-3 rounded-full">
+            <Image source={require("../../assets/icons/logo-transparent.png")} className="w-4 h-4" />
+          </View>
+          <View className="">
+            <Text className="text-sm font-sans text-black">CRON ID</Text>
+            <Text className="text-sm font-sans font-semibold text-black">{user?.cron_id}</Text>
           </View>
         </View>
       </View>
 
-      <ScrollView
-        className="flex-1"
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ flexGrow: 1 }}
-      >
-        {/* Action Cards */}
-        <View className="px-4 py-4">
-          <View className="flex-row flex-wrap -mx-2">
-            <View className="w-1/2 px-2 mb-4">
-              <ActionCard
-                icon={Send}
-                title="Pay anyone"
-                description="Send money to anyone"
-                onPress={() => router.push("/(tabs)/pay-anyone")}
-              />
+      <View className="w-full h-fit px-8 mt-8">
+        <Text className="text-2xl font-sans font-medium text-black">Offers & Rewards</Text>
+      </View>
+
+      <View className="w-full h-fit px-8 mt-4">
+        <View className="w-full h-fit bg-[#F8F9FD] rounded-xl p-4 pb-12 flex items-start overflow-hidden">
+          <View className="bg-[#EDEBFF] w-fit p-3 rounded-full">
+            <Image source={require("../../assets/icons/prize.png")} className="w-4 h-4" />
+          </View>
+          <View className="w-full flex-row">
+            <View className="mt-2 w-1/2">
+              <Text className="text-lg font-sans text-black font-semibold">Claim Your Reward</Text>
+              <Text className="text-sm font-sans text-black">Before it vanishes 👀</Text>
             </View>
-            <View className="w-1/2 px-2 mb-4">
-              <ActionCard
-                icon={Wallet}
-                title="Balances"
-                description="Check your assets on Solana"
-                onPress={() => router.push("/(tabs)/balance")}
-              />
-            </View>
-            <View className="w-1/2 px-2 mb-4">
-              <ActionCard
-                icon={History}
-                title="Transfer History"
-                description="View your transfer history"
-                onPress={() => router.push("/(tabs)/history")}
-              />
-            </View>
-            <View className="w-1/2 px-2 mb-4">
-              <ActionCard
-                icon={QrCode}
-                title="Scan QR"
-                description="Scan QR to send money"
-                onPress={() => router.push("/(tabs)/scan-qr")}
-              />
+            <View className="w-1/2 flex items-end justify-start">
+              <Button className="w-fit h-fit rounded-full flex justify-center items-center gap-2 px- py-3 " style={whiteInset}>
+                <Text className=" font-sans text-white ">Claim Now</Text>
+              </Button>
             </View>
           </View>
+          <Image source={require("../../assets/images/gift.png")} className="w-36 h-36 absolute bottom-0 right-0" />
         </View>
-      </ScrollView>
+      </View>
 
-      {/* Wallet Selection Modal */}
-      <WalletSelectionModal
-        visible={isWalletModalVisible}
-        onClose={() => setIsWalletModalVisible(false)}
-      />
+      <View className="absolute bottom-20 w-full h-fit px-8 mt-8 flex items-center justify-center">
+        <Button className="w-fit rounded-full flex justify-center items-center gap-2 px-8 " style={whiteInset}>
+          <Image source={require("../../assets/icons/add.png")} className="w-6 h-6 " />
+          <Text className="text-lg font-sans text-white ">Add Money</Text>
+        </Button>
+      </View>
 
-      {/* Welcome Reward Modal */}
-      <WelcomeRewardModal
-        visible={showWelcomeModal}
-        onClose={handleCloseWelcomeModal}
-      />
-    </SafeAreaView>
+
+    </View>
   );
 }
