@@ -1,6 +1,7 @@
 import CodeInput from "@/components/CodeInput";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
+import { whiteInset } from "@/lib/constants/theme";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { ApiError, apiService } from "@/lib/services/api";
 import { storage } from "@/lib/storage/storage";
@@ -369,6 +370,7 @@ export default function OTPVerificationScreen() {
                 disabled={!isVerifyEnabled}
                 loading={isVerifying}
                 className="shadow-lg shadow-primary/20 font-medium mb-4 rounded-full"
+                style={whiteInset}
               >
                 Confirm
               </Button>

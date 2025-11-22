@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
+import { whiteInset } from "@/lib/constants/theme";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { ApiError, apiService } from "@/lib/services/api";
 import { mapBackendUserToUser } from "@/lib/utils/userMapping";
@@ -170,7 +171,8 @@ export default function BiometricSetupScreen() {
             <Image source={require("../../assets/images/face-id-icon.png")} className="w-10 h-10 z-10" />
             <Text className="text-black text-4xl font-bold font-sans">Save Passkey</Text>
             <Text className="text-[#979797] text-base font-sans leading-6 mb-16">Passkeys are a secure alternative to {'\n'}passwords saved on your device</Text>
-            <Button className="w-full bg-primary rounded-full" onPress={handleEnableBiometric}>
+            <Button className="w-full bg-primary rounded-full" onPress={handleEnableBiometric} style={whiteInset}>
+              <Image source={require("../../assets/icons/face-id.png")} className="w-6 h-6 z-10 mr-4" />
               <Text className="text-white text-lg font-semibold">Setup Passkey</Text>
             </Button>
           </View>

@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
+import { whiteInset } from "@/lib/constants/theme";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { ApiError, apiService } from "@/lib/services/api";
 import { mapBackendUserToUser } from "@/lib/utils/userMapping";
@@ -273,6 +274,7 @@ export default function UsernameScreen() {
                 disabled={!isButtonEnabled}
                 loading={isLoading}
                 className="shadow-lg shadow-primary/20 font-medium mb-4 rounded-full"
+                style={whiteInset}
               >
                 Claim Username
               </Button>
